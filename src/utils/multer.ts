@@ -2,10 +2,9 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
-import { getSetting } from './settings';
+import { getSetting, getBaseDir } from './settings';
 
-const baseDir = getSetting('BASE_DIR');
-const BASE_DIR = path.join(__dirname,"../../", baseDir.toString());
+const BASE_DIR = getBaseDir();
 
 // Función para validar que la ruta esté dentro del directorio base
 export function isValidPath(requestedPath: string) {

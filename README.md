@@ -12,10 +12,14 @@ npm install
 
 ### 3. Configurar carpeta a administrar
 
-En `server.js`, línea 10, modifica la ruta según tu preferencia:
+En `src/persistent/config.json`, modifica la ruta según tu preferencia:
 
-```javascript
-const BASE_DIR = path.join(__dirname, "archivos");
+```json
+{
+    "BASE_DIR": "/home/jorgemarcos/Documentos/archivos",
+    "STORAGE_DIR": "storage",
+    "LIMIT_STORAGE": 10737418240
+}
 ```
 
 Ejemplos de rutas:
