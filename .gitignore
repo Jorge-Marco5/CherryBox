@@ -1,10 +1,11 @@
-.env
+.env*
 node_modules
 yarn.lock
 
 /generated/prisma
 
 dist
+build
 logs
 
 generated
