@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CherryBox - Administrador de Archivos</title>
+    <link rel="icon" type="image/svg+xml" href="public/cherries.svg">
+    <link rel="stylesheet" href="public/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <script src="public/js/lib/axios.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">
+                <h1>CherryBox</h1>
+                <img src="public/cherries.svg" alt="CherryBox" width="50" height="50">
+            </div>
+            <button class="btn btn-primary" onclick="logout()">Cerrar Sesión 🚪</button>
+        </div>
+        <div class="card-storage">
+            <div class="bar-storage-info">
+                <span id="storageLimit">-</span>
+                <span id="storageUsed">-</span>
+                <span id="storageAvailable">-</span>
+            </div>
+            <div class="bar-storage">
+                <div class="bar-storage-fill"></div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="search-container">
+                <div class="search">
+                    <input type="text" id="searchInput" placeholder="Buscar archivos...">
+                    <button class="btn btn-primary" onclick="searchFiles()">🔎 Buscar</button>
+                </div>
+            </div>
+            <div class="breadcrumb" id="breadcrumb">
+                <span onclick="navigateTo('')">🏠 Inicio</span>
+            </div>
+            <button class="btn btn-primary" onclick="showCreateFolderModal()">➕ Nueva Carpeta</button>
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📤 Subir
+                Archivos</button>
+            <input type="file" id="fileInput" multiple onchange="uploadFiles(event)">
+        </div>
+        <div class="file-list" id="fileList">
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📤</div>
+                <div class="upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
+                <div class="upload-hint">Puedes subir múltiples archivos a la vez (máx. 100MB por archivo)</div>
+            </div>
+        </div>
+    </div>
+    <!-- Indicador de progreso de subida -->
+    <div class="upload-progress" id="uploadProgress">
+        <div class="progress-header">
+            <span>Subiendo archivos</span>
+            <span class="file-count" id="fileCount">0/0</span>
+        </div>
+        <div id="progressList"></div>
+    </div>
+
+    <!-- Modal para crear carpeta -->
+    <div class="modal" id="createFolderModal">
+        <div class="modal-content">
+            <div class="modal-header">Nueva Carpeta</div>
+            <div class="form-group">
+                <label>Nombre de la carpeta:</label>
+                <input type="text" id="folderNameInput" placeholder="Mi carpeta">
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal('createFolderModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="createFolder()">Crear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para renombrar -->
+    <div class="modal" id="renameModal">
+        <div class="modal-content">
+            <div class="modal-header">Renombrar</div>
+            <div class="form-group">
+                <label>Nuevo nombre:</label>
+                <input type="text" id="renameInput">
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal('renameModal')">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmRename()">Renombrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para vista previa -->
+    <div class="modal" id="previewModal">
+        <div class="modal-content preview-modal">
+            <div class="modal-header" id="previewTitle">Vista Previa</div>
+            <div class="preview-content" id="previewContent"></div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeModal('previewModal')">Cerrar</button>
+                <button class="btn btn-primary" onclick="downloadFile(currentPreviewPath)">Descargar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="public/js/script.js"></script>
+</body>
+
+</html>

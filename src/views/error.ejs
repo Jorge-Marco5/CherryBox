@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrador de Archivos</title>
+    <link rel="stylesheet" href="public/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <script src="public/js/lib/axios.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CherryBox 🍒</h1>
+        </div>
+        <div class="error-container">
+            <h2>Error 404</h2>
+            <p>Ha ocurrido un error.</p>
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+    //obtener el parammetro message
+    const code = new URLSearchParams(window.location.search).get('code');
+    const message = new URLSearchParams(window.location.search).get('message');
+    //mostrar el message en el error-container
+    if (message) {
+        document.querySelector('.error-container').innerHTML = `<h2>${code}</h2><p>${message}</p><button style="margin-top: 10px;" onclick="window.location.href = '/'" class="btn btn-primary">Volver al inicio</button>`;
+    } else {
+        document.querySelector('.error-container').innerHTML = `<h2>Error 500</h2><p>Error interno del servidor.</p><button style="margin-top: 10px;" onclick="window.location.href = '/'" class="btn btn-primary">Volver al inicio</button>`;
+    }
+</script>
+
+</html>
