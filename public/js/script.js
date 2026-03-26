@@ -24,7 +24,7 @@ async function loadFiles(path = '') {
         updateBreadcrumb(currentPath);
         renderFiles(data.files);
     } catch (error) {
-        location.href = '/error?code=' + error.response.status + '&message=' + error.response.data.error;
+        location.href = '/login';
     }
 }
 
