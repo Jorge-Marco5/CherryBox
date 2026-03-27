@@ -13,7 +13,7 @@ const BASE_DIR = getBaseDir();
 
 export const dashboard = (req: Request, res: Response) => {
   try {
-    res.render('index');
+    res.sendFile(path.join(__dirname, '../views/index.html'));
   } catch (error: any) {
     logger.error('Error al cargar la página: ' + error.message);
     res.status(500).send(`
