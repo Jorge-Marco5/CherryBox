@@ -23,10 +23,14 @@ export const register = async (email: string, password: string) => {
 
 export const login = async (email: string, password: string) => {
 
-    const user = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true, role: true, password: true } })
+    const user = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true, role: true, is_blocked: true, password: true } })
 
     if (!user) {
         throw new Error("Credenciales inválidas")
+    }
+
+    if (user.is_blocked) {
+        throw new Error("Usuario bloqueado")
     }
 
     const valid = await bcrypt.compare(password, user.password)
@@ -35,9 +39,11 @@ export const login = async (email: string, password: string) => {
         throw new Error("Credenciales inválidas")
     }
 
-    const { password: _, ...userWithoutPassword } = user
+    //remover password y is_blocked del objeto
+    const userWithoutPassword = { ...user, password: "" }
+    const userWithoutBlocked = { ...userWithoutPassword, is_blocked: false }
 
     const token = signToken({ id: user.id })
 
-    return { user: userWithoutPassword, token }
+    return { user: userWithoutBlocked, token }
 }

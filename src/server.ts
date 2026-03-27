@@ -8,6 +8,7 @@ import cors from 'cors';
 import { logger } from './utils/logger';
 import indexRouter from './routes/index';
 import filesRouter from './routes/files.routes';
+import usersRouter from './routes/users.routes';
 import { getSetting, getBaseDir } from './utils/settings';
 import settingsRouter from './routes/settings.routes';
 import multer from 'multer';
@@ -63,6 +64,7 @@ Promise.all([
     app.use('/', indexRouter);
     app.use('/api', filesRouter);
     app.use('/api', settingsRouter);
+    app.use('/api', usersRouter);
     app.use('/api/auth', authRouter);
 
     app.listen(PORT, () => {

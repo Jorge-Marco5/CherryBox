@@ -1,12 +1,22 @@
 const API_URL = '/api';
 
 const user = JSON.parse(localStorage.getItem('user'));
+if (user) {
+    const userId = document.getElementById('userId');
+    if (userId) {
+        userId.textContent = user.id;
+    }
+    const adminActions = document.getElementById('admin-actions');
+    if (user.role !== 'ADMIN') {
+        adminActions.style.display = 'none';
+    }
 
-if (!user) {
-    window.location.href = '/login';
+} else {
+    const userId = document.getElementById('userId');
+    if (userId) {
+        userId.textContent = 'Invitado';
+    }
 }
-
-console.log(user);
 
 // Interceptor global para redirección si no hay sesión
 axios.interceptors.response.use(
@@ -502,58 +512,16 @@ window.addEventListener('resize', () => {
     }, 250);
 });
 
-// Manejo de formulario de Login
-const loginForm = document.getElementById('loginForm');
-if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        try {
-            const response = await axios.post('/api/auth/login', { email, password });
-            //guardar datos basicos de usuario en localStorage
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-            window.location.href = '/';
-        } catch (error) {
-            alert(error.response?.data?.error || 'Error al iniciar sesión');
-        }
-    });
-}
-
-// Manejo de formulario de Registro
-const registerForm = document.getElementById('registerForm');
-if (registerForm) {
-    registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const passwordConfirm = document.getElementById('passwordConfirm').value;
-
-        if (password !== passwordConfirm) {
-            alert('Las contraseñas no coinciden');
-            return;
-        }
-
-        try {
-            const res = await axios.post('/api/auth/register', { email, password });
-            alert(res.data.message || 'Usuario registrado exitosamente');
-            registerForm.reset();
-        } catch (error) {
-            alert(error.response?.data?.error || 'Error al registrar usuario');
-        }
-    });
-}
 
 async function logout() {
     try {
         await axios.post('/api/auth/logout');
+        localStorage.removeItem('user');
         window.location.href = '/login';
     } catch (error) {
         alert(error.response?.data?.error || 'Error al cerrar sesión');
     }
 }
-
 
 //eliminar los archivos con el checkbox seleccionado
 async function deleteSelectedFiles() {

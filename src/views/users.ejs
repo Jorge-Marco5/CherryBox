@@ -13,22 +13,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
     <script src="public/js/lib/axios.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
-    <style>
-        /* Estilo adicional para resaltar niveles de log */
-        .hljs-log .error {
-            color: #ff5555;
-            font-weight: bold;
-        }
-
-        .hljs-log .warn {
-            color: #ffb86c;
-        }
-
-        .hljs-log .info {
-            color: #8be9fd;
-        }
-    </style>
 </head>
 
 <body>
@@ -54,19 +38,14 @@
                 <div class="title-group">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon icon-tabler icons-tabler-outline icon-tabler-logs">
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-users">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M4 12h.01" />
-                        <path d="M4 6h.01" />
-                        <path d="M4 18h.01" />
-                        <path d="M8 18h2" />
-                        <path d="M8 12h2" />
-                        <path d="M8 6h2" />
-                        <path d="M14 6h6" />
-                        <path d="M14 12h6" />
-                        <path d="M14 18h6" />
+                        <path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                        <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
                     </svg>
-                    <h1 class="title">Logs</h1>
+                    <h1 class="title">Usuarios</h1>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <a title="home" class="btn btn-secondary" href="/">
@@ -79,34 +58,57 @@
                             <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
                         </svg>
                     </a>
-                    <select id="logTypeSelect" class="log-select">
-                        <option value="combined">Logs Combinados</option>
-                        <option value="error">Logs de Errores</option>
-                    </select>
+                    <a title="Nuevo Usuario" class="btn btn-primary" href="/register"
+                        style="display: flex; align-items: center; gap: 5px; border: 1px solid #bebebe;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M12 5l0 14" />
+                            <path d="M5 12l14 0" />
+                        </svg>
+                        <span>Nuevo</span>
+                    </a>
                 </div>
             </div>
-            <pre id="logs"></pre>
+            <div class="supabase-table-container">
+                <table id="users" class="supabase-table">
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Usuario -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2>Editar Usuario</h2>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label for="editEmail">Correo Electrónico</label>
+                    <input type="email" disabled id="editEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRole">Rol del Sistema</label>
+                    <select id="editRole" class="log-select" style="width: 100%;">
+                        <option value="USER">USER</option>
+                        <option value="ADMIN">ADMIN</option>
+                    </select>
+                </div>
+                <div class="modal-footer"
+                    style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
         </div>
     </div>
     <script src="public/js/lib/highlight.min.js"></script>
-    <script>
-        // Registrar un lenguaje personalizado para logs
-        hljs.registerLanguage('log', function (hljs) {
-            return {
-                name: 'Log',
-                contains: [
-                    { className: 'date', begin: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/ },
-                    { className: 'info', begin: /\[info\]/ },
-                    { className: 'warn', begin: /\[warn\]/ },
-                    { className: 'error', begin: /\[error\]/ }
-                ]
-            };
-        });
-
-        // Inicializar highlight.js
-        hljs.highlightAll();
-    </script>
-    <script src="public/js/logs.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="public/js/users.js"></script>
 </body>
 
 </html>

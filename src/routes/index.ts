@@ -24,4 +24,8 @@ router.get('/logs', (req, res) => {
     res.render('logs');
 });
 
+router.get('/users', (req, res) => {
+    res.render('users');
+});
+
 export default router;

@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const codeContainer = document.createElement('code');
             // Usamos 'language-log' para logs generales o 'language-bash'/'language-plaintext' si preferimos
-            codeContainer.className = 'language-log hljs';
+            codeContainer.className = 'language-log';
 
             // Limpieza de secuencias ANSI y caracteres especiales
             const rawLogs = response.data.logs || '';
