@@ -513,16 +513,6 @@ window.addEventListener('resize', () => {
 });
 
 
-async function logout() {
-    try {
-        await axios.post('/api/auth/logout');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-    } catch (error) {
-        alert(error.response?.data?.error || 'Error al cerrar sesión');
-    }
-}
-
 //eliminar los archivos con el checkbox seleccionado
 async function deleteSelectedFiles() {
     const checkboxes = document.querySelectorAll('.file-checkbox:checked');

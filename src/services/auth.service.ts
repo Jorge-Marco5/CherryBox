@@ -18,7 +18,10 @@ export const register = async (email: string, password: string) => {
 
     const token = signToken({ id: user.id })
 
-    return { user, token }
+    const userWithoutPassword = { ...user, password: "" }
+    const userWithoutBlocked = { ...userWithoutPassword, is_blocked: false }
+
+    return { user: userWithoutBlocked, token }
 }
 
 export const login = async (email: string, password: string) => {

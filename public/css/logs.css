@@ -54,7 +54,8 @@
 pre {
     overflow-x: auto;
     overflow-y: auto;
-    height: 80dvh;
+    height: 75dvh;
+    max-height: 75dvh;
     /* Ajustar basado en el header */
     padding: 15px;
     color: #ededed;
@@ -66,6 +67,7 @@ pre {
 
 pre code {
     width: 100%;
+    height: 100%;
     font-size: 0.9rem;
     font-weight: 400;
     font-family: 'Geist Mono', 'Courier New', Courier, monospace;
@@ -276,7 +278,7 @@ pre#logs {
 
 .badge-admin {
     background: rgba(139, 92, 246, 0.1);
-    color: #a78bfa;
+    color: #8ba3fa;
     border: 1px solid rgba(139, 92, 246, 0.2);
 }
 

@@ -11,38 +11,51 @@ dotenv.config();
 
 const BASE_DIR = getBaseDir();
 
+/**
+ * Renderiza la vista principal del administrador de archivos.
+ * 
+ * @param req Petición de Express
+ * @param res Respuesta que envía el archivo index.html
+ */
 export const dashboard = (req: Request, res: Response) => {
   try {
     res.sendFile(path.join(__dirname, '../views/index.html'));
   } catch (error: any) {
-    logger.error('Error al cargar la página: ' + error.message);
+    logger.error('Error al cargar la página dashboard: ' + error.message);
     res.status(500).send(`
       <html>
-        <head>
-          <title>Error</title>
-        </head>
+        <head><title>Error</title></head>
         <body>
           <h1>Error al cargar la página</h1>
           <p>${error.message}</p>
         </body>
       </html>
-      `);
+    `);
   }
 }
 
-export const listFiles = async (req: Request, res: Response) => {
+/**
+ * Lista los archivos y carpetas de un directorio específico.
+ * Registra quién accedió a qué ruta para auditoría de navegación.
+ * 
+ * @param req Petición con la ruta relativa en query.path
+ * @param res JSON con la lista de archivos y metadatos
+ */
+export const listFiles = async (req: AuthRequest, res: Response) => {
+  const user = req.user;
   try {
     const relativePath = (req.query.path as string) || '';
 
     if (!isValidPath(relativePath)) {
-      logger.error('Ruta no válida: ' + relativePath);
+      logger.error(`[AUDIT] Intento de acceso a ruta no válida por usuario ${user?.id}: ${relativePath}`);
       return res.status(403).json({ error: 'Ruta no válida' });
     }
 
     const fullPath = path.join(BASE_DIR, relativePath);
     const items = await fs.readdir(fullPath, { withFileTypes: true });
 
-    // Usamos Promise.allSettled para que un error en un archivo no falle todo el listado
+    logger.info(`[AUDIT] Usuario ${user?.id} listó el directorio: ${relativePath || '/'}`);
+
     const results = await Promise.allSettled(
       items.map(async (item) => {
         const itemPath = path.join(fullPath, item.name);
@@ -56,8 +69,6 @@ export const listFiles = async (req: Request, res: Response) => {
             path: path.join(relativePath, item.name)
           };
         } catch (err: any) {
-          // Si falla stat (permisos, symlink roto, race condition), lo ignoramos o logueamos warning
-          // Retornamos null para filtrarlo después
           logger.warn(`No se pudo obtener info de ${item.name}: ${err.message}`);
           return null;
         }
@@ -69,19 +80,27 @@ export const listFiles = async (req: Request, res: Response) => {
       .map(r => r.value);
 
     res.json({ files, currentPath: relativePath });
-  } catch (error) {
-    const err = error as Error;
-    logger.error('Error al listar archivos: ' + err.message);
-    res.status(500).json({ error: err.message });
+  } catch (error: any) {
+    logger.error('Error al listar archivos: ' + error.message);
+    res.status(500).json({ error: error.message });
   }
 }
 
-export const searchFiles = async (req: Request, res: Response) => {
+/**
+ * Realiza una búsqueda recursiva de archivos que coincidan con un criterio.
+ * 
+ * @param req Petición con el término de búsqueda en query.q
+ * @param res JSON con los resultados encontrados
+ */
+export const searchFiles = async (req: AuthRequest, res: Response) => {
+  const user = req.user;
   try {
     const q = req.query.q as string;
     if (!q) {
       return res.json([]);
     }
+
+    logger.info(`[AUDIT] Usuario ${user?.id} realizó búsqueda: "${q}"`);
 
     const results: any[] = [];
     const searchRecursive = async (currentDir: string) => {
@@ -101,9 +120,8 @@ export const searchFiles = async (req: Request, res: Response) => {
               modified: stats.mtime,
               path: relativePath
             });
-          } catch (err) {
-            const error = err as Error;
-            logger.warn(`No se pudo obtener info de ${item.name} durante búsqueda: ${error.message}`);
+          } catch (err: any) {
+            logger.warn(`No se pudo obtener info durante búsqueda: ${err.message}`);
           }
         }
 
@@ -121,48 +139,49 @@ export const searchFiles = async (req: Request, res: Response) => {
   }
 }
 
+/**
+ * Crea una nueva carpeta en la ruta especificada.
+ * 
+ * @param req Petición con el nombre y ruta de la nueva carpeta
+ * @param res Respuesta de confirmación
+ */
 export const createFolder = async (req: AuthRequest, res: Response) => {
+  const user = req.user;
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(401).json({ error: "No autenticado" });
-    }
     const { path: relativePath, name } = req.body;
 
     if (!isValidPath(relativePath)) {
-      logger.error('Ruta no válida: ' + relativePath);
+      logger.error(`[AUDIT] Intento de creación de carpeta en ruta no válida por ${user?.id}: ${relativePath}`);
       return res.status(403).json({ error: 'Ruta no válida' });
     }
 
     const fullPath = path.join(BASE_DIR, relativePath, name);
     await fs.mkdir(fullPath, { recursive: true });
 
-    logger.info('EL usuario: ' + user.id + ' ha creado la carpeta: ' + fullPath);
+    logger.info(`[AUDIT] Usuario ${user?.id} creó la carpeta: ${path.join(relativePath, name)}`);
     res.json({ success: true, message: 'Carpeta creada' });
   } catch (error: any) {
-    logger.error('Error al crear carpeta: ' + error.message);
+    logger.error(`Error al crear carpeta (Usuario: ${user?.id}): ` + error.message);
     res.status(500).json({ error: error.message });
   }
 }
 
+/**
+ * Gestiona la subida de múltiples archivos.
+ * 
+ * @param req Petición con los archivos en req.files
+ * @param res JSON con la lista de archivos subidos exitosamente
+ */
 export const uploadFiles = async (req: AuthRequest, res: Response) => {
+  const user = req.user;
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(401).json({ error: "No autenticado" });
-    }
-
-    console.log('Recibiendo archivos...');
-    console.log('Query path:', req.query.path as string);
-    console.log('Archivos recibidos:', req.files?.length || 0);
-
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: 'No se subieron archivos' });
     }
 
     const files = req.files as Express.Multer.File[];
     const uploadedFiles = files.map(file => {
-      logger.info('EL usuario: ' + user.id + ' ha subido el archivo: ' + file.filename + ' a la ruta: ' + file.path);
+      logger.info(`[AUDIT] Usuario ${user?.id} subió archivo: ${file.filename} (${file.size} bytes)`);
       return {
         name: file.filename,
         size: file.size,
@@ -170,24 +189,27 @@ export const uploadFiles = async (req: AuthRequest, res: Response) => {
       };
     });
 
-    logger.info('EL usuario: ' + user.id + ' ha subido ' + uploadedFiles.length + ' archivo(s) a la ruta: ' + req.query.path);
+    logger.info(`[AUDIT] Usuario ${user?.id} completó subida de ${uploadedFiles.length} archivo(s) a: ${req.query.path || '/'}`);
     res.json({
       success: true,
       message: `${uploadedFiles.length} archivo(s) subido(s) correctamente`,
       files: uploadedFiles
     });
   } catch (error: any) {
-    console.error('Error al subir archivos:', error);
+    logger.error(`Error al subir archivos (Usuario: ${user?.id}):`, error.message);
     res.status(500).json({ error: error.message });
   }
 }
 
+/**
+ * Cambia el nombre de un archivo o carpeta existente.
+ * 
+ * @param req Petición con oldPath y newName en el body
+ * @param res Respuesta de confirmación
+ */
 export const renameFile = async (req: AuthRequest, res: Response) => {
+  const user = req.user;
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(401).json({ error: "No autenticado" });
-    }
     const { oldPath, newName } = req.body;
 
     if (!oldPath || !newName) {
@@ -195,46 +217,45 @@ export const renameFile = async (req: AuthRequest, res: Response) => {
     }
 
     if (!isValidPath(oldPath)) {
-      logger.error('Ruta no válida: ' + oldPath);
+      logger.error(`[AUDIT] Intento de renombrado no válido por ${user?.id}: ${oldPath}`);
       return res.status(403).json({ error: 'Ruta no válida' });
     }
 
     const oldFullPath = path.join(BASE_DIR, oldPath);
     const newFullPath = path.join(path.dirname(oldFullPath), newName);
 
-    // Verificar que el archivo/carpeta original existe
     try {
       await fs.access(oldFullPath);
     } catch {
       return res.status(404).json({ error: 'El archivo o carpeta no existe' });
     }
 
-    // Verificar que el nuevo nombre no existe ya
     try {
       await fs.access(newFullPath);
       return res.status(409).json({ error: 'Ya existe un archivo con ese nombre' });
     } catch {
-      // No existe, podemos continuar
+      // Nombre disponible
     }
 
     await fs.rename(oldFullPath, newFullPath);
-    logger.info('EL usuario: ' + user.id + ' ha renombrado el archivo: ' + oldFullPath + ' a: ' + newFullPath);
+    logger.info(`[AUDIT] Usuario ${user?.id} renombró: ${oldPath} -> ${newName}`);
 
     res.json({ success: true, message: 'Renombrado exitosamente' });
   } catch (error: any) {
-    logger.error('Error al renombrar:' + error.message);
+    logger.error(`Error al renombrar (Usuario: ${user?.id}): ` + error.message);
     res.status(500).json({ error: error.message });
   }
 }
 
+/**
+ * Elimina un archivo o una carpeta (recursivamente) del sistema.
+ * 
+ * @param req Petición con la ruta en body o query
+ * @param res Respuesta de confirmación
+ */
 export const deleteFile = async (req: AuthRequest, res: Response) => {
+  const user = req.user;
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(401).json({ error: "No autenticado" });
-    }
-
-    // Intentar obtener la ruta desde body o query
     const relativePath = req.body?.path || (req.query?.path as string);
 
     if (!relativePath) {
@@ -242,12 +263,12 @@ export const deleteFile = async (req: AuthRequest, res: Response) => {
     }
 
     if (!isValidPath(relativePath)) {
+      logger.error(`[AUDIT] Intento de eliminación en ruta no válida por ${user?.id}: ${relativePath}`);
       return res.status(403).json({ error: 'Ruta no válida' });
     }
 
     const fullPath = path.join(BASE_DIR, relativePath);
 
-    // Verificar que el archivo/carpeta existe
     try {
       await fs.access(fullPath);
     } catch {
@@ -258,19 +279,27 @@ export const deleteFile = async (req: AuthRequest, res: Response) => {
 
     if (stats.isDirectory()) {
       await fs.rm(fullPath, { recursive: true, force: true });
-      logger.info('EL usuario: ' + user.id + ' ha eliminado la carpeta: ' + fullPath);
+      logger.warn(`[AUDIT] Usuario ${user?.id} ELIMINÓ CARPETA: ${relativePath}`);
     } else {
       await fs.unlink(fullPath);
-      logger.info('EL usuario: ' + user.id + ' ha eliminado el archivo: ' + fullPath);
+      logger.warn(`[AUDIT] Usuario ${user?.id} ELIMINÓ ARCHIVO: ${relativePath}`);
     }
     res.json({ success: true, message: 'Eliminado exitosamente' });
   } catch (error: any) {
-    logger.error('Error al eliminar:', error);
+    logger.error(`Error al eliminar (Usuario: ${user?.id}): ` + error.message);
     res.status(500).json({ error: error.message });
   }
 }
 
-export const getFileContent = async (req: Request, res: Response) => {
+/**
+ * Obtiene el contenido de un archivo para vista previa.
+ * Registra el acceso a contenidos específicos para auditoría de privacidad.
+ * 
+ * @param req Petición con la ruta del archivo en query.path
+ * @param res JSON con el contenido (texto) o el archivo directamente (media)
+ */
+export const getFileContent = async (req: AuthRequest, res: Response) => {
+  const user = req.user;
   try {
     const relativePath = (req.query.path as string) || '';
 
@@ -280,6 +309,8 @@ export const getFileContent = async (req: Request, res: Response) => {
 
     const fullPath = path.join(BASE_DIR, relativePath);
     const ext = path.extname(fullPath).toLowerCase();
+
+    logger.info(`[AUDIT] Usuario ${user?.id} previsualizó el archivo: ${relativePath}`);
 
     // Archivos de texto
     const textExtensions = ['.txt', '.md', '.json', '.js', '.css', '.html', '.xml', '.csv'];
@@ -295,17 +326,21 @@ export const getFileContent = async (req: Request, res: Response) => {
     }
     res.status(400).json({ error: 'Tipo de archivo no soportado para vista previa' });
   } catch (error: any) {
-    logger.error('Error al obtener contenido de archivo:', error);
+    logger.error(`Error al obtener contenido (Usuario: ${user?.id}): ` + error.message);
     res.status(500).json({ error: error.message });
   }
 }
 
+/**
+ * Inicia la descarga de un archivo.
+ * Registra la descarga para control de fuga de información.
+ * 
+ * @param req Petición con la ruta del archivo en query.path
+ * @param res Stream de descarga del archivo
+ */
 export const downloadFile = async (req: AuthRequest, res: Response) => {
+  const user = req.user;
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(401).json({ error: "No autenticado" });
-    }
     const relativePath = (req.query.path as string) || '';
 
     if (!isValidPath(relativePath)) {
@@ -313,10 +348,10 @@ export const downloadFile = async (req: AuthRequest, res: Response) => {
     }
 
     const fullPath = path.join(BASE_DIR, relativePath);
+    logger.info(`[AUDIT] Usuario ${user?.id} DESCARGÓ el archivo: ${relativePath}`);
     res.download(fullPath);
-    logger.info('EL usuario: ' + user.id + ' ha descargado el archivo: ' + fullPath);
   } catch (error: any) {
-    logger.error('Error al descargar archivo:', error);
+    logger.error(`Error al descargar (Usuario: ${user?.id}): ` + error.message);
     res.status(500).json({ error: error.message });
   }
 }
