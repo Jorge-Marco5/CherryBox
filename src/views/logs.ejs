@@ -13,20 +13,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
     <script src="public/js/lib/axios.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
     <style>
-        /* Estilo adicional para resaltar niveles de log */
-        .hljs-log .error {
+        /* Estilos para el lenguaje de log personalizado */
+        .hljs-date {
+            color: #6272a4;
+        }
+
+        .hljs-error {
             color: #ff5555;
             font-weight: bold;
         }
 
-        .hljs-log .warn {
+        .hljs-warn {
             color: #ffb86c;
         }
 
-        .hljs-log .info {
-            color: #8be9fd;
+        .hljs-info {
+            color: #50fa7b;
         }
     </style>
 </head>
@@ -95,10 +98,10 @@
             return {
                 name: 'Log',
                 contains: [
-                    { className: 'date', begin: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/ },
-                    { className: 'info', begin: /\[info\]/ },
-                    { className: 'warn', begin: /\[warn\]/ },
-                    { className: 'error', begin: /\[error\]/ }
+                    { className: 'date', begin: /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/ },
+                    { className: 'info', begin: /\binfo\b/ },
+                    { className: 'warn', begin: /\bwarn\b/ },
+                    { className: 'error', begin: /\berror\b/ }
                 ]
             };
         });

@@ -15,29 +15,51 @@ document.addEventListener('DOMContentLoaded', async () => {
             const endpoint = logType === 'error' ? '/api/getErrorLogs' : '/api/getLogs';
 
             const response = await axios.get(endpoint);
+            const rawLogs = response.data.logs || '';
 
-            // Reemplazar contenido en lugar de ir sumando para evitar duplicados infinitos
+            // Reemplazar contenido por completo para evitar saltos raros
             logsContainer.innerHTML = '';
 
-            const codeContainer = document.createElement('code');
-            // Usamos 'language-log' para logs generales o 'language-bash'/'language-plaintext' si preferimos
-            codeContainer.className = 'language-log';
+            const lines = rawLogs.split('\n').filter(line => line.trim() !== '');
 
-            // Limpieza de secuencias ANSI y caracteres especiales
-            const rawLogs = response.data.logs || '';
-            const cleanLogs = rawLogs
-                .replace(/\u001b\[[0-9;]*m/g, '') // Eliminar secuencias ANSI de color de forma robusta
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
+            lines.forEach(line => {
+                const logLine = document.createElement('div');
+                logLine.className = 'log-line';
 
-            codeContainer.innerHTML = cleanLogs;
+                // Detección de nivel y limpieza
+                let level = 'info';
+                let icon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
 
-            logsContainer.appendChild(codeContainer);
+                if (line.toLowerCase().includes('error')) {
+                    level = 'error';
+                    logLine.classList.add('log-line-error');
+                    icon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+                } else if (line.toLowerCase().includes('warn')) {
+                    level = 'warn';
+                    logLine.classList.add('log-line-warn');
+                    icon = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+                }
 
-            // Aplicar highlight.js específicamente a este bloque
-            if (typeof hljs !== 'undefined') {
-                hljs.highlightElement(codeContainer);
-            }
+                // Parsear timestamp si existe (formato: YYYY-MM-DD HH:mm:ss)
+                const timestampMatch = line.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/);
+                const timestamp = timestampMatch ? timestampMatch[0] : '';
+                const message = timestamp ? line.replace(timestamp, '').trim() : line;
+
+                // Limpieza de secuencias ANSI y caracteres especiales
+                const cleanMessage = message
+                    .replace(/\u001b\[[0-9;]*m/g, '') // Eliminar secuencias ANSI de color de forma robusta
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+
+                logLine.innerHTML = `
+                    <span class="log-icon level-${level}">${icon}</span>
+                    <span class="log-timestamp">${timestamp}</span>
+                    <span class="log-level level-${level}">${level}</span>
+                    <span class="log-message">${cleanMessage}</span>
+                `;
+
+                logsContainer.appendChild(logLine);
+            });
 
             // Auto-scroll al final
             if (autoScroll) {
@@ -45,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             console.error('Error al obtener logs:', error);
-            codeContainer.innerHTML = 'Error al obtener logs';
+            logsContainer.innerHTML = '<div class="log-line log-line-error"><span class="log-message">Error al obtener logs</span></div>';
         }
     }
 

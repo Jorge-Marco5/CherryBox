@@ -137,7 +137,7 @@ export const createFolder = async (req: AuthRequest, res: Response) => {
     const fullPath = path.join(BASE_DIR, relativePath, name);
     await fs.mkdir(fullPath, { recursive: true });
 
-    logger.info('EL usuario: ' + user.id + '(' + user.username + ') ha creado la carpeta: ' + fullPath);
+    logger.info('EL usuario: ' + user.id + ' ha creado la carpeta: ' + fullPath);
     res.json({ success: true, message: 'Carpeta creada' });
   } catch (error: any) {
     logger.error('Error al crear carpeta: ' + error.message);
@@ -162,7 +162,7 @@ export const uploadFiles = async (req: AuthRequest, res: Response) => {
 
     const files = req.files as Express.Multer.File[];
     const uploadedFiles = files.map(file => {
-      logger.info('EL usuario: ' + user.id + '(' + user.username + ') ha subido el archivo: ' + file.filename + ' a la ruta: ' + file.path);
+      logger.info('EL usuario: ' + user.id + ' ha subido el archivo: ' + file.filename + ' a la ruta: ' + file.path);
       return {
         name: file.filename,
         size: file.size,
@@ -170,7 +170,7 @@ export const uploadFiles = async (req: AuthRequest, res: Response) => {
       };
     });
 
-    logger.info('EL usuario: ' + user.id + '(' + user.username + ') ha subido ' + uploadedFiles.length + ' archivo(s) a la ruta: ' + req.query.path);
+    logger.info('EL usuario: ' + user.id + ' ha subido ' + uploadedFiles.length + ' archivo(s) a la ruta: ' + req.query.path);
     res.json({
       success: true,
       message: `${uploadedFiles.length} archivo(s) subido(s) correctamente`,
@@ -218,7 +218,7 @@ export const renameFile = async (req: AuthRequest, res: Response) => {
     }
 
     await fs.rename(oldFullPath, newFullPath);
-    logger.info('EL usuario: ' + user.id + '(' + user.username + ') ha renombrado el archivo: ' + oldFullPath + ' a: ' + newFullPath);
+    logger.info('EL usuario: ' + user.id + ' ha renombrado el archivo: ' + oldFullPath + ' a: ' + newFullPath);
 
     res.json({ success: true, message: 'Renombrado exitosamente' });
   } catch (error: any) {
@@ -258,10 +258,10 @@ export const deleteFile = async (req: AuthRequest, res: Response) => {
 
     if (stats.isDirectory()) {
       await fs.rm(fullPath, { recursive: true, force: true });
-      logger.info('EL usuario: ' + user.id + '(' + user.username + ') ha eliminado la carpeta: ' + fullPath);
+      logger.info('EL usuario: ' + user.id + ' ha eliminado la carpeta: ' + fullPath);
     } else {
       await fs.unlink(fullPath);
-      logger.info('EL usuario: ' + user.id + '(' + user.username + ') ha eliminado el archivo: ' + fullPath);
+      logger.info('EL usuario: ' + user.id + ' ha eliminado el archivo: ' + fullPath);
     }
     res.json({ success: true, message: 'Eliminado exitosamente' });
   } catch (error: any) {
@@ -314,7 +314,7 @@ export const downloadFile = async (req: AuthRequest, res: Response) => {
 
     const fullPath = path.join(BASE_DIR, relativePath);
     res.download(fullPath);
-    logger.info('EL usuario: ' + user.id + '(' + user.username + ') ha descargado el archivo: ' + fullPath);
+    logger.info('EL usuario: ' + user.id + ' ha descargado el archivo: ' + fullPath);
   } catch (error: any) {
     logger.error('Error al descargar archivo:', error);
     res.status(500).json({ error: error.message });
