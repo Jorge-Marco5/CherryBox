@@ -1,0 +1,92 @@
+.header-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 5px;
+    gap: 15px;
+    border-bottom: 1px solid #333;
+    margin-bottom: 10px;
+}
+
+.title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0;
+    color: #fff;
+}
+
+.log-select {
+    background: #2a2a2a;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.log-select:focus {
+    border-color: #bebebe;
+    box-shadow: 0 0 0 2px rgba(190, 190, 190, 0.1);
+}
+
+.log-select option {
+    background: #2a2a2a;
+    color: #fff;
+}
+
+.logs-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+pre {
+    overflow-x: auto;
+    overflow-y: auto;
+    height: 80dvh;
+    /* Ajustar basado en el header */
+    padding: 15px;
+    color: #ededed;
+    font-size: 13px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    border: 1px solid #333;
+}
+
+pre code {
+    width: 100%;
+    font-size: 0.9rem;
+    font-weight: 400;
+    font-family: 'Geist Mono', 'Courier New', Courier, monospace;
+    line-height: 1.5;
+    white-space: pre;
+    /*si se termina el espacio continuar en nueva linea abajo*/
+    text-wrap: balance;
+
+    /* Evitar que envuelva las líneas de logs largas, mejor hacer scroll horizontal */
+    tab-size: 4;
+}
+
+@media (max-width: 768px) {
+    pre {
+        font-size: 0.8rem;
+        height: 85dvh;
+        padding: 10px;
+    }
+
+    pre code {
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+}

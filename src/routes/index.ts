@@ -20,4 +20,8 @@ router.get('/error', (req, res) => {
     res.render('error');
 });
 
+router.get('/logs', (req, res) => {
+    res.render('logs');
+});
+
 export default router;

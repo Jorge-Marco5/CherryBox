@@ -5,7 +5,7 @@ const { combine, timestamp, printf, colorize, errors } = format;
 
 // Formato personalizado para los logs
 const logFormat = printf(({ level, message, timestamp, stack }: any) => {
-  return `${timestamp} [${level}]: ${stack || message}`;
+  return `${timestamp} ${level} - ${stack || message}`;
 });
 
 // Configuración del logger

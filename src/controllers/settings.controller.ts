@@ -63,3 +63,26 @@ export const setSettings = async (req: Request, res: Response) => {
         return res.status(500).json({ message: 'Error al obtener la configuración', error: error.message });
     }
 };
+
+export const getLogs = async (req: Request, res: Response) => {
+    try {
+        const logPath = path.join(__dirname, '../../logs/combined.log');
+        const logs = await fs.readFile(logPath, 'utf-8');
+        return res.status(200).json({ logs });
+    } catch (error: any) {
+        console.error('Error al obtener los logs:', error);
+        return res.status(500).json({ message: 'Error al obtener los logs', error: error.message });
+    }
+}
+
+export const getErrorLogs = async (req: Request, res: Response) => {
+    try {
+        const logPath = path.join(__dirname, '../../logs/error.log');
+        const logs = await fs.readFile(logPath, 'utf-8');
+        return res.status(200).json({ logs });
+    } catch (error: any) {
+        console.error('Error al obtener los logs:', error);
+        return res.status(500).json({ message: 'Error al obtener los logs', error: error.message });
+    }
+}
+

@@ -3,6 +3,7 @@ node_modules
 yarn.lock
 
 /generated/prisma
+/public/js/lib/highlight
 
 dist
 build

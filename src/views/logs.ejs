@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CherryBox - Administrador de Archivos</title>
+    <link rel="icon" type="image/svg+xml" href="public/cherries.svg">
+    <link rel="stylesheet" href="public/css/styles.css">
+    <link rel="stylesheet" href="public/css/logs.css">
+
+    <link rel="stylesheet" href="public/css/atom-one-dark.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <script src="public/js/lib/axios.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">
+                <h1>CherryBox</h1>
+                <img src="public/cherries.svg" alt="CherryBox" width="50" height="50">
+            </div>
+            <button class="btn btn-primary" style="border: solid 1px #bebebe;" onclick="logout()"><svg
+                    xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-logout">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+                    <path d="M9 12h12l-3 -3" />
+                    <path d="M18 15l3 -3" />
+                </svg></button>
+        </div>
+
+        <div class="logs-wrapper">
+            <div class="header-container">
+                <div class="title-group">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-logs">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M4 12h.01" />
+                        <path d="M4 6h.01" />
+                        <path d="M4 18h.01" />
+                        <path d="M8 18h2" />
+                        <path d="M8 12h2" />
+                        <path d="M8 6h2" />
+                        <path d="M14 6h6" />
+                        <path d="M14 12h6" />
+                        <path d="M14 18h6" />
+                    </svg>
+                    <h1 class="title">Logs</h1>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <a title="home" class="btn btn-secondary" href="/">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-home">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
+                            <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+                            <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+                        </svg>
+                    </a>
+                    <select id="logTypeSelect" class="log-select">
+                        <option value="combined">Logs Combinados</option>
+                        <option value="error">Logs de Errores</option>
+                    </select>
+                </div>
+            </div>
+            <pre id="logs"></pre>
+        </div>
+    </div>
+    <script src="public/js/lib/highlight.min.js"></script>
+    <script src="public/js/logs.js"></script>
+</body>
+
+</html>

@@ -53,7 +53,7 @@ searchFiles();
 
 function updateBreadcrumb(path) {
     const breadcrumb = document.getElementById('breadcrumb');
-    breadcrumb.innerHTML = '<span onclick="navigateTo(\'\')">🏠 Inicio</span>';
+    breadcrumb.innerHTML = '<span onclick="navigateTo(\'\')"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-home"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg></span>';
 
     if (path) {
         const parts = path.split('/').filter(p => p);
@@ -62,7 +62,7 @@ function updateBreadcrumb(path) {
         parts.forEach(part => {
             currentPath += (currentPath ? '/' : '') + part;
             const pathCopy = currentPath;
-            breadcrumb.innerHTML += ` / <span onclick="navigateTo('${pathCopy}')">${part}</span>`;
+            breadcrumb.innerHTML += ` / <span style="cursor: pointer; max-width: 150px; overflow: hidden; text-overflow: ellipsis;" onclick="navigateTo('${pathCopy}')">${part}</span>`;
         });
     }
 }
@@ -81,11 +81,14 @@ function renderFiles(files) {
                     </div>
                 `;
         if (typeof setupDragAndDrop === 'function') setupDragAndDrop();
+        updateSelectionButtons();
         return;
     }
 
     const isMobile = window.innerWidth < 768;
-    fileList.innerHTML = files.map(file => {
+    //agregar fila al inicio con checkbox para seleccionar todos o deseleccionar todos
+    fileList.innerHTML = '<div class="file-item"><input type="checkbox" class="file-checkbox" id="checkbox-all" onchange="toggleSelectAll(this)"> <label for="checkbox-all" class="checkbox-label"><div class="file-icon"></div></label> <div class="file-info"> <div class="file-name" style="font-weight: 600;"></div> <div class="file-meta"></div> </div> <div class="file-actions"></div> </div>';
+    fileList.innerHTML += files.map(file => {
         const isFolder = file.type === 'folder';
         const icon = isFolder ? '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="#FFE36C" class="icon icon-tabler icons-tabler-filled icon-tabler-folder"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 3a1 1 0 0 1 .608 .206l.1 .087l2.706 2.707h6.586a3 3 0 0 1 2.995 2.824l.005 .176v8a3 3 0 0 1 -2.824 2.995l-.176 .005h-14a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-11a3 3 0 0 1 2.824 -2.995l.176 -.005h4z" /></svg>' : getFileIcon(file.name);
         const size = isFolder ? '' : formatBytes(file.size);
@@ -112,6 +115,8 @@ function renderFiles(files) {
                     </div>
                 `;
     }).join('');
+
+    updateSelectionButtons();
 }
 
 function formatBytes(bytes) {
@@ -438,10 +443,10 @@ async function getStorage() {
     }
 }
 
-
 function downloadFile(path) {
     window.open(`${API_URL}/download?path=${encodeURIComponent(path)}`, '_blank');
 }
+
 
 function escapeHtml(text) {
     const div = document.createElement('div');
@@ -538,3 +543,64 @@ async function logout() {
         alert(error.response?.data?.error || 'Error al cerrar sesión');
     }
 }
+
+
+//eliminar los archivos con el checkbox seleccionado
+async function deleteSelectedFiles() {
+    const checkboxes = document.querySelectorAll('.file-checkbox:checked');
+    const paths = Array.from(checkboxes).map(checkbox => checkbox.dataset.path);
+    if (paths.length === 0) {
+        alert('No se han seleccionado archivos');
+        return;
+    }
+    if (confirm(`¿Estás seguro de que quieres eliminar ${paths.length} archivos?`)) {
+        try {
+            await Promise.all(paths.map(path => axios.delete(`${API_URL}/delete`, { data: { path } })));
+
+            const btn = document.getElementById('btn-deleteSelectedFiles');
+            if (btn) btn.style.display = 'none';
+
+            await loadFiles(currentPath);
+        } catch (error) {
+            console.error('Error al eliminar archivos:', error);
+            alert('A ocurrido un error al intentar eliminar algunos archivos.');
+            await loadFiles(currentPath);
+        }
+    }
+}
+
+const btnDeleteSelectFiles = document.getElementById('btn-deleteSelectedFiles');
+
+function updateSelectionButtons() {
+    const totalCount = document.querySelectorAll('.file-checkbox').length;
+    const checkedCount = document.querySelectorAll('.file-checkbox:checked').length;
+
+    if (btnDeleteSelectFiles) {
+        btnDeleteSelectFiles.style.display = checkedCount > 0 ? 'inline-flex' : 'none';
+    }
+
+    const checkboxAll = document.getElementById('checkbox-all');
+    if (checkboxAll) {
+        checkboxAll.checked = (totalCount > 0 && checkedCount === totalCount);
+        checkboxAll.indeterminate = (checkedCount > 0 && checkedCount < totalCount);
+    }
+}
+
+// Inicializar estado oculto
+updateSelectionButtons();
+
+function toggleSelectAll(element) {
+    const isChecked = element.checked;
+    const checkboxes = document.querySelectorAll('.file-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = isChecked;
+    });
+    updateSelectionButtons();
+}
+
+// Delegación de eventos para capturar el cambio en los checkboxes dinámicos
+document.addEventListener('change', (e) => {
+    if (e.target && e.target.classList.contains('file-checkbox')) {
+        updateSelectionButtons();
+    }
+});

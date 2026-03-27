@@ -132,6 +132,7 @@ export const createFolder = async (req: Request, res: Response) => {
     const fullPath = path.join(BASE_DIR, relativePath, name);
     await fs.mkdir(fullPath, { recursive: true });
 
+    logger.info('Carpeta creada: ' + fullPath);
     res.json({ success: true, message: 'Carpeta creada' });
   } catch (error: any) {
     logger.error('Error al crear carpeta: ' + error.message);
@@ -151,7 +152,7 @@ export const uploadFiles = async (req: Request, res: Response) => {
 
     const files = req.files as Express.Multer.File[];
     const uploadedFiles = files.map(file => {
-      console.log('Archivo guardado:', file.path);
+      logger.info('Archivo guardado:' + file.filename + ' en la ruta: ' + file.path);
       return {
         name: file.filename,
         size: file.size,
@@ -159,6 +160,7 @@ export const uploadFiles = async (req: Request, res: Response) => {
       };
     });
 
+    logger.info('Archivos subidos: ' + uploadedFiles.length + ' en la ruta: ' + req.query.path);
     res.json({
       success: true,
       message: `${uploadedFiles.length} archivo(s) subido(s) correctamente`,
@@ -202,11 +204,11 @@ export const renameFile = async (req: Request, res: Response) => {
     }
 
     await fs.rename(oldFullPath, newFullPath);
-    logger.info('Renombrado:', oldFullPath, '->', newFullPath);
+    logger.info('Renombrado:' + oldFullPath + ' -> ' + newFullPath);
 
     res.json({ success: true, message: 'Renombrado exitosamente' });
   } catch (error: any) {
-    logger.error('Error al renombrar:', error);
+    logger.error('Error al renombrar:' + error.message);
     res.status(500).json({ error: error.message });
   }
 }
@@ -240,9 +242,9 @@ export const deleteFile = async (req: Request, res: Response) => {
       logger.info('Carpeta eliminada:', fullPath);
     } else {
       await fs.unlink(fullPath);
-      logger.info('Archivo eliminado:', fullPath);
     }
 
+    logger.info('Archivo eliminado: ' + fullPath);
     res.json({ success: true, message: 'Eliminado exitosamente' });
   } catch (error: any) {
     logger.error('Error al eliminar:', error);
@@ -290,6 +292,7 @@ export const downloadFile = async (req: Request, res: Response) => {
 
     const fullPath = path.join(BASE_DIR, relativePath);
     res.download(fullPath);
+    logger.info('Archivo descargado: ' + fullPath);
   } catch (error: any) {
     logger.error('Error al descargar archivo:', error);
     res.status(500).json({ error: error.message });
