@@ -66,7 +66,7 @@ export const setSettings = async (req: Request, res: Response) => {
 
 export const getLogs = async (req: Request, res: Response) => {
     try {
-        const logPath = path.join(__dirname, '../../logs/combined.log');
+        const logPath = path.join(__dirname, '../logs/combined.log');
         const logs = await fs.readFile(logPath, 'utf-8');
         return res.status(200).json({ logs });
     } catch (error: any) {
@@ -77,7 +77,7 @@ export const getLogs = async (req: Request, res: Response) => {
 
 export const getErrorLogs = async (req: Request, res: Response) => {
     try {
-        const logPath = path.join(__dirname, '../../logs/error.log');
+        const logPath = path.join(__dirname, '../logs/error.log');
         const logs = await fs.readFile(logPath, 'utf-8');
         return res.status(200).json({ logs });
     } catch (error: any) {

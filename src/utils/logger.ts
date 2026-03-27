@@ -1,7 +1,10 @@
-// logger.js
 import { createLogger, format, transports } from 'winston';
+import path from 'path';
 
 const { combine, timestamp, printf, colorize, errors } = format;
+
+// Directorio de logs dentro de src
+const LOGS_DIR = path.join(__dirname, '../logs');
 
 // Formato personalizado para los logs
 const logFormat = printf(({ level, message, timestamp, stack }: any) => {
@@ -19,13 +22,13 @@ export const logger = createLogger({
   ),
   transports: [
     new transports.Console(), // Salida en consola
-    new transports.File({ filename: 'logs/error.log', level: 'error' }), // Solo errores
-    new transports.File({ filename: 'logs/combined.log' }) // Todos los niveles
+    new transports.File({ filename: path.join(LOGS_DIR, 'error.log'), level: 'error' }), // Solo errores
+    new transports.File({ filename: path.join(LOGS_DIR, 'combined.log') }) // Todos los niveles
   ],
   exceptionHandlers: [
-    new transports.File({ filename: 'logs/exceptions.log' })
+    new transports.File({ filename: path.join(LOGS_DIR, 'exceptions.log') })
   ],
   rejectionHandlers: [
-    new transports.File({ filename: 'logs/rejections.log' })
+    new transports.File({ filename: path.join(LOGS_DIR, 'rejections.log') })
   ]
 });
