@@ -33,7 +33,10 @@ let currentPath = '';
 let currentRenameItem = null;
 let currentPreviewPath = null;
 
+let isLoadingFiles = false;
 async function loadFiles(path = '') {
+    if (isLoadingFiles) return;
+    isLoadingFiles = true;
     try {
         const response = await axios.get(`${API_URL}/files?path=${encodeURIComponent(path)}`);
         const data = response.data;
@@ -42,16 +45,20 @@ async function loadFiles(path = '') {
         updateBreadcrumb(currentPath);
         renderFiles(data.files);
     } catch (error) {
-        location.href = '/login';
+        if (error.response && error.response.status === 401) {
+            location.href = '/login';
+        }
+    } finally {
+        isLoadingFiles = false;
     }
 }
+
+//busqueda instantanea al escribir
+document.getElementById('searchInput')?.addEventListener('input', searchFiles);
 
 async function searchFiles() {
     const searchInput = document.getElementById('searchInput');
     const query = searchInput?.value.trim();
-
-    //busqueda instantanea al escribir
-    searchInput.addEventListener('input', searchFiles);
 
     if (!query) {
         await loadFiles(currentPath);
@@ -98,7 +105,6 @@ function renderFiles(files) {
                         <div class="upload-hint">Esta carpeta está vacía. Puedes subir múltiples archivos a la vez</div>
                     </div>
                 `;
-        if (typeof setupDragAndDrop === 'function') setupDragAndDrop();
         updateSelectionButtons();
         return;
     }
@@ -300,11 +306,6 @@ function setupDragAndDrop() {
     const uploadArea = document.getElementById('uploadArea');
     if (!uploadArea) return;
 
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        uploadArea.addEventListener(eventName, preventDefaults, false);
-        document.body.addEventListener(eventName, preventDefaults, false);
-    });
-
     ['dragenter', 'dragover'].forEach(eventName => {
         uploadArea.addEventListener(eventName, () => {
             uploadArea.classList.add('drag-over');
@@ -319,6 +320,11 @@ function setupDragAndDrop() {
 
     uploadArea.addEventListener('drop', handleDrop, false);
 }
+
+// Listeners globales que solo se deben registrar una vez
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    document.body.addEventListener(eventName, preventDefaults, false);
+});
 
 function preventDefaults(e) {
     e.preventDefault();
@@ -399,6 +405,9 @@ async function previewFile(path, name) {
 
     previewTitle.innerHTML = getFileIcon(ext) + ' ' + name;
     previewContent.innerHTML = '<p>Cargando...</p>';
+    
+    // Limpiar clases previas de tipo de archivo
+    modal.classList.remove('preview-pdf', 'preview-image', 'preview-text', 'preview-video', 'preview-audio');
     modal.classList.add('active');
 
     // Scroll al inicio del modal
@@ -412,16 +421,21 @@ async function previewFile(path, name) {
         const pdfExts = ['pdf'];
 
         if (textExts.includes(ext)) {
+            modal.classList.add('preview-text');
             const response = await fetch(`${API_URL}/file-content?path=${encodeURIComponent(path)}`);
             const data = await response.json();
             previewContent.innerHTML = `<pre>${escapeHtml(data.content)}</pre>`;
         } else if (imageExts.includes(ext)) {
+            modal.classList.add('preview-image');
             previewContent.innerHTML = `<img src="${API_URL}/file-content?path=${encodeURIComponent(path)}" alt="${name}" loading="lazy">`;
         } else if (videoExts.includes(ext)) {
+            modal.classList.add('preview-video');
             previewContent.innerHTML = `<video controls preload="metadata"><source src="${API_URL}/file-content?path=${encodeURIComponent(path)}"></video>`;
         } else if (audioExts.includes(ext)) {
+            modal.classList.add('preview-audio');
             previewContent.innerHTML = `<audio controls preload="metadata"><source src="${API_URL}/file-content?path=${encodeURIComponent(path)}"></audio>`;
         } else if (pdfExts.includes(ext)) {
+            modal.classList.add('preview-pdf');
             previewContent.innerHTML = `<iframe src="${API_URL}/file-content?path=${encodeURIComponent(path)}" type="application/pdf" class="pdfViewer"></iframe>`;
         } else {
             previewContent.innerHTML = '<p>Vista previa no disponible para este tipo de archivo. Puedes descargarlo.</p>';
@@ -479,7 +493,12 @@ function showCreateFolderModal() {
 
 
 function closeModal(modalId) {
-    document.getElementById(modalId).classList.remove('active');
+    const modal = document.getElementById(modalId);
+    modal.classList.remove('active');
+    // Limpiar clases de tipo de archivo si es el modal de preview
+    if (modalId === 'previewModal') {
+        modal.classList.remove('preview-pdf', 'preview-image', 'preview-text', 'preview-video', 'preview-audio');
+    }
     const audio = document.querySelector('audio');
     const video = document.querySelector('video');
     if (audio) audio.pause();

@@ -14,17 +14,20 @@ const logFormat = printf(({ level, message, timestamp, stack }: any) => {
 // Configuración del logger
 export const logger = createLogger({
   level: 'info', // Nivel mínimo de log
-  format: combine(
-    colorize(), // Colores en consola
-    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    errors({ stack: true }), // Captura stack trace en errores
+  format: format.combine(
+    format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    format.errors({ stack: true }),
     logFormat
   ),
   transports: [
-    new transports.Console(), // Salida en consola
-    new transports.File({ filename: path.join(LOGS_DIR, 'error.log'), level: 'error' }), // Solo errores
-    new transports.File({ filename: path.join(LOGS_DIR, 'combined.log') }), // Todos los niveles
-    new transports.File({ filename: path.join(LOGS_DIR, 'users.log'), level: 'info' })
+    new transports.Console({
+      format: format.combine(
+        format.colorize(),
+        logFormat
+      )
+    }),
+    new transports.File({ filename: path.join(LOGS_DIR, 'error.log'), level: 'error' }),
+    new transports.File({ filename: path.join(LOGS_DIR, 'combined.log') }),
   ],
   exceptionHandlers: [
     new transports.File({ filename: path.join(LOGS_DIR, 'exceptions.log') })

@@ -372,14 +372,37 @@ body {
 
 /* Estilos específicos para el modal de preview */
 .modal-content.preview-modal {
-    max-width: 90%;
-    max-height: calc(100dvh - 40px);
+    max-width: 95vw;
+    max-height: 95dvh;
+    width: auto;
+    display: inline-flex;
+    flex-direction: column;
+}
+
+/* En móviles/tablets, asegurar que ocupen casi todo el ancho */
+.modal.preview-pdf .modal-content.preview-modal,
+.modal.preview-text .modal-content.preview-modal,
+.modal.preview-video .modal-content.preview-modal {
+    width: 95vw;
 }
 
 @media (min-width: 768px) {
     .modal-content.preview-modal {
-        max-width: 80vw;
-        max-height: 90dvh;
+        max-width: 95vw;
+        max-height: 95dvh;
+        width: auto;
+    }
+
+    /* Forzar ancho para PDFs y texto en desktop */
+    .modal.preview-pdf .modal-content.preview-modal,
+    .modal.preview-text .modal-content.preview-modal {
+        width: 85vw;
+    }
+
+    /* Ajustar ancho para videos en desktop si son muy grandes */
+    .modal.preview-video .modal-content.preview-modal {
+        width: auto;
+        max-width: 90vw;
     }
 }
 
@@ -407,8 +430,8 @@ body {
 
 .pdfViewer {
     width: 100%;
-    height: 600px;
-
+    flex: 1;
+    min-height: 70dvh;
 }
 
 .form-group {
@@ -474,31 +497,43 @@ body {
 .preview-content {
     display: flex;
     justify-content: center;
-    margin-top: 15px;
+    align-items: center;
+    flex: 1;
     overflow: auto;
-    max-height: calc(100dvh - 240px);
+    min-height: 0;
+    /* Importante para flex-basis */
 }
 
 @media (min-width: 768px) {
     .preview-content {
         margin-top: 20px;
-        max-height: calc(100dvh - 280px);
     }
 }
 
 .preview-content img {
     max-width: 100%;
+    max-height: calc(95dvh - 200px);
+    /* Prevenir scroll vertical innecesario */
+    width: auto;
     height: auto;
-    max-height: 90dvh;
     border-radius: 8px;
     display: block;
     object-fit: contain;
 }
 
-.preview-content video,
-.preview-content audio {
-    width: 100%;
+.preview-content video {
+    width: auto;
     max-width: 100%;
+    max-height: calc(95dvh - 200px);
+    /* Prevenir scroll vertical */
+    border-radius: 8px;
+    display: block;
+    object-fit: contain;
+}
+
+.preview-content audio {
+    max-width: auto;
+    min-width: 200px;
     border-radius: 8px;
     display: block;
 }
@@ -525,9 +560,11 @@ body {
 
 .preview-content iframe {
     width: 100%;
+    height: 100%;
+    flex: 1;
     border: none;
     border-radius: 8px;
-    min-height: 400px;
+    min-height: 70dvh;
 }
 
 .empty-state {

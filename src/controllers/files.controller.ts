@@ -54,8 +54,6 @@ export const listFiles = async (req: AuthRequest, res: Response) => {
     const fullPath = path.join(BASE_DIR, relativePath);
     const items = await fs.readdir(fullPath, { withFileTypes: true });
 
-    logger.info(`[AUDIT] Usuario ${user?.id} listó el directorio: ${relativePath || '/'}`);
-
     const results = await Promise.allSettled(
       items.map(async (item) => {
         const itemPath = path.join(fullPath, item.name);
@@ -310,7 +308,10 @@ export const getFileContent = async (req: AuthRequest, res: Response) => {
     const fullPath = path.join(BASE_DIR, relativePath);
     const ext = path.extname(fullPath).toLowerCase();
 
-    logger.info(`[AUDIT] Usuario ${user?.id} previsualizó el archivo: ${relativePath}`);
+    // Solo registramos la auditoría si NO es una petición de rango (evita spam en streaming de video/audio)
+    if (!req.headers.range) {
+      logger.info(`[AUDIT] Usuario ${user?.id} previsualizó el archivo: ${relativePath}`);
+    }
 
     // Archivos de texto
     const textExtensions = ['.txt', '.md', '.json', '.js', '.css', '.html', '.xml', '.csv'];
