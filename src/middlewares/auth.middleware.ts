@@ -3,7 +3,9 @@ import { verifyToken } from "../lib/jwt"
 import { prisma } from "../lib/prisma"
 
 export interface AuthRequest extends Request {
-    user?: { id: string, username: string }
+    user?: {
+        id: string
+    }
 }
 
 /**
@@ -29,7 +31,7 @@ export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction)
 
         const decoded = verifyToken(token) as { id: string, username: string }
 
-        req.user = { id: decoded.id, username: decoded.username }
+        req.user = { id: decoded.id }
 
         next()
 

@@ -1,15 +1,19 @@
 import { Request, Response } from "express"
+import { logger } from "../utils/logger"
 import { register, login } from "../services/auth.service"
 import { AuthRequest } from "../middlewares/auth.middleware"
 
-export const registerHandler = async (req: Request, res: Response) => {
-
-    const { email, password } = req.body
-
+export const registerHandler = async (req: AuthRequest, res: Response) => {
     try {
+        const user = req.user;
+        if (!user) {
+            return res.status(401).json({ error: "No autenticado" });
+        }
+        const { email, password } = req.body
 
         await register(email, password)
 
+        logger.info('EL usuario ' + user.id + ' se ha registrado exitosamente')
         res.json({ message: "Usuario registrado" })
 
     } catch (err: any) {
@@ -27,10 +31,11 @@ export const loginHandler = async (req: Request, res: Response) => {
 
         res.cookie("token", token, {
             httpOnly: true,
-            secure: true,
-            sameSite: "strict"
+            secure: false,
+            sameSite: "lax"
         })
 
+        logger.info(`Usuario ${user.email} logueado exitosamente`)
         res.json({ message: "Login exitoso", user })
 
     } catch (err: any) {
@@ -38,8 +43,9 @@ export const loginHandler = async (req: Request, res: Response) => {
     }
 }
 
-export const logoutHandler = (_req: Request, res: Response) => {
+export const logoutHandler = (req: AuthRequest, res: Response) => {
     res.clearCookie("token")
+    logger.info(`Usuario ${req.user?.id} ha cerrado sesion`)
     res.json({ message: "Logout" })
 }
 

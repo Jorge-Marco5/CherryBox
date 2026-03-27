@@ -23,7 +23,8 @@ export const logger = createLogger({
   transports: [
     new transports.Console(), // Salida en consola
     new transports.File({ filename: path.join(LOGS_DIR, 'error.log'), level: 'error' }), // Solo errores
-    new transports.File({ filename: path.join(LOGS_DIR, 'combined.log') }) // Todos los niveles
+    new transports.File({ filename: path.join(LOGS_DIR, 'combined.log') }), // Todos los niveles
+    new transports.File({ filename: path.join(LOGS_DIR, 'users.log'), level: 'info' })
   ],
   exceptionHandlers: [
     new transports.File({ filename: path.join(LOGS_DIR, 'exceptions.log') })
