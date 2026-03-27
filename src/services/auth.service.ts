@@ -23,7 +23,7 @@ export const register = async (email: string, password: string) => {
 
 export const login = async (email: string, password: string) => {
 
-    const user = await prisma.user.findUnique({ where: { email } })
+    const user = await prisma.user.findUnique({ where: { email }, select: { id: true, email: true, role: true, password: true } })
 
     if (!user) {
         throw new Error("Credenciales inválidas")
@@ -35,7 +35,9 @@ export const login = async (email: string, password: string) => {
         throw new Error("Credenciales inválidas")
     }
 
+    const { password: _, ...userWithoutPassword } = user
+
     const token = signToken({ id: user.id })
 
-    return { user, token }
+    return { user: userWithoutPassword, token }
 }

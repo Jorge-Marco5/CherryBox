@@ -23,15 +23,15 @@ export const loginHandler = async (req: Request, res: Response) => {
 
     try {
 
-        const { token } = await login(email, password)
+        const { token, user } = await login(email, password)
 
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax"
+            secure: true,
+            sameSite: "strict"
         })
 
-        res.json({ message: "Login exitoso" })
+        res.json({ message: "Login exitoso", user })
 
     } catch (err: any) {
         res.status(401).json({ error: err.message })

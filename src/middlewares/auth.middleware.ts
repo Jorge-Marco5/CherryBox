@@ -50,14 +50,17 @@ export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction)
  * @param next Función para pasar al controlador si todo es correcto
  */
 export const requireAdmin = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-    if (!req.user || !req.user.id) {
+
+    const user = req.user
+    const userId = user?.id
+    if (!user || !userId) {
         res.status(401).json({ error: "No autenticado" })
         return
     }
 
     try {
         const user = await prisma.user.findUnique({
-            where: { id: req.user.id }
+            where: { id: userId.toString() }
         })
 
         if (!user || user.role !== "ADMIN") {

@@ -1,5 +1,13 @@
 const API_URL = '/api';
 
+const user = JSON.parse(localStorage.getItem('user'));
+
+if (!user) {
+    window.location.href = '/login';
+}
+
+console.log(user);
+
 // Interceptor global para redirección si no hay sesión
 axios.interceptors.response.use(
     response => response,
@@ -503,7 +511,9 @@ if (loginForm) {
         const password = document.getElementById('password').value;
 
         try {
-            await axios.post('/api/auth/login', { email, password });
+            const response = await axios.post('/api/auth/login', { email, password });
+            //guardar datos basicos de usuario en localStorage
+            localStorage.setItem('user', JSON.stringify(response.data.user));
             window.location.href = '/';
         } catch (error) {
             alert(error.response?.data?.error || 'Error al iniciar sesión');
