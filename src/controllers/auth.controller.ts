@@ -13,6 +13,7 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 export const registerHandler = async (req: AuthRequest, res: Response) => {
     const user = req.user;
     const { email, password } = req.body
+
     try {
         if (!user) {
             return res.status(401).json({ error: "No autenticado" });

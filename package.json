@@ -27,7 +27,8 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
     "pg": "^8.20.0",
-    "winston": "^3.19.0"
+    "winston": "^3.19.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
