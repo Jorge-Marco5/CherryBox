@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 tbody.appendChild(tr);
             });
         } catch (error) {
-            console.error("Error al obtener usuarios:", error);
+            console.error(error.response.data.error || "Error al obtener usuarios:", error);
         }
     }
 
@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await axios.patch(`/api/users/${id}/block`);
             updateUsers();
         } catch (error) {
-            alert("Error al cambiar estado de bloqueo");
+            alert(error.response.data.error || "Error al cambiar estado de bloqueo");
         }
     };
 
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await axios.patch(`/api/users/${id}/role`, { role: newRole });
             updateUsers();
         } catch (error) {
-            alert("Error al cambiar el rol");
+            alert(error.response.data.error || "Error al cambiar el rol");
         }
     };
 
@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await axios.delete(`/api/users/${id}`);
                 updateUsers();
             } catch (error) {
-                alert("Error al eliminar usuario");
+                alert(error.response.data.error || "Error al eliminar usuario");
             }
         }
     };
@@ -117,11 +117,16 @@ document.addEventListener("DOMContentLoaded", () => {
         const role = document.getElementById('editRole').value;
 
         try {
-            await axios.put(`/api/users/${id}`, { email, role });
+            if (email) {
+                await axios.put(`/api/users/${id}`, { email });
+            }
+            if (role) {
+                await axios.patch(`/api/users/${id}/role`, { role });
+            }
             closeEditModal();
             updateUsers();
         } catch (error) {
-            alert("Error al guardar cambios");
+            alert(error.response.data.error || "Error al guardar cambios");
         }
     });
 

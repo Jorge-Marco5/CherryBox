@@ -4,7 +4,8 @@ import { prisma } from "../lib/prisma"
 
 export interface AuthRequest extends Request {
     user?: {
-        id: string
+        id: string;
+        role: string;
     }
 }
 
@@ -18,7 +19,7 @@ export interface AuthRequest extends Request {
  * @param res Respuesta de Express para retornar errores de autenticación
  * @param next Función para continuar al siguiente middleware o controlador
  */
-export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction): void => {
+export const requireAuth = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
 
     const token = req.cookies?.token
 
@@ -28,13 +29,25 @@ export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction)
     }
 
     try {
-
         const decoded = verifyToken(token) as { id: string, username: string }
+        
+        const dbUser = await prisma.user.findUnique({
+            where: { id: decoded.id }
+        })
 
-        req.user = { id: decoded.id }
+        if (!dbUser) {
+            res.status(401).json({ error: "Usuario no encontrado" })
+            return
+        }
+
+        if (dbUser.is_blocked) {
+            res.status(403).json({ error: "Usuario bloqueado" })
+            return
+        }
+
+        req.user = { id: dbUser.id, role: dbUser.role }
 
         next()
-
     } catch (err) {
         res.status(401).json({ error: "Token inválido" })
         return
@@ -52,27 +65,16 @@ export const requireAuth = (req: AuthRequest, res: Response, next: NextFunction)
  * @param next Función para pasar al controlador si todo es correcto
  */
 export const requireAdmin = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
-
     const user = req.user
-    const userId = user?.id
-    if (!user || !userId) {
+    if (!user) {
         res.status(401).json({ error: "No autenticado" })
         return
     }
 
-    try {
-        const user = await prisma.user.findUnique({
-            where: { id: userId.toString() }
-        })
-
-        if (!user || user.role !== "ADMIN") {
-            res.status(403).json({ error: "Acceso denegado. Se necesitan permisos de administrador." })
-            return
-        }
-
-        next()
-    } catch (err) {
-        res.status(500).json({ error: "Error al verificar permisos" })
+    if (user.role !== "ADMIN" && user.role !== "SUPERADMIN") {
+        res.status(403).json({ error: "Acceso denegado. Se necesitan permisos de administrador." })
         return
     }
+
+    next()
 }

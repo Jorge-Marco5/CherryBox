@@ -46,7 +46,13 @@ export const login = async (email: string, password: string) => {
     const userWithoutPassword = { ...user, password: "" }
     const userWithoutBlocked = { ...userWithoutPassword, is_blocked: false }
 
+    //cambiar el valor de 'SUPERADMIN' a 'ADMIN'
+    let changedRole = userWithoutBlocked
+    if (user.role === "SUPERADMIN") {
+        changedRole = { ...userWithoutBlocked, role: "ADMIN" }
+    }
+
     const token = signToken({ id: user.id })
 
-    return { user: userWithoutBlocked, token }
+    return { user: changedRole, token }
 }
