@@ -314,6 +314,7 @@ pre#logs {
 .modal-content {
     background-color: #1c1c1c;
     border: 1px solid #333;
+    border-top: 4px solid var(--primary);
     padding: 0;
     border-radius: 12px;
     width: 90%;

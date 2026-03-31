@@ -123,6 +123,7 @@ body {
 .icon img {
     width: 30px;
     height: 30px;
+    filter: drop-shadow(0 0 5px rgb(0, 0, 0));
 }
 
 .icon h1 {
@@ -374,6 +375,7 @@ body {
     border-radius: 12px;
     width: 100%;
     border: 1px solid #333;
+    border-top: 4px solid var(--primary);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     max-width: 500px;
     max-height: calc(100dvh - 40px);

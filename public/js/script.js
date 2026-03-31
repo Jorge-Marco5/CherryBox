@@ -12,8 +12,6 @@ if (!user && isAdminPage && currentPathName !== '/login') {
 }
 
 if (user) {
-    const userId = document.getElementById('userId');
-    if (userId) userId.textContent = user.id;
 
     // Bloqueo visual preventivo si no es ADMIN en página de administración
     if (user.role !== 'ADMIN' && user.role !== 'SUPERADMIN' && isAdminPage) {

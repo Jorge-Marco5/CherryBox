@@ -126,9 +126,11 @@
                             <br>
                             Si se cambia podria haber conflictos con los archivos y permisos, se recomienda usar el
                             boton de
-                            <strong>sincronizar</strong> despues de cambiar el directorio base y se reiniciaran los
-                            permisos
-                            de los usuarios sobre los archivos
+                            <strong>sincronizar</strong>.
+                            <br>
+                            Despues de cambiar el directorio base y sicronizar, se reiniciaran los permisos de los
+                            usuarios sobre los
+                            archivos
                         </p>
                         <input type="text" id="baseDir" placeholder="Directorio base">
                     </div>
@@ -152,9 +154,13 @@
                 <hr>
                 <div class="form-group">
                     <label for="syncFiles" style="color: #ffffff;">Sincronizar archivos</label>
-                    <p>Sincronizar archivos con la base de datos, se eliminaran los archivos que no estén en el
-                        directorio, asi como los permisos de los usuarios sobre los archivos, todos los archivos seran
-                        propiedad del usuario <strong>superadmin</strong></p>
+                    <p>Sincroniza los archivos con la base de datos.
+                        <br>
+                        Se eliminaran los archivos que no estén en el directorio, asi como los permisos de los usuarios
+                        sobre los archivos.
+                        <br>
+                        Todos los archivos seran propiedad del usuario <strong>superadmin</strong>
+                    </p>
                     <button class="btn btn-primary" id="btn-sync" onclick="syncFiles()"><svg
                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                             stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -169,12 +175,15 @@
                 <hr>
                 <div class="form-group">
                     <label for="syncFiles" style="color: #ffffff;">Escaneo de archivos</label>
-                    <p>Escaneo de archivos en el directorio para deteccion de archivos maliciosos y sean puestos en
-                        cuarentena
+                    <p>Escaneo de archivos en el directorio para deteccion de archivos maliciosos.
+                        <br>
+                        Los archivos maliciosos seran puestos en cuarentena y no podran ser accedidos.
                         <br>
                         <strong>
                             Advertencia: Este proceso puede tardar varios minutos dependiendo del tamaño del directorio
                         </strong>
+                        <br>
+                    <p id="last-scan">Ultimo escaneo: <strong>No realizado</strong></p>
                     </p>
                     <button class="btn btn-primary" id="btn-analyze" onclick="analyzeFiles()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -205,13 +214,14 @@
         </div>
     </div>
 
-
+    <p id="userId" style="position: fixed; bottom: 5px; left: 5px; color: white; font-size: 0.7rem;">-</p>
     <div id="toast-container"></div>
     <script src="public/js/lib/highlight.min.js"></script>
     <script>hljs.highlightAll();</script>
     <script src="public/js/toast.js"></script>
     <script src="public/js/settings.js"></script>
     <script src="public/js/logout.js"></script>
+    <script src="public/js/info-user.js"></script>
 </body>
 
 </html>
