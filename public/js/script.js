@@ -18,12 +18,24 @@ if (user) {
     }
 }
 
-// Interceptor global para redirección si no hay sesión
+
+// Interceptor global para errores
 axios.interceptors.response.use(
-    response => response,
+    response => {
+        // Mostrar toast de éxito si la respuesta tiene un mensaje y no es un GET
+        if (response.data && response.data.message && response.config.method !== 'get') {
+            showToast(response.data.message, 'success');
+        }
+        return response;
+    },
     error => {
-        if (error.response && error.response.status === 401 && window.location.pathname !== '/login') {
+        const status = error.response ? error.response.status : null;
+        const message = error.response?.data?.error || "Error de conexión con el servidor";
+
+        if (status === 401 && window.location.pathname !== '/login') {
             window.location.href = '/login';
+        } else {
+            showToast(message, 'error');
         }
         return Promise.reject(error);
     }
@@ -32,6 +44,8 @@ axios.interceptors.response.use(
 let currentPath = '';
 let currentRenameItem = null;
 let currentPreviewPath = null;
+let currentPermissionFileId = null;
+let currentFolderData = { id: null, name: "" };
 
 let isLoadingFiles = false;
 async function loadFiles(path = '') {
@@ -42,8 +56,10 @@ async function loadFiles(path = '') {
         const data = response.data;
 
         currentPath = data.currentPath;
+        currentFolderData = { id: data.currentFolderId, name: data.currentFolderName };
         updateBreadcrumb(currentPath);
         renderFiles(data.files);
+        updateFolderPermissionButton();
     } catch (error) {
         if (error.response && error.response.status === 401) {
             location.href = '/login';
@@ -53,8 +69,12 @@ async function loadFiles(path = '') {
     }
 }
 
-//busqueda instantanea al escribir
-document.getElementById('searchInput')?.addEventListener('input', searchFiles);
+// Búsqueda al presionar Enter
+document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        searchFiles();
+    }
+});
 
 async function searchFiles() {
     const searchInput = document.getElementById('searchInput');
@@ -129,6 +149,10 @@ function renderFiles(files) {
                             <div class="file-meta">${size}${size ? ' • ' : ''}${date}</div>
                         </div>
                         <div class="file-actions">
+                            <button class="icon-btn" onclick="event.stopPropagation(); showPermissionsModal('${file.id}', '${file.name}')" title="Permisos">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-lock"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" /><path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /><path d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg>
+                                ${isMobile ? '' : '<p style="color: #22c55e;">Permisos</p>'}
+                            </button>
                             <button class="icon-btn" onclick="event.stopPropagation(); showRenameModal('${file.path}', '${file.name}')" title="Renombrar">
                                 ${isMobile ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#4284efff" class="icon icon-tabler icons-tabler-filled icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a1 1 0 0 1 -1 1h-1a1 1 0 0 0 -1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1 -1v-1a1 1 0 0 1 2 0v1a3 3 0 0 1 -3 3h-9a3 3 0 0 1 -3 -3v-9a3 3 0 0 1 3 -3h1a1 1 0 0 1 1 1" /><path d="M14.596 5.011l4.392 4.392l-6.28 6.303a1 1 0 0 1 -.708 .294h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 .294 -.708zm6.496 -2.103a3.097 3.097 0 0 1 .165 4.203l-.164 .18l-.693 .694l-4.387 -4.387l.695 -.69a3.1 3.1 0 0 1 4.384 0" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#4284efff" class="icon icon-tabler icons-tabler-filled icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a1 1 0 0 1 -1 1h-1a1 1 0 0 0 -1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1 -1v-1a1 1 0 0 1 2 0v1a3 3 0 0 1 -3 3h-9a3 3 0 0 1 -3 -3v-9a3 3 0 0 1 3 -3h1a1 1 0 0 1 1 1" /><path d="M14.596 5.011l4.392 4.392l-6.28 6.303a1 1 0 0 1 -.708 .294h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 .294 -.708zm6.496 -2.103a3.097 3.097 0 0 1 .165 4.203l-.164 .18l-.693 .694l-4.387 -4.387l.695 -.69a3.1 3.1 0 0 1 4.384 0" /></svg> <p>Renombrar</p>'}
                             </button>
@@ -177,7 +201,7 @@ function handleTouchEnd(event, path, type) {
 async function createFolder() {
     const name = document.getElementById('folderNameInput').value.trim();
     if (!name) {
-        alert('Por favor ingresa un nombre');
+        showToast('Por favor ingresa un nombre', 'warning');
         return;
     }
 
@@ -193,10 +217,10 @@ async function createFolder() {
             document.getElementById('folderNameInput').value = '';
             loadFiles(currentPath);
         } else {
-            alert('Error: ' + data.error);
+            showToast(data.error, 'error');
         }
     } catch (error) {
-        alert('Error al crear carpeta');
+        showToast('Error al crear carpeta', 'error');
     }
 }
 
@@ -268,7 +292,7 @@ async function uploadFilesProcess(files) {
             completed = total;
             fileCount.textContent = `${completed}/${total}`;
 
-            console.log('Archivos subidos exitosamente:', data.files);
+            showToast(data.message, 'success');
         } else {
             // Marcar todos como error
             files.forEach((_, index) => {
@@ -278,8 +302,6 @@ async function uploadFilesProcess(files) {
                     progressFill.style.width = '100%';
                 }
             });
-            console.error('Error al subir archivos:', data.error);
-            alert('Error al subir archivos: ' + data.error);
         }
     } catch (error) {
         // Marcar todos como error
@@ -291,7 +313,6 @@ async function uploadFilesProcess(files) {
             }
         });
         console.error('Error al subir archivos:', error);
-        alert('Error de conexión al subir archivos');
     }
 
     // Ocultar progreso y recargar después de 2 segundos
@@ -349,25 +370,19 @@ function showRenameModal(path, currentName) {
 async function confirmRename() {
     const newName = document.getElementById('renameInput').value.trim();
     if (!newName) {
-        alert('Por favor ingresa un nombre');
+        showToast('Por favor ingresa un nombre', 'warning');
         return;
     }
 
     try {
-        const response = await axios.put(`${API_URL}/rename`, {
+        await axios.put(`${API_URL}/rename`, {
             oldPath: currentRenameItem,
             newName
         });
-
-        const data = response.data;
-        if (data.success) {
-            closeModal('renameModal');
-            loadFiles(currentPath);
-        } else {
-            alert('Error: ' + data.error);
-        }
+        closeModal('renameModal');
+        loadFiles(currentPath);
     } catch (error) {
-        alert('Error al renombrar');
+        console.error(error);
     }
 }
 
@@ -375,24 +390,12 @@ async function deleteFile(path, name) {
     if (!confirm(`¿Estás seguro de eliminar "${name}"?`)) return;
 
     try {
-        console.log('Eliminando:', path);
-
-        const response = await axios.delete(`${API_URL}/delete`, {
+        await axios.delete(`${API_URL}/delete`, {
             data: { path: path }
         });
-
-        const data = response.data;
-
-        if (data.success) {
-            console.log('Eliminado exitosamente');
-            loadFiles(currentPath);
-        } else {
-            console.error('Error del servidor:', data.error);
-            alert('Error al eliminar: ' + data.error);
-        }
+        loadFiles(currentPath);
     } catch (error) {
         console.error('Error al eliminar:', error);
-        alert('Error de conexión al eliminar el archivo');
     }
 }
 
@@ -405,7 +408,7 @@ async function previewFile(path, name) {
 
     previewTitle.innerHTML = getFileIcon(ext) + ' ' + name;
     previewContent.innerHTML = '<p>Cargando...</p>';
-    
+
     // Limpiar clases previas de tipo de archivo
     modal.classList.remove('preview-pdf', 'preview-image', 'preview-text', 'preview-video', 'preview-audio');
     modal.classList.add('active');
@@ -492,6 +495,90 @@ function showCreateFolderModal() {
 
 
 
+function showCurrentFolderPermissions() {
+    if (currentFolderData.id) {
+        showPermissionsModal(currentFolderData.id, currentFolderData.name || "Carpeta Actual");
+    } else {
+        showToast('No se puede gestionar los permisos de esta carpeta en este momento.', 'error');
+    }
+}
+
+function updateFolderPermissionButton() {
+    const btn = document.getElementById('btn-folderPermissions');
+    if (btn) {
+        // Solo administradores o si estamos en una carpeta con ID válido
+        const user = JSON.parse(localStorage.getItem('user'));
+        const isAdmin = user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN');
+        btn.style.display = (currentFolderData.id || isAdmin) ? 'inline-flex' : 'none';
+    }
+}
+
+async function showPermissionsModal(fileId, fileName) {
+    currentPermissionFileId = fileId;
+    document.getElementById('permFileName').textContent = fileName;
+    document.getElementById('permissionsModal').classList.add('active');
+    await loadPermissions(fileId);
+}
+
+async function loadPermissions(fileId) {
+    const list = document.getElementById('permissionsList');
+    list.innerHTML = '<p>Cargando permisos...</p>';
+    try {
+        const response = await axios.get(`${API_URL}/permissions/file/${fileId}`);
+        const perms = response.data;
+
+        if (perms.length === 0) {
+            list.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No hay permisos adicionales otorgados.</p>';
+        } else {
+            list.innerHTML = perms.map(p => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+                    <div>
+                        <div style="font-weight: 500;">${p.user.email}</div>
+                        <div style="font-size: 0.8rem; color: #666;">Acceso: ${p.access}</div>
+                    </div>
+                    <button class="btn btn-danger" style="padding: 5px;" onclick="revokePermission('${p.id}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        list.innerHTML = '<p style="color: #ff5555;">Error al cargar permisos.</p>';
+    }
+}
+
+async function grantPermission() {
+    const targetUserId = document.getElementById('targetUserId').value.trim();
+    const access = document.getElementById('accessLevel').value;
+
+    if (!targetUserId) return showToast('Ingresa un ID de usuario o Email', 'warning');
+
+    try {
+        await axios.post(`${API_URL}/permissions/grant`, {
+            fileId: currentPermissionFileId,
+            targetUserId,
+            access
+        });
+        document.getElementById('targetUserId').value = '';
+        await loadPermissions(currentPermissionFileId);
+    } catch (error) {
+        showToast('Error: ' + (error.response?.data?.error || 'No se pudo otorgar el permiso'), 'error');
+    }
+}
+
+async function revokePermission(permissionId) {
+    if (!confirm('¿Revocar este permiso?')) return;
+    try {
+        await axios.delete(`${API_URL}/permissions/revoke/${permissionId}`);
+        await loadPermissions(currentPermissionFileId);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     modal.classList.remove('active');
@@ -537,7 +624,7 @@ async function deleteSelectedFiles() {
     const checkboxes = document.querySelectorAll('.file-checkbox:checked');
     const paths = Array.from(checkboxes).map(checkbox => checkbox.dataset.path);
     if (paths.length === 0) {
-        alert('No se han seleccionado archivos');
+        showToast('No se han seleccionado archivos', 'error');
         return;
     }
     if (confirm(`¿Estás seguro de que quieres eliminar ${paths.length} archivos?`)) {
@@ -550,7 +637,6 @@ async function deleteSelectedFiles() {
             await loadFiles(currentPath);
         } catch (error) {
             console.error('Error al eliminar archivos:', error);
-            alert('A ocurrido un error al intentar eliminar algunos archivos.');
             await loadFiles(currentPath);
         }
     }

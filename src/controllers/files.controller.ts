@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { logger } from "../utils/logger";
 import path from "path";
 import { AuthRequest } from "../middlewares/auth.middleware";
@@ -8,10 +8,12 @@ import {
     createFolderService, 
     renameItemService, 
     deleteItemService, 
-    getItemContentService 
+    getItemContentService,
+    registerUploadedFilesService
 } from "../services/files.service";
 import { isValidPath } from "../utils/multer";
 import { getBaseDir } from "../utils/settings";
+import { ValidationError } from "../utils/errors";
 
 /**
  * Renderiza la vista principal del administrador de archivos.
@@ -43,14 +45,13 @@ export const dashboard = (req: Request, res: Response) => {
  * @param req Petición con la ruta relativa en query.path
  * @param res JSON con la lista de archivos y metadatos
  */
-export const listFiles = async (req: AuthRequest, res: Response) => {
+export const listFiles = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const relativePath = (req.query.path as string) || '';
-    const files = await listItemsService(relativePath);
-    res.json({ files, currentPath: relativePath });
+    const { files, currentFolderId, currentFolderName } = await listItemsService(relativePath, req.user!.id, req.user!.role);
+    res.json({ files, currentPath: relativePath, currentFolderId, currentFolderName });
   } catch (error: any) {
-    logger.error(`Error al listar archivos (Usuario: ${req.user?.id}): ` + error.message);
-    res.status(error.message === 'Ruta no válida' ? 403 : 500).json({ error: error.message });
+    next(error);
   }
 }
 
@@ -60,17 +61,16 @@ export const listFiles = async (req: AuthRequest, res: Response) => {
  * @param req Petición con el término de búsqueda en query.q
  * @param res JSON con los resultados encontrados
  */
-export const searchFiles = async (req: AuthRequest, res: Response) => {
+export const searchFiles = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const q = req.query.q as string;
     if (!q) return res.json([]);
 
     logger.info(`[AUDIT] Usuario ${req.user?.id} realizó búsqueda: "${q}"`);
-    const results = await searchItemsService(q);
+    const results = await searchItemsService(q, req.user!.id, req.user!.role);
     res.json(results);
   } catch (error: any) {
-    logger.error(`Error al buscar archivos (Usuario: ${req.user?.id}): ` + error.message);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 }
 
@@ -80,15 +80,16 @@ export const searchFiles = async (req: AuthRequest, res: Response) => {
  * @param req Petición con el nombre y ruta de la nueva carpeta
  * @param res Respuesta de confirmación
  */
-export const createFolder = async (req: AuthRequest, res: Response) => {
+export const createFolder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const { path: relativePath, name } = req.body;
-    const result = await createFolderService(relativePath, name);
+    if (!name) throw new ValidationError("El nombre de la carpeta es requerido");
+    
+    const result = await createFolderService(relativePath, name, req.user!.id, req.user!.role);
     logger.info(`[AUDIT] Usuario ${req.user?.id} creó la carpeta: ${path.join(relativePath, name)}`);
     res.json(result);
   } catch (error: any) {
-    logger.error(`Error al crear carpeta (Usuario: ${req.user?.id}): ` + error.message);
-    res.status(error.message === 'Ruta no válida' ? 403 : 500).json({ error: error.message });
+    next(error);
   }
 }
 
@@ -98,32 +99,25 @@ export const createFolder = async (req: AuthRequest, res: Response) => {
  * @param req Petición con los archivos en req.files
  * @param res JSON con la lista de archivos subidos exitosamente
  */
-export const uploadFiles = async (req: AuthRequest, res: Response) => {
+export const uploadFiles = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const user = req.user;
   try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: 'No se subieron archivos' });
+    if (!req.files || (req.files as any).length === 0) {
+      throw new ValidationError('No se subieron archivos');
     }
 
     const files = req.files as Express.Multer.File[];
-    const uploadedFiles = files.map(file => {
-      logger.info(`[AUDIT] Usuario ${user?.id} subió archivo: ${file.filename} (${file.size} bytes)`);
-      return {
-        name: file.filename,
-        size: file.size,
-        path: file.path
-      };
-    });
+    const relativePath = (req.query.path as string) || '';
 
-    logger.info(`[AUDIT] Usuario ${user?.id} completó subida de ${uploadedFiles.length} archivo(s) a: ${req.query.path || '/'}`);
+    await registerUploadedFilesService(files, relativePath, user!.id);
+
+    logger.info(`[AUDIT] Usuario ${user?.id} completó subida de ${files.length} archivo(s) a: ${relativePath}`);
     res.json({
       success: true,
-      message: `${uploadedFiles.length} archivo(s) subido(s) correctamente`,
-      files: uploadedFiles
+      message: `${files.length} archivo(s) subido(s) correctamente`
     });
   } catch (error: any) {
-    logger.error(`Error al subir archivos (Usuario: ${user?.id}):`, error.message);
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 }
 
@@ -133,19 +127,17 @@ export const uploadFiles = async (req: AuthRequest, res: Response) => {
  * @param req Petición con oldPath y newName en el body
  * @param res Respuesta de confirmación
  */
-export const renameFile = async (req: AuthRequest, res: Response) => {
+export const renameFile = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { oldPath, newName } = req.body;
+    const { path: oldPath, newName } = req.body;
     if (!oldPath || !newName) {
-        return res.status(400).json({ error: 'Faltan parámetros (oldPath o newName)' });
+       throw new ValidationError('Faltan parámetros (oldPath o newName)');
     }
-    const result = await renameItemService(oldPath, newName);
+    const result = await renameItemService(oldPath, newName, req.user!.id, req.user!.role);
     logger.info(`[AUDIT] Usuario ${req.user?.id} renombró: ${oldPath} -> ${newName}`);
     res.json(result);
   } catch (error: any) {
-    logger.error(`Error al renombrar (Usuario: ${req.user?.id}): ` + error.message);
-    const status = error.message === 'Ruta no válida' ? 403 : (error.message === 'El archivo o carpeta no existe' ? 404 : 500);
-    res.status(status).json({ error: error.message });
+    next(error);
   }
 }
 
@@ -161,13 +153,13 @@ export const deleteFile = async (req: AuthRequest, res: Response) => {
     if (!relativePath) {
         return res.status(400).json({ error: 'No se proporcionó la ruta del archivo' });
     }
-    const result = await deleteItemService(relativePath);
+    const result = await deleteItemService(relativePath, req.user!.id, req.user!.role);
     const action = result.isDirectory ? 'ELIMINÓ CARPETA' : 'ELIMINÓ ARCHIVO';
     logger.warn(`[AUDIT] Usuario ${req.user?.id} ${action}: ${relativePath}`);
     res.json({ success: true, message: result.message });
   } catch (error: any) {
     logger.error(`Error al eliminar (Usuario: ${req.user?.id}): ` + error.message);
-    const status = error.message === 'Ruta no válida' ? 403 : (error.message === 'El archivo o carpeta no existe' ? 404 : 500);
+    const status = error.message.includes('Permiso denegado') ? 403 : (error.message === 'El archivo o carpeta no existe' ? 404 : 500);
     res.status(status).json({ error: error.message });
   }
 }
@@ -182,7 +174,7 @@ export const deleteFile = async (req: AuthRequest, res: Response) => {
 export const getFileContent = async (req: AuthRequest, res: Response) => {
   try {
     const relativePath = (req.query.path as string) || '';
-    const result = await getItemContentService(relativePath);
+    const result = await getItemContentService(relativePath, req.user!.id, req.user!.role);
     
     if (!req.headers.range) {
       logger.info(`[AUDIT] Usuario ${req.user?.id} previsualizó el archivo: ${relativePath}`);
@@ -195,7 +187,8 @@ export const getFileContent = async (req: AuthRequest, res: Response) => {
     }
   } catch (error: any) {
     logger.error(`Error al obtener contenido (Usuario: ${req.user?.id}): ` + error.message);
-    res.status(error.message === 'Ruta no válida' ? 403 : 500).json({ error: error.message });
+    const status = error.message.includes('Permiso denegado') ? 403 : 500;
+    res.status(status).json({ error: error.message });
   }
 }
 

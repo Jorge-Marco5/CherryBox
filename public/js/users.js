@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await axios.patch(`/api/users/${id}/block`);
             updateUsers();
         } catch (error) {
-            alert(error.response.data.error || "Error al cambiar estado de bloqueo");
+            showToast(error.response.data.error || "Error al cambiar estado de bloqueo", 'error');
         }
     };
 
@@ -94,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
             await axios.patch(`/api/users/${id}/role`, { role: newRole });
             updateUsers();
         } catch (error) {
-            alert(error.response.data.error || "Error al cambiar el rol");
+            showToast(error.response.data.error || "Error al cambiar el rol", 'error');
         }
     };
 
@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 await axios.delete(`/api/users/${id}`);
                 updateUsers();
             } catch (error) {
-                alert(error.response.data.error || "Error al eliminar usuario");
+                showToast(error.response.data.error || "Error al eliminar usuario", 'error');
             }
         }
     };
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
             closeEditModal();
             updateUsers();
         } catch (error) {
-            alert(error.response.data.error || "Error al guardar cambios");
+            showToast(error.response.data.error || "Error al guardar cambios", 'error');
         }
     });
 

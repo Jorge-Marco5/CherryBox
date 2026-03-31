@@ -12,7 +12,7 @@ if (loginForm) {
             localStorage.setItem('user', JSON.stringify(response.data.user));
             window.location.href = '/';
         } catch (error) {
-            alert(error.response?.data?.error || 'Error al iniciar sesión');
+            showToast(error.response?.data?.error || 'Error al iniciar sesión', 'error');
         }
     });
 }
@@ -27,16 +27,16 @@ if (registerForm) {
         const passwordConfirm = document.getElementById('passwordConfirm').value;
 
         if (password !== passwordConfirm) {
-            alert('Las contraseñas no coinciden');
+            showToast('Las contraseñas no coinciden', 'error');
             return;
         }
 
         try {
             const res = await axios.post('/api/auth/register', { email, password });
-            alert(res.data.message || 'Usuario registrado exitosamente');
+            showToast(res.data.message || 'Usuario registrado exitosamente', 'success');
             registerForm.reset();
         } catch (error) {
-            alert(error.response?.data?.error || 'Error al registrar usuario');
+            showToast(error.response?.data?.error || 'Error al registrar usuario', 'error');
         }
     });
 }

@@ -16,7 +16,20 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>CherryBox 🍒</h1>
+            <div class="icon">
+                <h1>CherryBox</h1>
+                <img src="public/cherries.svg" alt="CherryBox" width="50" height="50">
+            </div>
+            <a title="home" class="btn btn-primary" style="max-width: 50px; border: solid 1px #bebebe;" href="/">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-home">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
+                    <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+                    <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+                </svg>
+            </a>
         </div>
         <div class="auth-container">
             <div class="image">
@@ -44,6 +57,8 @@
             </div>
         </div>
     </div>
+    <div id="toast-container"></div>
+    <script src="public/js/toast.js"></script>
     <script src="public/js/auth.js"></script>
 </body>
 

@@ -20,21 +20,48 @@ model User {
   is_blocked Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  posts Post[]
+  ownedFiles File[] @relation("OwnerRelation")
+  permissions FilePermission[]
 }
 
-model Post {
-  id    String     @id @default(uuid())
-  title String
-  content String
-  authorId String
-  author User @relation(fields: [authorId], references: [id])
+model File {
+  id        String   @id @default(uuid())
+  name      String
+  path      String   @unique // Ruta relativa desde BASE_DIR
+  type      FileType
+  ownerId   String?
+  owner     User?     @relation("OwnerRelation", fields: [ownerId], references: [id])
+  parentId  String?
+  parent    File?    @relation("FolderHierarchy", fields: [parentId], references: [id])
+  children  File[]   @relation("FolderHierarchy")
+  permissions FilePermission[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model FilePermission {
+  id      String   @id @default(uuid())
+  fileId  String
+  file    File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  access  AccessType
 }
 
 enum Role {
   USER
   ADMIN
   SUPERADMIN
+}
+
+enum FileType {
+  FILE
+  FOLDER
+}
+
+enum AccessType {
+  READ      // Ver y descargar
+  WRITE     // Actualizar contenido, renombrar, mover
+  DELETE    // Eliminar archivo/carpeta
+  MANAGE    // Cambiar permisos
 }

@@ -1,8 +1,7 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware";
-import { getUsersService, deleteUserService, updateUserService, blockUserService, verifyAdminService, verifySuperAdminService } from "../services/users.service";
+import { getUsersService, deleteUserService, updateUserService, blockUserService } from "../services/users.service";
 import { logger } from "../utils/logger";
-import { prisma } from "../lib/prisma";
 
 /**
  * Obtiene la lista completa de usuarios del sistema.
@@ -11,13 +10,12 @@ import { prisma } from "../lib/prisma";
  * @param req Petición extendida con información de sesión
  * @param res Respuesta con el array de usuarios
  */
-export const getUsersHandler = async (req: AuthRequest, res: Response) => {
+export const getUsersHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const users = await getUsersService();
         res.json(users);
     } catch (error: any) {
-        logger.error("Error al obtener usuarios: " + error.message);
-        res.status(500).json({ error: "Error interno del servidor" });
+        next(error);
     }
 }
 
@@ -28,14 +26,13 @@ export const getUsersHandler = async (req: AuthRequest, res: Response) => {
  * @param req Petición con el ID del usuario a eliminar en params
  * @param res Respuesta con el usuario eliminado o error
  */
-export const deleteUserHandler = async (req: AuthRequest, res: Response) => {
+export const deleteUserHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const user = await deleteUserService(req.params.id, req.user!);
         logger.info(`ADMIN ${req.user?.id} eliminó al usuario ${req.params.id} (${user?.email})`);
         res.json(user);
     } catch (error: any) {
-        logger.error(`Error al eliminar usuario ${req.params.id}: ` + error.message);
-        res.status(error.message === "Usuario no encontrado" ? 404 : 403).json({ error: error.message });
+        next(error);
     }
 }
 
@@ -45,14 +42,13 @@ export const deleteUserHandler = async (req: AuthRequest, res: Response) => {
  * @param req Petición con el ID en params y data en body
  * @param res Respuesta con el usuario actualizado
  */
-export const updateUserHandler = async (req: AuthRequest, res: Response) => {
+export const updateUserHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const user = await updateUserService(req.params.id, req.body, req.user!);
         logger.info(`ADMIN ${req.user?.id} actualizó datos del usuario ${req.params.id}`);
         res.json(user);
     } catch (error: any) {
-        logger.error(`Error al actualizar usuario ${req.params.id}: ` + error.message);
-        res.status(error.message === "Usuario no encontrado" ? 404 : 403).json({ error: error.message });
+        next(error);
     }
 }
 
@@ -63,15 +59,14 @@ export const updateUserHandler = async (req: AuthRequest, res: Response) => {
  * @param req Petición con el ID del usuario en params
  * @param res Respuesta con el nuevo estado del usuario
  */
-export const blockUserHandler = async (req: AuthRequest, res: Response) => {
+export const blockUserHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const user = await blockUserService(req.params.id, req.user!);
         const action = user?.is_blocked ? "BLOQUEÓ" : "DESBLOQUEÓ";
         logger.info(`ADMIN ${req.user?.id} ${action} al usuario ${req.params.id}`);
         res.json(user);
     } catch (error: any) {
-        logger.error(`Error al bloquear/desbloquear usuario ${req.params.id}: ` + error.message);
-        res.status(error.message === "Usuario no encontrado" ? 404 : 403).json({ error: error.message });
+        next(error);
     }
 }
 
@@ -82,13 +77,12 @@ export const blockUserHandler = async (req: AuthRequest, res: Response) => {
  * @param req Petición con el ID en params y nuevo rol en body
  * @param res Respuesta con el usuario actualizado
  */
-export const changeRoleHandler = async (req: AuthRequest, res: Response) => {
+export const changeRoleHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const user = await updateUserService(req.params.id, { role: req.body.role }, req.user!);
         logger.info(`ADMIN ${req.user?.id} cambió el rol de ${req.params.id} (${user?.email}) a ${req.body.role}`);
         res.json(user);
     } catch (error: any) {
-        logger.error(`Error al cambiar rol del usuario ${req.params.id}: ` + error.message);
-        res.status(error.message === "Usuario no encontrado" ? 404 : 403).json({ error: error.message });
+        next(error);
     }
 }

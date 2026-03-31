@@ -3,13 +3,18 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
 import { getSetting, getBaseDir } from './settings';
+import { ValidationError } from './errors';
 
 const BASE_DIR = getBaseDir();
 
 // Función para validar que la ruta esté dentro del directorio base
 export function isValidPath(requestedPath: string) {
-  const fullPath = path.resolve(BASE_DIR, requestedPath);
-  return fullPath.startsWith(path.resolve(BASE_DIR));
+  const normalizedBase = path.resolve(BASE_DIR);
+  const fullPath = path.resolve(normalizedBase, requestedPath);
+  
+  // Usar path.relative para verificar que no escapa del directorio base
+  const relative = path.relative(normalizedBase, fullPath);
+  return relative === "" || (!relative.startsWith('..') && !path.isAbsolute(relative));
 }
 
 // Configuración de multer para subir archivos
@@ -20,7 +25,7 @@ export const storage = multer.diskStorage({
       
       // Validación de seguridad para la ruta de subida
       if (!isValidPath(uploadPath)) {
-        return cb(new Error('Ruta de destino no válida'), null);
+        return cb(new ValidationError('Ruta de destino no válida'), null);
       }
 
       const fullPath = path.join(BASE_DIR, uploadPath);
@@ -33,8 +38,12 @@ export const storage = multer.diskStorage({
     }
   },
   filename: (req: any, file: any, cb: any) => {
-    // Decodificar el nombre del archivo para soportar caracteres especiales
-    const filename = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    // Decodificar y sanitizar el nombre del archivo
+    let filename = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    
+    // Eliminar caracteres que podrían ser usados para path traversal o inyección
+    filename = filename.replace(/[\/\\]/g, '_').trim();
+    
     cb(null, filename);
   }
 });

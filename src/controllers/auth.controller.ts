@@ -1,7 +1,8 @@
-import { Request, Response } from "express"
+import { Request, Response, NextFunction } from "express"
 import { logger } from "../utils/logger"
 import { register, login } from "../services/auth.service"
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { UnauthorizedError } from "../utils/errors";
 
 /**
  * Gestiona el registro de nuevos usuarios en el sistema.
@@ -10,14 +11,12 @@ import { AuthRequest } from "../middlewares/auth.middleware";
  * @param req Petición con email y password en el body
  * @param res Respuesta de confirmación o error
  */
-export const registerHandler = async (req: AuthRequest, res: Response) => {
+export const registerHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const user = req.user;
     const { email, password } = req.body
 
     try {
-        if (!user) {
-            return res.status(401).json({ error: "No autenticado" });
-        }
+        if (!user) throw new UnauthorizedError();
 
         const newUser = await register(email, password)
 
@@ -25,8 +24,7 @@ export const registerHandler = async (req: AuthRequest, res: Response) => {
         res.json({ message: "Usuario registrado" })
 
     } catch (err: any) {
-        logger.warn(`[SECURITY] Intento fallido de registro por administrador ${user?.id} para email: ${email} - Error: ${err.message}`);
-        res.status(400).json({ error: err.message })
+        next(err);
     }
 }
 
@@ -37,7 +35,7 @@ export const registerHandler = async (req: AuthRequest, res: Response) => {
  * @param req Petición con el email y contraseña
  * @param res Respuesta con los datos del usuario y la cookie de token
  */
-export const loginHandler = async (req: Request, res: Response) => {
+export const loginHandler = async (req: Request, res: Response, next: NextFunction) => {
 
     const { email, password } = req.body
 
@@ -55,8 +53,7 @@ export const loginHandler = async (req: Request, res: Response) => {
         res.json({ message: "Login exitoso", user })
 
     } catch (err: any) {
-        logger.warn(`[SECURITY] Intento de login fallido para email: ${email} - Error: ${err.message}`);
-        res.status(401).json({ error: err.message })
+        next(err);
     }
 }
 
@@ -66,14 +63,16 @@ export const loginHandler = async (req: Request, res: Response) => {
  * @param req Petición autenticada
  * @param res Respuesta de confirmación
  */
-export const logoutHandler = async (req: AuthRequest, res: Response) => {
-    const user = req.user;
-    if (!user) {
-        return res.status(401).json({ error: "No autenticado" });
+export const logoutHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user;
+        if (!user) throw new UnauthorizedError();
+        res.clearCookie("token")
+        logger.info('Usuario ' + user.id + ' ha cerrado sesion')
+        res.json({ message: "Logout" })
+    } catch (error) {
+        next(error);
     }
-    res.clearCookie("token")
-    logger.info('Usuario ' + user.id + ' ha cerrado sesion')
-    res.json({ message: "Logout" })
 }
 
 /**

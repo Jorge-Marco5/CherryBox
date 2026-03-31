@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma";
 import { Role } from "../generated/prisma/client";
+import { NotFoundError, ForbiddenError, ValidationError } from "../utils/errors";
 
 /**
  * Valida si un solicitante tiene permiso para realizar una acción sobre un objetivo.
@@ -10,17 +11,17 @@ import { Role } from "../generated/prisma/client";
  */
 const validateUserAction = async (requester: { id: string, role: string }, targetId: string) => {
     const target = await prisma.user.findUnique({ where: { id: targetId } });
-    if (!target) throw new Error("Usuario no encontrado");
+    if (!target) throw new NotFoundError("Usuario no encontrado");
 
     // 1. Superadmin es intocable
     if (target.role === "SUPERADMIN") {
-        throw new Error("No se permite realizar esta acción sobre el Superadministrador");
+        throw new ForbiddenError("No se permite realizar esta acción sobre el Superadministrador");
     }
 
     // 2. Si el solicitante es ADMIN, solo puede gestionar USERS
     if (requester.role === "ADMIN" && target.role === "ADMIN") {
         if (requester.id !== targetId) {
-            throw new Error("Un administrador no puede gestionar a otro administrador");
+            throw new ForbiddenError("Un administrador no puede gestionar a otro administrador");
         }
     }
 
@@ -51,11 +52,11 @@ export const updateUserService = async (targetId: string, data: any, requester: 
     // Si es un cambio de rol, validar restricciones adicionales
     if (data.role) {
         if (data.role === "SUPERADMIN") {
-            throw new Error("No es posible asignar el rol de Superadministrador");
+            throw new ValidationError("No es posible asignar el rol de Superadministrador");
         }
         // Admins solo pueden promover/demoter a USER <-> ADMIN
         if (requester.role === "ADMIN" && (data.role !== "USER" && data.role !== "ADMIN")) {
-            throw new Error("Permiso denegado para el rol solicitado");
+            throw new ForbiddenError("Permiso denegado para el rol solicitado");
         }
     }
 

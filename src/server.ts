@@ -14,6 +14,8 @@ import settingsRouter from './routes/settings.routes';
 import multer from 'multer';
 import cookieParser from "cookie-parser"
 import authRouter from './routes/auth.routes';
+import permissionsRouter from './routes/permissions.routes';
+import { errorHandler } from "./middlewares/error.middleware";
 
 const app = express();
 const PORT = process.env.PORT || 7005;
@@ -41,30 +43,16 @@ Promise.all([
     fs.mkdir(BASE_DIR, { recursive: true }),
     fs.mkdir(STORAGE_DIR, { recursive: true })
 ]).then(() => {
-    // Middleware de manejo de errores global
-    app.use((err: any, req: any, res: any, next: any) => {
-        if (err instanceof multer.MulterError) {
-            if (err.code === 'LIMIT_FILE_SIZE') {
-                return res.status(400).json({ error: 'El archivo es demasiado grande' });
-            }
-            return res.status(500).json({ error: err.message });
-        }
-
-        // Errores JSON mal formados
-        if (err instanceof SyntaxError && (err as any).status === 400 && 'body' in err) {
-            return res.status(400).json({ error: 'Bad Request: Malformed JSON' });
-        }
-
-        logger.error('Error no manejado:', err);
-        res.status(500).json({ error: err.message || 'Error interno del servidor' });
-    });
-
     // Rutas
     app.use('/', indexRouter);
     app.use('/api', filesRouter);
     app.use('/api', settingsRouter);
     app.use('/api', usersRouter);
     app.use('/api/auth', authRouter);
+    app.use('/api/permissions', permissionsRouter);
+
+    // Middleware de manejo de errores global (Debe ir después de las rutas)
+    app.use(errorHandler);
 
     app.listen(PORT, () => {
         console.log(`🍒 CherryBox page en: http://localhost:${PORT}/`);
