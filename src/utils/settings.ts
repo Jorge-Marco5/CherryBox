@@ -14,6 +14,11 @@ export const getBaseDir = () => {
 
 // cambiar el valor de una confiuguracion
 export const setSetting = async <K extends keyof typeof config>(setting: K, value: (typeof config)[K]) => {
-    (config as any)[setting] = value;
+    //si es limit storage convertir GB a bytes
+    if (setting === 'LIMIT_STORAGE') {
+        (config as any)[setting] = Number(value) * 1024 * 1024 * 1024;
+    } else {
+        (config as any)[setting] = value;
+    }
     await fs.writeFile(file_config, JSON.stringify(config, null, 2));
 }

@@ -21,7 +21,7 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
 
   // Errores no controlados
   logger.error(`[CRITICAL] Unhandled Error: ${err.message}`, { stack: err.stack });
-  
+
   res.status(500).json({
     error: 'Ha ocurrido un error inesperado en el servidor',
     code: 'InternalServerError'

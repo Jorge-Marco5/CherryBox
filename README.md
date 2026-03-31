@@ -17,7 +17,7 @@ En `src/persistent/config.json`, modifica la ruta según tu preferencia:
 ```json
 {
     "BASE_DIR": "/home/jorgemarcos/Documentos/archivos",
-    "STORAGE_DIR": "storage",
+    "STORAGE_DIR": "",
     "LIMIT_STORAGE": 10737418240
 }
 ```

@@ -16,7 +16,7 @@ export const registerHandler = async (req: AuthRequest, res: Response, next: Nex
     const { email, password } = req.body
 
     try {
-        if (!user) throw new UnauthorizedError();
+        if (!user) throw new UnauthorizedError("Sesión expirada o no válida. Por favor, inicia sesión de nuevo.");
 
         const newUser = await register(email, password)
 
@@ -53,6 +53,7 @@ export const loginHandler = async (req: Request, res: Response, next: NextFuncti
         res.json({ message: "Login exitoso", user })
 
     } catch (err: any) {
+
         next(err);
     }
 }
@@ -66,7 +67,7 @@ export const loginHandler = async (req: Request, res: Response, next: NextFuncti
 export const logoutHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const user = req.user;
-        if (!user) throw new UnauthorizedError();
+        if (!user) throw new UnauthorizedError("No hay una sesión activa para cerrar.");
         res.clearCookie("token")
         logger.info('Usuario ' + user.id + ' ha cerrado sesion')
         res.json({ message: "Logout" })

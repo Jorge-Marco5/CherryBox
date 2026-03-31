@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CherryBox - Administrador de Archivos</title>
+    <link rel="icon" type="image/svg+xml" href="public/cherries.svg">
+    <link rel="stylesheet" href="public/css/styles.css">
+    <link rel="stylesheet" href="public/css/settings.css">
+    <link rel="stylesheet" href="public/css/atom-one-dark.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+    <script src="public/js/lib/axios.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">
+                <h1>CherryBox</h1>
+                <img src="public/cherries.svg" alt="CherryBox" width="50" height="50">
+            </div>
+            <button class="btn btn-primary" style="border: solid 1px #bebebe;" onclick="logout()"><svg
+                    xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-logout">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+                    <path d="M9 12h12l-3 -3" />
+                    <path d="M18 15l3 -3" />
+                </svg></button>
+        </div>
+
+        <div class="logs-wrapper">
+            <div class="header-container">
+                <div class="title-group">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path
+                            d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065" />
+                        <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                    </svg>
+                    <h1 class="title">Configuración</h1>
+                </div>
+                <div class="dropdown">
+                    <button class="dropbtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-dots-circle-horizontal">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                            <path d="M8 12l0 .01" />
+                            <path d="M12 12l0 .01" />
+                            <path d="M16 12l0 .01" />
+                        </svg>
+                        Opciones</button>
+                    <div class="dropdown-content">
+                        <a href="/users">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-users">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                                <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
+                            </svg>
+                            Usuarios</a>
+                        <a href="/logs">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-logs">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M4 12h.01" />
+                                <path d="M4 6h.01" />
+                                <path d="M4 18h.01" />
+                                <path d="M8 18h2" />
+                                <path d="M8 12h2" />
+                                <path d="M8 6h2" />
+                                <path d="M14 6h6" />
+                                <path d="M14 12h6" />
+                                <path d="M14 18h6" />
+                            </svg>
+                            Logs</a>
+                        <a href="/">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-home">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
+                                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+                                <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+                            </svg>
+                            Home</a>
+                    </div>
+                </div>
+            </div>
+            <div class="form-wrapper" id="form-settings">
+                <form id="general-settings">
+                    <div class="caption">
+                        <svg xmlns=" http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-file-settings">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                            <path d="M12 10.5v1.5" />
+                            <path d="M12 16v1.5" />
+                            <path d="M15.031 12.25l-1.299 .75" />
+                            <path d="M10.268 15l-1.3 .75" />
+                            <path d="M15 15.803l-1.285 -.773" />
+                            <path d="M10.285 12.97l-1.285 -.773" />
+                            <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
+                        </svg>Configuración general
+                    </div>
+                    <p class="message-alert">Cambiar las configuraciones del sistema puede interrumpir algunas
+                        operaciones y el servicio momentaneamente, proceda con precaucion
+                    </p>
+                    <div class="form-group">
+                        <label for="baseDir" style="color: #ffffff;">Directorio base</label>
+                        <p>Directorio donde se almacenan los archivos.
+                            <br>
+                            Si se cambia podria haber conflictos con los archivos y permisos, se recomienda usar el
+                            boton de
+                            <strong>sincronizar</strong> despues de cambiar el directorio base y se reiniciaran los
+                            permisos
+                            de los usuarios sobre los archivos
+                        </p>
+                        <input type="text" id="baseDir" placeholder="Directorio base">
+                    </div>
+                    <div class="form-group">
+                        <label for="limitStorage" style="color: #ffffff;">Limite de almacenamiento</label>
+                        <p>Limite de almacenamiento en <strong>GB</strong>.
+                            <br>
+                            Si se establece en 0, no habrá límite.
+                            <br>
+                            Si se establece un limite menor al actual no se podra subir archivos hasta que se libere
+                            espacio
+                            o se aumente el limite
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="number" id="limitStorage" placeholder="10"> <span
+                                style="color: #ffffff;">GB</span>
+                        </div>
+                    </div>
+                    <button type="submit" id="btn-save" class="btn btn-primary">Guardar</button>
+                </form>
+                <hr>
+                <div class="form-group">
+                    <label for="syncFiles" style="color: #ffffff;">Sincronizar archivos</label>
+                    <p>Sincronizar archivos con la base de datos, se eliminaran los archivos que no estén en el
+                        directorio, asi como los permisos de los usuarios sobre los archivos, todos los archivos seran
+                        propiedad del usuario <strong>superadmin</strong></p>
+                    <button class="btn btn-primary" id="btn-sync" onclick="syncFiles()"><svg
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-refresh-alert">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+                            <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+                            <path d="M12 9l0 3" />
+                            <path d="M12 15l.01 0" />
+                        </svg>Sincronizar</button>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label for="syncFiles" style="color: #ffffff;">Escaneo de archivos</label>
+                    <p>Escaneo de archivos en el directorio para deteccion de archivos maliciosos y sean puestos en
+                        cuarentena
+                        <br>
+                        <strong>
+                            Advertencia: Este proceso puede tardar varios minutos dependiendo del tamaño del directorio
+                        </strong>
+                    </p>
+                    <button class="btn btn-primary" id="btn-analyze" onclick="analyzeFiles()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-virus">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M7 12a5 5 0 1 0 10 0a5 5 0 1 0 -10 0" />
+                            <path d="M12 7v-4" />
+                            <path d="M11 3h2" />
+                            <path d="M15.536 8.464l2.828 -2.828" />
+                            <path d="M17.657 4.929l1.414 1.414" />
+                            <path d="M17 12h4" />
+                            <path d="M21 11v2" />
+                            <path d="M15.535 15.536l2.829 2.828" />
+                            <path d="M19.071 17.657l-1.414 1.414" />
+                            <path d="M12 17v4" />
+                            <path d="M13 21h-2" />
+                            <path d="M8.465 15.536l-2.829 2.828" />
+                            <path d="M6.343 19.071l-1.413 -1.414" />
+                            <path d="M7 12h-4" />
+                            <path d="M3 13v-2" />
+                            <path d="M8.464 8.464l-2.828 -2.828" />
+                            <path d="M4.929 6.343l1.414 -1.413" />
+                        </svg>
+                        Analizar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="toast-container"></div>
+    <script src="public/js/lib/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script src="public/js/toast.js"></script>
+    <script src="public/js/settings.js"></script>
+    <script src="public/js/logout.js"></script>
+</body>
+
+</html>

@@ -67,7 +67,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             console.error('Error al obtener logs:', error);
-            logsContainer.innerHTML = '<div class="log-line log-line-error"><span class="log-message">Error al obtener logs</span></div>';
+            if (error.response && error.response.status === 403) {
+                logsContainer.parentElement.innerHTML = `
+                <div style="text-align: center; padding: 50px; color: #ff4d4d; background: #1a1a1a; border-radius: 15px; border: 1px solid #333;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v2m0 4v.01m-6.938 4h13.876c1.1 0 1.938-.838 1.938-1.938V6.938c0-1.1-.838-1.938-1.938-1.938H5.062C3.962 5 3.125 5.838 3.125 6.938v10.124c0 1.1.838 1.938 1.938 1.938zM3 3l18 18"/></svg>
+                    <h2 style="margin-top: 20px; color: #fff;">Acceso Restringido</h2>
+                    <p style="color: #888;">Solo los administradores pueden ver los logs del sistema.</p>
+                </div>
+                `;
+            } else {
+                logsContainer.innerHTML = '<div class="log-line log-line-error"><span class="log-message">Error al obtener logs</span></div>';
+            }
         }
     }
 

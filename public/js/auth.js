@@ -12,7 +12,9 @@ if (loginForm) {
             localStorage.setItem('user', JSON.stringify(response.data.user));
             window.location.href = '/';
         } catch (error) {
-            showToast(error.response?.data?.error || 'Error al iniciar sesión', 'error');
+            console.error(error);
+            const errorMsg = error.response?.data?.error || 'Error al iniciar sesión. Por favor, verifica tus credenciales.';
+            showToast(errorMsg, 'error');
         }
     });
 }
@@ -36,7 +38,9 @@ if (registerForm) {
             showToast(res.data.message || 'Usuario registrado exitosamente', 'success');
             registerForm.reset();
         } catch (error) {
-            showToast(error.response?.data?.error || 'Error al registrar usuario', 'error');
+            console.error(error);
+            const errorMsg = error.response?.data?.error || 'Error al registrar usuario. Inténtalo de nuevo más tarde.';
+            showToast(errorMsg, 'error');
         }
     });
 }

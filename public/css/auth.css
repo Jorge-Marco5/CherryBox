@@ -71,6 +71,24 @@ body {
     font-weight: 600;
 }
 
+.btn-header {
+    width: fit-content;
+    min-width: 50px;
+    max-width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    gap: 5px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
 .icon {
     display: flex;
     align-items: center;

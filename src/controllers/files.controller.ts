@@ -2,14 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import { logger } from "../utils/logger";
 import path from "path";
 import { AuthRequest } from "../middlewares/auth.middleware";
-import { 
-    listItemsService, 
-    searchItemsService, 
-    createFolderService, 
-    renameItemService, 
-    deleteItemService, 
-    getItemContentService,
-    registerUploadedFilesService
+import {
+  listItemsService,
+  searchItemsService,
+  createFolderService,
+  renameItemService,
+  deleteItemService,
+  getItemContentService,
+  registerUploadedFilesService
 } from "../services/files.service";
 import { isValidPath } from "../utils/multer";
 import { getBaseDir } from "../utils/settings";
@@ -84,7 +84,7 @@ export const createFolder = async (req: AuthRequest, res: Response, next: NextFu
   try {
     const { path: relativePath, name } = req.body;
     if (!name) throw new ValidationError("El nombre de la carpeta es requerido");
-    
+
     const result = await createFolderService(relativePath, name, req.user!.id, req.user!.role);
     logger.info(`[AUDIT] Usuario ${req.user?.id} creó la carpeta: ${path.join(relativePath, name)}`);
     res.json(result);
@@ -131,7 +131,7 @@ export const renameFile = async (req: AuthRequest, res: Response, next: NextFunc
   try {
     const { path: oldPath, newName } = req.body;
     if (!oldPath || !newName) {
-       throw new ValidationError('Faltan parámetros (oldPath o newName)');
+      throw new ValidationError('Faltan parámetros (oldPath o newName)');
     }
     const result = await renameItemService(oldPath, newName, req.user!.id, req.user!.role);
     logger.info(`[AUDIT] Usuario ${req.user?.id} renombró: ${oldPath} -> ${newName}`);
@@ -151,7 +151,7 @@ export const deleteFile = async (req: AuthRequest, res: Response) => {
   try {
     const relativePath = req.body?.path || (req.query?.path as string);
     if (!relativePath) {
-        return res.status(400).json({ error: 'No se proporcionó la ruta del archivo' });
+      return res.status(400).json({ error: 'No se proporcionó la ruta del archivo' });
     }
     const result = await deleteItemService(relativePath, req.user!.id, req.user!.role);
     const action = result.isDirectory ? 'ELIMINÓ CARPETA' : 'ELIMINÓ ARCHIVO';
@@ -175,7 +175,7 @@ export const getFileContent = async (req: AuthRequest, res: Response) => {
   try {
     const relativePath = (req.query.path as string) || '';
     const result = await getItemContentService(relativePath, req.user!.id, req.user!.role);
-    
+
     if (!req.headers.range) {
       logger.info(`[AUDIT] Usuario ${req.user?.id} previsualizó el archivo: ${relativePath}`);
     }
@@ -203,7 +203,7 @@ export const downloadFile = async (req: AuthRequest, res: Response) => {
   try {
     const relativePath = (req.query.path as string) || '';
     if (!isValidPath(relativePath)) return res.status(403).json({ error: 'Ruta no válida' });
-    
+
     // Aquí no movemos el res.download porque es una respuesta específica de Express, 
     // pero mantenemos la lógica mínima.
     const fullPath = path.join(getBaseDir(), relativePath);

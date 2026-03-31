@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt"
 import { prisma } from "../lib/prisma"
 import { signToken } from "../lib/jwt"
+import { logger } from "../utils/logger"
 import { UnauthorizedError, ForbiddenError, ConflictError } from "../utils/errors";
 
 export const register = async (email: string, password: string) => {
@@ -40,6 +41,7 @@ export const login = async (email: string, password: string) => {
     const valid = await bcrypt.compare(password, user.password)
 
     if (!valid) {
+        logger.error(`[ERROR] Intento de login fallido para la cuenta ${email}`);
         throw new UnauthorizedError("Credenciales inválidas")
     }
 

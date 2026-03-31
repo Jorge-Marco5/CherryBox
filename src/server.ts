@@ -24,7 +24,6 @@ app.use(cookieParser())
 
 // Configura esta ruta a la carpeta que deseas administrar
 const BASE_DIR = getBaseDir();
-const STORAGE_DIR = path.join(__dirname, '../storage');
 
 app.set('views', path.join(__dirname, 'views'));
 
@@ -40,8 +39,7 @@ app.use(express.json());
 
 // Inicialización del servidor y carpetas
 Promise.all([
-    fs.mkdir(BASE_DIR, { recursive: true }),
-    fs.mkdir(STORAGE_DIR, { recursive: true })
+    fs.mkdir(BASE_DIR, { recursive: true })
 ]).then(() => {
     // Rutas
     app.use('/', indexRouter);

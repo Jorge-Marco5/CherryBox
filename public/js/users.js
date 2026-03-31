@@ -63,7 +63,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 tbody.appendChild(tr);
             });
         } catch (error) {
-            console.error(error.response.data.error || "Error al obtener usuarios:", error);
+            console.error(error);
+            if (error.response && error.response.status === 403) {
+                usersTable.parentElement.innerHTML = `
+                <div style="text-align: center; padding: 50px; color: #ff4d4d; background: var(--card-bg); border-radius: 15px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M3 3l18 18"/></svg>
+                    <h2 style="margin-top: 20px; color: #fff;">Acceso Denegado</h2>
+                    <p style="color: #888;">No tienes permisos para gestionar usuarios.</p>
+                    <a href="/" class="btn btn-primary" style="display: inline-block; margin-top: 15px;">Volver al Inicio</a>
+                </div>
+                `;
+            } else {
+                showToast(error.response?.data?.error || "Error al obtener usuarios", 'error');
+            }
         }
     }
 
