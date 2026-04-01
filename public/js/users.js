@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 tbody.appendChild(tr);
             });
         } catch (error) {
-            console.error(error);
+            console.log(error.response.data.error);
             if (error.response && error.response.status === 403) {
                 usersTable.parentElement.innerHTML = `
                 <div style="text-align: center; padding: 50px; color: #ff4d4d; background: var(--card-bg); border-radius: 15px;">
@@ -73,6 +73,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <a href="/" class="btn btn-primary" style="display: inline-block; margin-top: 15px;">Volver al Inicio</a>
                 </div>
                 `;
+            } else if (error.response && error.response.status === 401) {
+                window.location.href = '/login';
             } else {
                 showToast(error.response?.data?.error || "Error al obtener usuarios", 'error');
             }

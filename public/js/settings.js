@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await axios.get("/api/getSettings");
             limitStorage.value = response.data.limitStorage;
             baseDir.value = response.data.baseDir;
-            
+
             if (!response.data.permission) {
                 // Modo lectura para administradores (no superadmins)
                 baseDir.disabled = true;
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (btnSave) btnSave.style.display = "none";
                 if (btnSync) btnSync.style.display = "none";
                 if (btnAnalyze) btnAnalyze.style.display = "none";
-                
+
                 // Añadir mensaje informativo
                 const infoMsg = document.createElement("p");
                 infoMsg.className = "message-alert";
@@ -39,6 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     <a href="/" class="btn btn-primary" style="display: inline-block; margin-top: 15px;">Volver al Inicio</a>
                 </div>
                 `;
+            } else if (error.response && error.response.status === 401) {
+                window.location.href = '/login';
             } else {
                 showToast(error.response?.data?.error || "Error al obtener la configuración", 'error');
             }
@@ -56,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 setting: "LIMIT_STORAGE",
                 value: limitStorage.value
             });
-            
+
             // Guardar Directorio Base
             await axios.post("/api/setSettings", {
                 setting: "BASE_DIR",

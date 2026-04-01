@@ -75,6 +75,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p style="color: #888;">Solo los administradores pueden ver los logs del sistema.</p>
                 </div>
                 `;
+            } else if (error.response && error.response.status === 401) {
+                window.location.href = '/login';
             } else {
                 logsContainer.innerHTML = '<div class="log-line log-line-error"><span class="log-message">Error al obtener logs</span></div>';
             }
