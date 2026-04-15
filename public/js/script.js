@@ -555,6 +555,10 @@ function closeModal(modalId) {
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal')) {
         e.target.classList.remove('active');
+        const audio = document.querySelector('audio');
+        const video = document.querySelector('video');
+        if (audio) audio.pause();
+        if (video) video.pause();
     }
 });
 
