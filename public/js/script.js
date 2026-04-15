@@ -636,3 +636,17 @@ document.addEventListener('change', (e) => {
         updateSelectionButtons();
     }
 });
+
+//recargar lista de archivos de la ruta actual con F5
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'F5') {
+        e.preventDefault();
+        console.log("Lista actualizada:" + currentPath)
+        loadFiles(currentPath);
+    }
+});
+
+function refreshpath() {
+    console.log("Lista actualizada:" + currentPath)
+    loadFiles(currentPath);
+}
