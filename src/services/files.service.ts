@@ -16,7 +16,7 @@ async function hasAccess(userId: string, userRole: string, relativePath: string,
     if (userRole === "ADMIN" || userRole === "SUPERADMIN") return true;
 
     const parts = relativePath.split(path.sep).filter(p => p !== "");
-    const pathsToCheck = [""]; 
+    const pathsToCheck = [""];
     let current = "";
     for (const part of parts) {
         current = path.join(current, part);
@@ -68,15 +68,15 @@ async function syncFileInDb(relativePath: string, action: 'CREATE' | 'DELETE' | 
     } else if (action === 'CREATE') {
         const parentPath = path.dirname(relativePath);
         const parent = parentPath === "." ? null : await prisma.file.findUnique({ where: { path: parentPath === "/" ? "" : parentPath } });
-        
+
         await prisma.file.upsert({
             where: { path: relativePath },
             update: { ...data, parentId: parent?.id },
-            create: { 
-                ...data, 
-                path: relativePath, 
+            create: {
+                ...data,
+                path: relativePath,
                 name: path.basename(relativePath),
-                parentId: parent?.id 
+                parentId: parent?.id
             }
         });
     }
@@ -84,7 +84,7 @@ async function syncFileInDb(relativePath: string, action: 'CREATE' | 'DELETE' | 
 
 export const listItemsService = async (relativePath: string, userId: string, userRole: string) => {
     if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-    
+
     // Asegurar que la raíz existe
     if (relativePath === "") {
         const superadmin = await prisma.user.findFirst({ where: { role: "SUPERADMIN" } });
@@ -97,7 +97,7 @@ export const listItemsService = async (relativePath: string, userId: string, use
 
     // 1. Verificar si tiene acceso READ directo o heredado al directorio
     const hasDirectAccess = await hasAccess(userId, userRole, relativePath, "READ");
-    
+
     // 2. Si no tiene acceso directo, verificar si tiene acceso a algún descendiente
     // Esto permite "ver" la carpeta para poder navegar hacia abajo.
     let isPathDiscoverable = hasDirectAccess;
@@ -123,7 +123,7 @@ export const listItemsService = async (relativePath: string, userId: string, use
     const results = await Promise.allSettled(
         items.map(async (item) => {
             const relItemPath = path.join(relativePath, item.name);
-            
+
             // FILTRADO: Si el usuario NO tiene acceso total al padre, solo mostrar lo que sea accesible
             if (!hasDirectAccess && userRole === "USER") {
                 const canSeeItem = await hasAccess(userId, userRole, relItemPath, "READ");
@@ -173,7 +173,7 @@ export const searchItemsService = async (query: string, userId: string, userRole
     // Optimización: Si no es admin, obtener todos los IDs de archivos/carpetas a los que tiene acceso
     // para filtrar la búsqueda en una sola pasada de base de datos si es posible, 
     // o al menos mitigar la recursividad infinita.
-    
+
     const results: any[] = [];
     const searchRecursive = async (currentDir: string) => {
         const fullPath = path.join(BASE_DIR, currentDir);
@@ -184,7 +184,7 @@ export const searchItemsService = async (query: string, userId: string, userRole
 
         for (const item of items) {
             const relPath = path.join(currentDir, item.name);
-            
+
             // Verificación de acceso rápida
             const allowed = await hasAccess(userId, userRole, relPath, "READ");
             if (!allowed) continue;
@@ -202,7 +202,7 @@ export const searchItemsService = async (query: string, userId: string, userRole
                         modified: stats.mtime,
                         path: relPath
                     });
-                } catch {}
+                } catch { }
             }
             if (item.isDirectory()) await searchRecursive(relPath);
         }
@@ -214,7 +214,7 @@ export const searchItemsService = async (query: string, userId: string, userRole
 
 export const createFolderService = async (relativePath: string, name: string, userId: string, userRole: string) => {
     if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-    
+
     // Necesita WRITE en la carpeta padre
     await checkPermission(userId, userRole, relativePath, "WRITE");
 
@@ -228,7 +228,7 @@ export const createFolderService = async (relativePath: string, name: string, us
 
 export const renameItemService = async (oldPath: string, newName: string, userId: string, userRole: string) => {
     if (!isValidPath(oldPath)) throw new ValidationError("Ruta no válida");
-    
+
     // Necesita WRITE en el ítem actual
     await checkPermission(userId, userRole, oldPath, "WRITE");
 
@@ -237,13 +237,13 @@ export const renameItemService = async (oldPath: string, newName: string, userId
     const newFullPath = path.join(BASE_DIR, newRelPath);
 
     await fs.rename(oldFullPath, newFullPath);
-    
+
     // Sincronizar (Borrar viejo, Crear nuevo)
     const oldFile = await prisma.file.findUnique({ where: { path: oldPath } });
     await syncFileInDb(oldPath, 'DELETE');
-    await syncFileInDb(newRelPath, 'CREATE', { 
-        type: oldFile?.type || 'FILE', 
-        ownerId: oldFile?.ownerId || userId 
+    await syncFileInDb(newRelPath, 'CREATE', {
+        type: oldFile?.type || 'FILE',
+        ownerId: oldFile?.ownerId || userId
     });
 
     return { success: true, message: 'Renombrado exitosamente' };
@@ -251,7 +251,7 @@ export const renameItemService = async (oldPath: string, newName: string, userId
 
 export const deleteItemService = async (relativePath: string, userId: string, userRole: string) => {
     if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-    
+
     // Necesita DELETE en el ítem
     await checkPermission(userId, userRole, relativePath, "DELETE");
 
@@ -270,7 +270,7 @@ export const deleteItemService = async (relativePath: string, userId: string, us
 
 export const getItemContentService = async (relativePath: string, userId: string, userRole: string) => {
     if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-    
+
     // Necesita READ
     await checkPermission(userId, userRole, relativePath, "READ");
 

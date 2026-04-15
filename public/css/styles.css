@@ -552,8 +552,9 @@ body {
 }
 
 .preview-content audio {
-    max-width: auto;
-    min-width: 200px;
+    width: 100%;
+    max-width: 90dvw;
+    min-width: 300px;
     border-radius: 8px;
     display: block;
 }

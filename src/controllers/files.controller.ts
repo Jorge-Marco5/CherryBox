@@ -129,7 +129,7 @@ export const uploadFiles = async (req: AuthRequest, res: Response, next: NextFun
  */
 export const renameFile = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { path: oldPath, newName } = req.body;
+    const { oldPath, newName } = req.body;
     if (!oldPath || !newName) {
       throw new ValidationError('Faltan parámetros (oldPath o newName)');
     }
