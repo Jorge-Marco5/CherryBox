@@ -379,7 +379,7 @@ async function previewFile(path, name) {
         const textExts = ['txt', 'md', 'json', 'js', 'css', 'html', 'xml', 'csv'];
         const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'];
         const videoExts = ['mp4', 'webm', 'ogg'];
-        const audioExts = ['mp3', 'wav', 'ogg', 'm4a'];
+        const audioExts = ['mp3', 'wav', 'ogg', 'm4a', 'flac'];
         const pdfExts = ['pdf'];
 
         if (textExts.includes(ext)) {
@@ -392,10 +392,10 @@ async function previewFile(path, name) {
             previewContent.innerHTML = `<img src="${API_URL}/file-content?path=${encodeURIComponent(path)}" alt="${name}" loading="lazy">`;
         } else if (videoExts.includes(ext)) {
             modal.classList.add('preview-video');
-            previewContent.innerHTML = `<video controls preload="metadata"><source src="${API_URL}/file-content?path=${encodeURIComponent(path)}"></video>`;
+            previewContent.innerHTML = `<video controls preload="metadata"><source src="${API_URL}/file-content?path=${encodeURIComponent(path)}" type="video/${ext}"></video>`;
         } else if (audioExts.includes(ext)) {
             modal.classList.add('preview-audio');
-            previewContent.innerHTML = `<audio controls preload="metadata"><source src="${API_URL}/file-content?path=${encodeURIComponent(path)}"></audio>`;
+            previewContent.innerHTML = `<audio controls preload="metadata"><source src="${API_URL}/file-content?path=${encodeURIComponent(path)}" type="audio/${ext}"></audio>`;
         } else if (pdfExts.includes(ext)) {
             modal.classList.add('preview-pdf');
             previewContent.innerHTML = `<iframe src="${API_URL}/file-content?path=${encodeURIComponent(path)}" type="application/pdf" class="pdfViewer"></iframe>`;
