@@ -796,6 +796,76 @@ body {
     font-weight: 600;
 }
 
+.total-progress-container {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #333;
+}
+
+.total-bar {
+    height: 8px !important;
+}
+
+.btn-cancel-all {
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-cancel-all:hover {
+    background: #dc2626;
+}
+
+.progress-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.progress-file-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 10px;
+}
+
+.btn-cancel-single {
+    background: transparent;
+    color: #a0a0a0;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.btn-cancel-single:hover {
+    color: #ef4444;
+}
+
+.progress-item.error .progress-fill {
+    background: #ef4444;
+}
+
+.progress-item.cancelled .progress-fill {
+    background: #666;
+}
+
+.progress-item.completed .progress-fill {
+    background: #22c55e;
+}
+
 .card-storage {
     background: #1E1E1E;
     border-radius: 16px;

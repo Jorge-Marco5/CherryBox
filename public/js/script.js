@@ -6,6 +6,24 @@ let currentPreviewPath = null;
 let currentPermissionFileId = null;
 let currentFolderData = { id: null, name: "" };
 
+function escapeJS(str) {
+    if (!str) return '';
+    return str.replace(/'/g, "\\'");
+}
+
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, function (m) {
+        return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[m];
+    });
+}
+
 let isLoadingFiles = false;
 async function loadFiles(path = '') {
     if (isLoadingFiles) return;
@@ -97,10 +115,15 @@ function renderFiles(files) {
         const size = isFolder ? '' : formatBytes(file.size);
         const date = new Date(file.modified).toLocaleDateString('es-ES');
 
+        const escPath = escapeJS(file.path);
+        const escName = escapeJS(file.name);
+        const escId = escapeJS(file.id);
+        const attrPath = escapeHTML(file.path);
+
         return `
-                    <div class="file-item" onclick="${isFolder ? `navigateTo('${file.path}')` : `previewFile('${file.path}', '${file.name}')`}">
-                        <input type="checkbox" id="checkbox-${file.path}" class="file-checkbox" data-path="${file.path}" onclick="event.stopPropagation();">
-                        <label for="checkbox-${file.path}" class="checkbox-label">
+                    <div class="file-item" onclick="${isFolder ? `navigateTo('${escPath}')` : `previewFile('${escPath}', '${escName}')`}">
+                        <input type="checkbox" id="checkbox-${attrPath}" class="file-checkbox" data-path="${attrPath}" onclick="event.stopPropagation();">
+                        <label for="checkbox-${attrPath}" class="checkbox-label">
                             <div class="file-icon">${icon}</div>
                         </label>
                         <div class="file-info">
@@ -108,14 +131,14 @@ function renderFiles(files) {
                             <div class="file-meta">${size}${size ? ' • ' : ''}${date}</div>
                         </div>
                         <div class="file-actions">
-                            <button class="icon-btn" onclick="event.stopPropagation(); showPermissionsModal('${file.id}', '${file.name}')" title="Permisos">
+                            <button class="icon-btn" onclick="event.stopPropagation(); showPermissionsModal('${escId}', '${escName}')" title="Permisos">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-lock"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" /><path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /><path d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg>
                                 ${isMobile ? '' : '<p style="color: #22c55e;">Permisos</p>'}
                             </button>
-                            <button class="icon-btn" onclick="event.stopPropagation(); showRenameModal('${file.path}', '${file.name}')" title="Renombrar">
+                            <button class="icon-btn" onclick="event.stopPropagation(); showRenameModal('${escPath}', '${escName}')" title="Renombrar">
                                 ${isMobile ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#4284efff" class="icon icon-tabler icons-tabler-filled icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a1 1 0 0 1 -1 1h-1a1 1 0 0 0 -1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1 -1v-1a1 1 0 0 1 2 0v1a3 3 0 0 1 -3 3h-9a3 3 0 0 1 -3 -3v-9a3 3 0 0 1 3 -3h1a1 1 0 0 1 1 1" /><path d="M14.596 5.011l4.392 4.392l-6.28 6.303a1 1 0 0 1 -.708 .294h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 .294 -.708zm6.496 -2.103a3.097 3.097 0 0 1 .165 4.203l-.164 .18l-.693 .694l-4.387 -4.387l.695 -.69a3.1 3.1 0 0 1 4.384 0" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#4284efff" class="icon icon-tabler icons-tabler-filled icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a1 1 0 0 1 -1 1h-1a1 1 0 0 0 -1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1 -1v-1a1 1 0 0 1 2 0v1a3 3 0 0 1 -3 3h-9a3 3 0 0 1 -3 -3v-9a3 3 0 0 1 3 -3h1a1 1 0 0 1 1 1" /><path d="M14.596 5.011l4.392 4.392l-6.28 6.303a1 1 0 0 1 -.708 .294h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 .294 -.708zm6.496 -2.103a3.097 3.097 0 0 1 .165 4.203l-.164 .18l-.693 .694l-4.387 -4.387l.695 -.69a3.1 3.1 0 0 1 4.384 0" /></svg> <p>Renombrar</p>'}
                             </button>
-                            <button class="icon-btn" onclick="event.stopPropagation(); deleteFile('${file.path}', '${file.name}')" title="Eliminar">
+                            <button class="icon-btn" onclick="event.stopPropagation(); deleteFile('${escPath}', '${escName}')" title="Eliminar">
                                 ${isMobile ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ff5555ff" class="icon icon-tabler icons-tabler-filled icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 6a1 1 0 0 1 .117 1.993l-.117 .007h-.081l-.919 11a3 3 0 0 1 -2.824 2.995l-.176 .005h-8c-1.598 0 -2.904 -1.249 -2.992 -2.75l-.005 -.167l-.923 -11.083h-.08a1 1 0 0 1 -.117 -1.993l.117 -.007zm-10 4a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1m4 0a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1" /><path d="M14 2a2 2 0 0 1 2 2a1 1 0 0 1 -1.993 .117l-.007 -.117h-4l-.007 .117a1 1 0 0 1 -1.993 -.117a2 2 0 0 1 1.85 -1.995l.15 -.005z" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ff5555ff" class="icon icon-tabler icons-tabler-filled icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 6a1 1 0 0 1 .117 1.993l-.117 .007h-.081l-.919 11a3 3 0 0 1 -2.824 2.995l-.176 .005h-8c-1.598 0 -2.904 -1.249 -2.992 -2.75l-.005 -.167l-.923 -11.083h-.08a1 1 0 0 1 -.117 -1.993l.117 -.007zm-10 4a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1m4 0a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1" /><path d="M14 2a2 2 0 0 1 2 2a1 1 0 0 1 -1.993 .117l-.007 -.117h-4l-.007 .117a1 1 0 0 1 -1.993 -.117a2 2 0 0 1 1.85 -1.995l.15 -.005z" /></svg> <p>Eliminar</p>'}
                             </button>
                         </div>
@@ -191,95 +214,172 @@ async function uploadFiles(event) {
     event.target.value = '';
 }
 
+let activeUploads = [];
+
 async function uploadFilesProcess(files) {
     const progressEl = document.getElementById('uploadProgress');
     const progressList = document.getElementById('progressList');
     const fileCount = document.getElementById('fileCount');
+    const totalProgressFill = document.getElementById('totalProgressFill');
+    const totalProgressText = document.getElementById('totalProgressText');
+    const uploadSpeed = document.getElementById('uploadSpeed');
 
     progressEl.classList.add('active');
     progressList.innerHTML = '';
+    activeUploads = [];
 
-    let completed = 0;
-    const total = files.length;
+    const totalFiles = files.length;
+    let completedCount = 0;
+    let totalBytes = files.reduce((acc, file) => acc + file.size, 0);
+    let loadedBytesMap = new Map();
+    let startTime = Date.now();
 
-    fileCount.textContent = `${completed}/${total}`;
+    fileCount.textContent = `0/${totalFiles}`;
+    totalProgressFill.style.width = '0%';
+    totalProgressText.textContent = '0%';
+    uploadSpeed.textContent = '0 KB/s';
 
-    // Crear elementos de progreso para cada archivo
+    // Crear elementos de progreso para cada archivo y preparar controladores
     files.forEach((file, index) => {
+        const controller = new AbortController();
+        activeUploads.push({
+            file,
+            controller,
+            status: 'pending',
+            loaded: 0
+        });
+
         const progressItem = document.createElement('div');
         progressItem.className = 'progress-item';
         progressItem.id = `progress-${index}`;
         progressItem.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span>${file.name} (${formatBytes(file.size)})</span>
-                        <span class="progress-percent">0%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 0%"></div>
-                    </div>
-                `;
+            <div class="progress-item-header">
+                <span class="progress-file-name" title="${file.name}">[${formatBytes(file.size)}]-${file.name}</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="progress-percent">0%</span>
+                    <button class="btn-cancel-single" onclick="cancelUpload(${index})" id="cancel-btn-${index}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+        `;
         progressList.appendChild(progressItem);
     });
 
-    // Subir todos los archivos en una sola petición
-    try {
-        const formData = new FormData();
-        files.forEach(file => {
-            formData.append('files', file);
+    const updateGlobalProgress = () => {
+        let totalLoaded = 0;
+        activeUploads.forEach(upload => {
+            totalLoaded += upload.loaded;
         });
 
-        const response = await axios.post(`${API_URL}/upload?path=${encodeURIComponent(currentPath)}`, formData, {
-            onUploadProgress: (progressEvent) => {
-                const percent = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-                files.forEach((_, i) => {
-                    const progressFill = document.querySelector(`#progress-${i} .progress-fill`);
-                    const progressText = document.querySelector(`#progress-${i} .progress-percent`);
-                    if (progressFill) progressFill.style.width = percent + '%';
-                    if (progressText) progressText.textContent = percent + '%';
-                });
-            }
-        });
+        const percent = totalBytes > 0 ? Math.round((totalLoaded / totalBytes) * 100) : 100;
+        totalProgressFill.style.width = percent + '%';
+        totalProgressText.textContent = percent + '%';
 
-        const data = response.data;
+        // Calcular velocidad
+        const timeElapsed = (Date.now() - startTime) / 1000;
+        if (timeElapsed > 0) {
+            const speed = totalLoaded / timeElapsed;
+            uploadSpeed.textContent = formatBytes(speed) + '/s';
+        }
 
-        if (data.success) {
-            // Marcar todos como completados
-            files.forEach((_, index) => {
-                const progressFill = document.querySelector(`#progress-${index} .progress-fill`);
-                if (progressFill) progressFill.style.width = '100%';
-            });
-            completed = total;
-            fileCount.textContent = `${completed}/${total}`;
+        fileCount.textContent = `${completedCount}/${totalFiles}`;
+    };
 
-            showToast(data.message, 'success');
-        } else {
-            // Marcar todos como error
-            files.forEach((_, index) => {
-                const progressFill = document.querySelector(`#progress-${index} .progress-fill`);
-                if (progressFill) {
-                    progressFill.style.background = '#dc3545';
-                    progressFill.style.width = '100%';
+    // Límite de concurrencia: 3 subidas simultáneas
+    const CONCURRENCY_LIMIT = 3;
+    let currentIndex = 0;
+
+    const startNextUpload = async () => {
+        if (currentIndex >= totalFiles) return;
+
+        const index = currentIndex++;
+        const upload = activeUploads[index];
+        const progressItem = document.getElementById(`progress-${index}`);
+        const progressFill = progressItem.querySelector('.progress-fill');
+        const progressText = progressItem.querySelector('.progress-percent');
+        const cancelBtn = document.getElementById(`cancel-btn-${index}`);
+
+        upload.status = 'uploading';
+
+        try {
+            const formData = new FormData();
+            formData.append('files', upload.file);
+
+            const response = await axios.post(`${API_URL}/upload?path=${encodeURIComponent(currentPath)}`, formData, {
+                signal: upload.controller.signal,
+                onUploadProgress: (event) => {
+                    upload.loaded = event.loaded;
+                    const percent = Math.round((event.loaded / event.total) * 100);
+                    progressFill.style.width = percent + '%';
+                    progressText.textContent = percent + '%';
+                    updateGlobalProgress();
                 }
             });
-        }
-    } catch (error) {
-        // Marcar todos como error
-        files.forEach((_, index) => {
-            const progressFill = document.querySelector(`#progress-${index} .progress-fill`);
-            if (progressFill) {
-                progressFill.style.background = '#dc3545';
+
+            if (response.data.success) {
+                upload.status = 'completed';
+                upload.loaded = upload.file.size;
+                progressItem.classList.add('completed');
                 progressFill.style.width = '100%';
+                progressText.textContent = '100%';
+            } else {
+                throw new Error(response.data.error || 'Error desconocido');
             }
-        });
-        console.error('Error al subir archivos:', error);
+        } catch (error) {
+            if (axios.isCancel(error)) {
+                upload.status = 'cancelled';
+                progressItem.classList.add('cancelled');
+                progressText.textContent = 'Cancelado';
+            } else {
+                upload.status = 'error';
+                progressItem.classList.add('error');
+                progressText.textContent = 'Error';
+                console.error(`Error subiendo ${upload.file.name}:`, error);
+            }
+        } finally {
+            if (cancelBtn) cancelBtn.style.display = 'none';
+            completedCount++;
+            updateGlobalProgress();
+            // Iniciar la siguiente subida en la cola
+            await startNextUpload();
+        }
+    };
+
+    // Iniciar el pool de subidas inicial
+    const uploadPromises = [];
+    for (let i = 0; i < Math.min(CONCURRENCY_LIMIT, totalFiles); i++) {
+        uploadPromises.push(startNextUpload());
     }
 
-    // Ocultar progreso y recargar después de 2 segundos
+    await Promise.all(uploadPromises);
+
+    // Ocultar progreso y recargar después de 2 segundos si no hay más subidas activas
     setTimeout(() => {
-        progressEl.classList.remove('active');
-        loadFiles(currentPath);
+        if (!activeUploads.some(u => u.status === 'uploading')) {
+            progressEl.classList.remove('active');
+            loadFiles(currentPath);
+        }
     }, 2000);
 }
+
+function cancelUpload(index) {
+    if (activeUploads[index] && activeUploads[index].status === 'uploading') {
+        activeUploads[index].controller.abort();
+    }
+}
+
+function cancelAllUploads() {
+    activeUploads.forEach((upload, index) => {
+        if (upload.status === 'uploading' || upload.status === 'pending') {
+            upload.controller.abort();
+        }
+    });
+}
+
 
 // Configurar drag and drop
 function setupDragAndDrop() {
@@ -365,7 +465,7 @@ async function previewFile(path, name) {
     const previewTitle = document.getElementById('previewTitle');
     const modal = document.getElementById('previewModal');
 
-    previewTitle.innerHTML = getFileIcon(ext) + ' ' + name;
+    previewTitle.innerHTML = getFileIcon(ext) + ' ' + escapeHTML(name);
     previewContent.innerHTML = '<p>Cargando...</p>';
 
     // Limpiar clases previas de tipo de archivo

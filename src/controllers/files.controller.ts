@@ -109,6 +109,7 @@ export const uploadFiles = async (req: AuthRequest, res: Response, next: NextFun
     const files = req.files as Express.Multer.File[];
     const relativePath = (req.query.path as string) || '';
 
+    //Registro de los datos en la base de datos
     await registerUploadedFilesService(files, relativePath, user!.id);
 
     logger.info(`[AUDIT] Usuario ${user?.id} completó subida de ${files.length} archivo(s) a: ${relativePath}`);

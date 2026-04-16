@@ -171,7 +171,27 @@
     <div class="upload-progress" id="uploadProgress">
         <div class="progress-header">
             <span>Subiendo archivos</span>
-            <span class="file-count" id="fileCount">0/0</span>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span class="file-count" id="fileCount">0/0</span>
+                <button class="btn-cancel-all" id="cancelAllBtn" onclick="cancelAllUploads()"
+                    title="Cancelar todas las subidas">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M18 6l-12 12" />
+                        <path d="M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="total-progress-container">
+            <div class="progress-bar total-bar">
+                <div class="progress-fill" id="totalProgressFill" style="width: 0%"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px;">
+                <span id="totalProgressText">0%</span>
+                <span id="uploadSpeed">0 KB/s</span>
+            </div>
         </div>
         <div id="progressList"></div>
     </div>

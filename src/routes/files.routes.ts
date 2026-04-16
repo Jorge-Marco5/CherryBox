@@ -10,6 +10,8 @@ import { downloadFile } from "../controllers/files.controller";
 import { upload } from "../utils/multer";
 import { requireAuth } from "../middlewares/auth.middleware";
 
+import { uploadCleanupMiddleware } from "../middlewares/cleanup.middleware";
+
 const router = Router();
 
 router.get('/files', requireAuth, listFiles);
@@ -18,7 +20,7 @@ router.get('/search', requireAuth, searchFiles);
 
 router.post('/folder', requireAuth, createFolder);
 
-router.post('/upload', requireAuth, upload.array('files', 20), uploadFiles);
+router.post('/upload', requireAuth, uploadCleanupMiddleware, upload.array('files', 10), uploadFiles);
 
 router.put('/rename', requireAuth, renameFile);
 

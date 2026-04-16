@@ -5,13 +5,11 @@ import express from 'express';
 import fs from 'fs/promises';
 import path from 'path';
 import cors from 'cors';
-import { logger } from './utils/logger';
 import indexRouter from './routes/index';
 import filesRouter from './routes/files.routes';
 import usersRouter from './routes/users.routes';
-import { getSetting, getBaseDir } from './utils/settings';
+import { getBaseDir } from './utils/settings';
 import settingsRouter from './routes/settings.routes';
-import multer from 'multer';
 import cookieParser from "cookie-parser"
 import authRouter from './routes/auth.routes';
 import permissionsRouter from './routes/permissions.routes';
