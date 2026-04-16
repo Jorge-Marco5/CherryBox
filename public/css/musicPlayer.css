@@ -1,4 +1,5 @@
 .modal-content-player {
+    width: 100%;
     max-width: 500px;
     max-height: calc(100dvh - 40px);
     background-color: #1B2026;
@@ -9,10 +10,19 @@
     overflow: hidden;
 }
 
+@media (max-width: 768px) {
+    .modal-content-player {
+        max-width: 95dvw;
+        max-height: 95dvh;
+        min-width: auto;
+    }
+}
+
 .modal-header-player {
     font-size: 1rem;
     display: flex;
     justify-content: space-between;
+
     align-items: center;
     border-bottom: none;
 }
@@ -20,6 +30,8 @@
 .modal-body-player {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
     gap: 10px;
     padding: 10px;
     margin: 20px 0;
@@ -29,13 +41,13 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    color: #FF746C;
+    color: #FF146C;
     text-align: center;
     overflow-y: auto;
     overflow-x: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 400px;
+    width: 100%;
     max-height: 300px;
     padding: 10px;
 }
@@ -62,62 +74,84 @@
     color: #FF146C;
 }
 
-/* Estilo general del contenedor */
-.progressMusic {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 100%;
-    height: 10px;
-    border-radius: 50px;
-}
-
-/* Fondo de la barra (Navegadores basados en WebKit/Blink) */
-.progressMusic::-webkit-progress-bar {
-    background-color: #eee;
-    border-radius: 5px;
-}
-
-/* Barra de progreso rellena (Navegadores basados en WebKit/Blink) */
-.progressMusic::-webkit-progress-value {
-    background-color: #FF146C;
-    border-radius: 5px;
-}
-
-/* Barra de progreso rellena (Firefox) */
-.progressMusic::-moz-progress-bar {
-    background-color: #FF146C;
-    border-radius: 5px;
-}
-
+/* Estilo general de los inputs de rango (Sliderrs) */
+.progressMusic,
 .volumeBar {
-    appearance: none;
     -webkit-appearance: none;
+    appearance: none;
     width: 100%;
-    height: 10px;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Pista (Track) - Webkit */
+.progressMusic::-webkit-slider-runnable-track,
+.volumeBar::-webkit-slider-runnable-track {
+    background: transparent;
+    height: 6px;
+    border-radius: 10px;
+}
+
+/* Pista (Track) - Firefox */
+.progressMusic::-moz-range-track,
+.volumeBar::-moz-range-track {
+    background: transparent;
+    height: 6px;
+    border-radius: 10px;
+}
+
+/* Pulgar (Thumb) - Webkit */
+.progressMusic::-webkit-slider-thumb,
+.volumeBar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 18px;
+    width: 18px;
+    background: #FF146C;
+    border-radius: 50%;
+    margin-top: -6px;
+    /* Centrado: (track_height/2 - thumb_height/2) */
+    box-shadow: 0 0 8px rgba(255, 20, 108, 0.5);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: none;
+}
+
+/* Pulgar (Thumb) - Firefox */
+.progressMusic::-moz-range-thumb,
+.volumeBar::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+    background: #FF146C;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 0 8px rgba(255, 20, 108, 0.5);
+    transition: transform 0.2s ease;
+}
+
+/* Estados Hover y Active */
+.progressMusic:hover::-webkit-slider-runnable-track,
+.volumeBar:hover::-webkit-slider-runnable-track {
+    background: rgba(238, 238, 238, 0.25);
     border-radius: 50px;
+
 }
 
-/* Fondo de la barra (Navegadores basados en WebKit/Blink) */
-.volumeBar::-webkit-progress-bar {
-    background-color: #eee;
-    border-radius: 5px;
-}
-
-/* Barra de progreso rellena (Navegadores basados en WebKit/Blink) */
-.volumeBar::-webkit-progress-value {
-    background-color: #FF146C;
-    border-radius: 5px;
-}
-
-/* Barra de progreso rellena (Firefox) */
-.volumeBar::-moz-progress-bar {
-    background-color: #FF146C;
-    border-radius: 5px;
+.progressMusic:active::-webkit-slider-thumb,
+.volumeBar:active::-webkit-slider-thumb {
+    transform: scale(1.3);
 }
 
 .volume-container {
-    min-width: 70px;
+    max-width: 100px;
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.playlist p.active-track {
+    color: #FF146C;
+    font-weight: bold;
+    background-color: rgba(255, 20, 108, 0.1);
+    border-radius: 4px;
+    padding: 2px 5px;
 }

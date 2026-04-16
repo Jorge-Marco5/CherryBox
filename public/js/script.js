@@ -30,6 +30,7 @@ async function loadFiles(path = '') {
             console.log("No hay archivos de musica");
             document.getElementById('btn-music-player').style.display = 'none';
         }
+        console.log(data);
         Renderers.renderFiles(data.files);
         updateFolderPermissionButton();
     } catch (error) {

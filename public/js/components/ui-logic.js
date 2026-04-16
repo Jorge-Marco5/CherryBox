@@ -33,12 +33,14 @@ const UILogic = {
 
         if (modalId === 'previewModal') {
             modal.classList.remove('preview-pdf', 'preview-image', 'preview-text', 'preview-video', 'preview-audio');
+            pauseMedia();
         }
 
-        const audio = document.querySelector('audio');
-        const video = document.querySelector('video');
-        if (audio) audio.pause();
-        if (video) video.pause();
+        if (modalId === 'musicPlayerModal') {
+            if (window.MusicPlayer) {
+                window.MusicPlayer.pause();
+            }
+        }
     },
 
     /**
@@ -121,19 +123,30 @@ const UILogic = {
 
     async readyPlayerMusic() {
         const musicFiles = await getMusicFiles(currentPath);
+        MusicPlayer.setPlaylist(musicFiles);
+
         const playlist = document.getElementById('playlist');
         playlist.innerHTML = '';
-        musicFiles.forEach(file => {
+
+        musicFiles.forEach((file, index) => {
             const p = document.createElement('p');
             p.textContent = file.name;
-            p.onclick = () => {
-                console.log("pista seleccionada: ", file.path);
-            }
+            p.onclick = () => MusicPlayer.playTrack(index);
             playlist.appendChild(p);
         });
+
         document.getElementById('musicPlayerModal').classList.add('active');
     }
+
+
 };
+
+function pauseMedia() {
+    const audio = document.querySelector('audio');
+    const video = document.querySelector('video');
+    if (audio) audio.pause();
+    if (video) video.pause();
+}
 
 window.UILogic = UILogic;
 window.showRenameModal = UILogic.showRenameModal;

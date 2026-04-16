@@ -16,7 +16,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="icon">
+            <div class="icon" onclick="navigateTo('')" style="cursor: pointer;">
                 <h1>CherryBox</h1>
                 <img src="public/cherries.svg" alt="CherryBox" width="50" height="50">
             </div>
@@ -119,8 +119,7 @@
                     <path d="M9.5 13.5l2.5 -2.5l2.5 2.5" />
                 </svg></button>
             <input type="file" id="fileInput" multiple onchange="uploadFiles(event)">
-            <button class="btn btn-music-player" title="Reproductor de música" id="btn-music-player"
-                onclick="readyPlayerMusic()">
+            <button class="btn btn-music-player" title="CherryJam" id="btn-music-player" onclick="readyPlayerMusic()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-vinyl">
@@ -380,9 +379,9 @@
                         <path d="M17 4h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h2a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2z" />
                     </svg>
                 </button>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon icon-tabler icons-tabler-outline icon-tabler-music">
+                <svg title="CherryJam" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-music" style="margin-left: 70px;">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M3 17a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
                     <path d="M13 17a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
@@ -390,7 +389,7 @@
                     <path d="M9 8h10" />
                 </svg>
                 <div class="volume-container">
-                    <progress class="volumeBar" id="volumeBar" value="40" max="100"></progress>
+                    <input type="range" class="volumeBar" id="volumeBar" value="40" min="0" max="100">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="icon icon-tabler icons-tabler-outline icon-tabler-volume">
@@ -407,7 +406,7 @@
                 </div>
             </div>
             <div class="modal-actions-player">
-                <progress id="progressBar" class="progressMusic" type="range" value="50" max="100"></progress>
+                <input type="range" id="progressBar" class="progressMusic" value="0" min="0" max="100">
             </div>
         </div>
     </div>
