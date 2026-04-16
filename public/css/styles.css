@@ -1,5 +1,6 @@
 @import url('toast.css');
 @import url('dropdown.css');
+@import url('musicPlayer.css');
 
 :root {
     --primary: #d2042d;
@@ -212,6 +213,21 @@ body {
 
 .btn-danger:hover {
     background: #dc2626;
+}
+
+.btn-music-player {
+    display: none;
+    background: linear-gradient(180deg, #d2042d, #800020);
+    color: white;
+}
+
+.btn-music-player:hover {
+    background: linear-gradient(180deg, #800020, #d2042d);
+    transform: translateY(-1px);
+}
+
+.btn-music-player:active {
+    transform: translateY(1px);
 }
 
 .file-list {

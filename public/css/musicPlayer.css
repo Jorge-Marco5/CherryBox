@@ -1,0 +1,123 @@
+.modal-content-player {
+    max-width: 500px;
+    max-height: calc(100dvh - 40px);
+    background-color: #1B2026;
+    color: #ededed;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.modal-header-player {
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: none;
+}
+
+.modal-body-player {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    margin: 20px 0;
+}
+
+.playlist {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #FF746C;
+    text-align: center;
+    overflow-y: auto;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 400px;
+    max-height: 300px;
+    padding: 10px;
+}
+
+.playlist p {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.playlist p:hover {
+    transform: scale(1.05);
+}
+
+.btn-player {
+    background-color: transparent;
+    border: none;
+    color: #ededed;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-player:hover {
+    transform: scale(1.05);
+    color: #FF146C;
+}
+
+/* Estilo general del contenedor */
+.progressMusic {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 10px;
+    border-radius: 50px;
+}
+
+/* Fondo de la barra (Navegadores basados en WebKit/Blink) */
+.progressMusic::-webkit-progress-bar {
+    background-color: #eee;
+    border-radius: 5px;
+}
+
+/* Barra de progreso rellena (Navegadores basados en WebKit/Blink) */
+.progressMusic::-webkit-progress-value {
+    background-color: #FF146C;
+    border-radius: 5px;
+}
+
+/* Barra de progreso rellena (Firefox) */
+.progressMusic::-moz-progress-bar {
+    background-color: #FF146C;
+    border-radius: 5px;
+}
+
+.volumeBar {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 10px;
+    border-radius: 50px;
+}
+
+/* Fondo de la barra (Navegadores basados en WebKit/Blink) */
+.volumeBar::-webkit-progress-bar {
+    background-color: #eee;
+    border-radius: 5px;
+}
+
+/* Barra de progreso rellena (Navegadores basados en WebKit/Blink) */
+.volumeBar::-webkit-progress-value {
+    background-color: #FF146C;
+    border-radius: 5px;
+}
+
+/* Barra de progreso rellena (Firefox) */
+.volumeBar::-moz-progress-bar {
+    background-color: #FF146C;
+    border-radius: 5px;
+}
+
+.volume-container {
+    min-width: 70px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}

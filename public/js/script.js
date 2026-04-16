@@ -1,41 +1,36 @@
 const API_URL = '/api';
 
+// Estado global
 let currentPath = '';
 let currentRenameItem = null;
 let currentPreviewPath = null;
 let currentPermissionFileId = null;
 let currentFolderData = { id: null, name: "" };
-
-function escapeJS(str) {
-    if (!str) return '';
-    return str.replace(/'/g, "\\'");
-}
-
-function escapeHTML(str) {
-    if (!str) return '';
-    return str.replace(/[&<>"']/g, function (m) {
-        return {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;'
-        }[m];
-    });
-}
-
 let isLoadingFiles = false;
+let activeUploads = [];
+
+/**
+ * Carga los archivos de una ruta específica.
+ */
 async function loadFiles(path = '') {
     if (isLoadingFiles) return;
     isLoadingFiles = true;
     try {
-        const response = await axios.get(`${API_URL}/files?path=${encodeURIComponent(path)}`);
+        const response = await FileService.getFiles(path);
         const data = response.data;
 
         currentPath = data.currentPath;
         currentFolderData = { id: data.currentFolderId, name: data.currentFolderName };
-        updateBreadcrumb(currentPath);
-        renderFiles(data.files);
+
+        Renderers.updateBreadcrumb(currentPath);
+        if (containsOnlyOneMusicFile(data.files)) {
+            console.log("Hay archivos de musica");
+            document.getElementById('btn-music-player').style.display = 'inline-flex';
+        } else {
+            console.log("No hay archivos de musica");
+            document.getElementById('btn-music-player').style.display = 'none';
+        }
+        Renderers.renderFiles(data.files);
         updateFolderPermissionButton();
     } catch (error) {
         if (error.response && error.response.status === 401) {
@@ -46,13 +41,9 @@ async function loadFiles(path = '') {
     }
 }
 
-// Búsqueda al presionar Enter
-document.getElementById('searchInput')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        searchFiles();
-    }
-});
-
+/**
+ * Busca archivos usando el campo de búsqueda.
+ */
 async function searchFiles() {
     const searchInput = document.getElementById('searchInput');
     const query = searchInput?.value.trim();
@@ -63,123 +54,24 @@ async function searchFiles() {
     }
 
     try {
-        const response = await axios.get(`${API_URL}/search?q=${encodeURIComponent(query)}`);
-        const data = response.data;
-        renderFiles(data);
+        const response = await FileService.searchFiles(query);
+        Renderers.renderFiles(response.data);
     } catch (error) {
         location.href = '/error?code=' + error.response.status + '&message=' + error.response.data.error;
     }
-}
-
-searchFiles();
-
-function updateBreadcrumb(path) {
-    const breadcrumb = document.getElementById('breadcrumb');
-    breadcrumb.innerHTML = '<span onclick="navigateTo(\'\')"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-home"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" /></svg></span>';
-
-    if (path) {
-        const parts = path.split('/').filter(p => p);
-        let currentPath = '';
-
-        parts.forEach(part => {
-            currentPath += (currentPath ? '/' : '') + part;
-            const pathCopy = currentPath;
-            breadcrumb.innerHTML += ` / <span style="cursor: pointer; max-width: 150px; overflow: hidden; text-overflow: ellipsis;" onclick="navigateTo('${pathCopy}')">${part}</span>`;
-        });
-    }
-}
-
-function renderFiles(files) {
-    const fileList = document.getElementById('fileList');
-
-    if (!fileList) return;
-
-    if (files.length === 0) {
-        fileList.innerHTML = `
-                    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput')?.click()">
-                        <div class="upload-icon">📤</div>
-                        <div class="upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
-                        <div class="upload-hint">Esta carpeta está vacía. Puedes subir múltiples archivos a la vez</div>
-                    </div>
-                `;
-        updateSelectionButtons();
-        return;
-    }
-
-    const isMobile = window.innerWidth < 768;
-    //agregar fila al inicio con checkbox para seleccionar todos o deseleccionar todos
-    fileList.innerHTML = '<div class="file-item"><input type="checkbox" class="file-checkbox" id="checkbox-all" onchange="toggleSelectAll(this)"> <label for="checkbox-all" class="checkbox-label"><div class="file-icon"></div></label> <div class="file-info"> <div class="file-name" style="font-weight: 600;"></div> <div class="file-meta"></div> </div> <div class="file-actions"></div> </div>';
-    fileList.innerHTML += files.map(file => {
-        const isFolder = file.type === 'folder';
-        const icon = isFolder ? '<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="#FFE36C" class="icon icon-tabler icons-tabler-filled icon-tabler-folder"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 3a1 1 0 0 1 .608 .206l.1 .087l2.706 2.707h6.586a3 3 0 0 1 2.995 2.824l.005 .176v8a3 3 0 0 1 -2.824 2.995l-.176 .005h-14a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-11a3 3 0 0 1 2.824 -2.995l.176 -.005h4z" /></svg>' : getFileIcon(file.name);
-        const size = isFolder ? '' : formatBytes(file.size);
-        const date = new Date(file.modified).toLocaleDateString('es-ES');
-
-        const escPath = escapeJS(file.path);
-        const escName = escapeJS(file.name);
-        const escId = escapeJS(file.id);
-        const attrPath = escapeHTML(file.path);
-
-        return `
-                    <div class="file-item" onclick="${isFolder ? `navigateTo('${escPath}')` : `previewFile('${escPath}', '${escName}')`}">
-                        <input type="checkbox" id="checkbox-${attrPath}" class="file-checkbox" data-path="${attrPath}" onclick="event.stopPropagation();">
-                        <label for="checkbox-${attrPath}" class="checkbox-label">
-                            <div class="file-icon">${icon}</div>
-                        </label>
-                        <div class="file-info">
-                            <div class="file-name">${file.name}</div>
-                            <div class="file-meta">${size}${size ? ' • ' : ''}${date}</div>
-                        </div>
-                        <div class="file-actions">
-                            <button class="icon-btn" onclick="event.stopPropagation(); showPermissionsModal('${escId}', '${escName}')" title="Permisos">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-lock"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" /><path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /><path d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg>
-                                ${isMobile ? '' : '<p style="color: #22c55e;">Permisos</p>'}
-                            </button>
-                            <button class="icon-btn" onclick="event.stopPropagation(); showRenameModal('${escPath}', '${escName}')" title="Renombrar">
-                                ${isMobile ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#4284efff" class="icon icon-tabler icons-tabler-filled icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a1 1 0 0 1 -1 1h-1a1 1 0 0 0 -1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1 -1v-1a1 1 0 0 1 2 0v1a3 3 0 0 1 -3 3h-9a3 3 0 0 1 -3 -3v-9a3 3 0 0 1 3 -3h1a1 1 0 0 1 1 1" /><path d="M14.596 5.011l4.392 4.392l-6.28 6.303a1 1 0 0 1 -.708 .294h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 .294 -.708zm6.496 -2.103a3.097 3.097 0 0 1 .165 4.203l-.164 .18l-.693 .694l-4.387 -4.387l.695 -.69a3.1 3.1 0 0 1 4.384 0" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#4284efff" class="icon icon-tabler icons-tabler-filled icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 7a1 1 0 0 1 -1 1h-1a1 1 0 0 0 -1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1 -1v-1a1 1 0 0 1 2 0v1a3 3 0 0 1 -3 3h-9a3 3 0 0 1 -3 -3v-9a3 3 0 0 1 3 -3h1a1 1 0 0 1 1 1" /><path d="M14.596 5.011l4.392 4.392l-6.28 6.303a1 1 0 0 1 -.708 .294h-3a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 .294 -.708zm6.496 -2.103a3.097 3.097 0 0 1 .165 4.203l-.164 .18l-.693 .694l-4.387 -4.387l.695 -.69a3.1 3.1 0 0 1 4.384 0" /></svg> <p>Renombrar</p>'}
-                            </button>
-                            <button class="icon-btn" onclick="event.stopPropagation(); deleteFile('${escPath}', '${escName}')" title="Eliminar">
-                                ${isMobile ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ff5555ff" class="icon icon-tabler icons-tabler-filled icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 6a1 1 0 0 1 .117 1.993l-.117 .007h-.081l-.919 11a3 3 0 0 1 -2.824 2.995l-.176 .005h-8c-1.598 0 -2.904 -1.249 -2.992 -2.75l-.005 -.167l-.923 -11.083h-.08a1 1 0 0 1 -.117 -1.993l.117 -.007zm-10 4a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1m4 0a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1" /><path d="M14 2a2 2 0 0 1 2 2a1 1 0 0 1 -1.993 .117l-.007 -.117h-4l-.007 .117a1 1 0 0 1 -1.993 -.117a2 2 0 0 1 1.85 -1.995l.15 -.005z" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ff5555ff" class="icon icon-tabler icons-tabler-filled icon-tabler-trash"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 6a1 1 0 0 1 .117 1.993l-.117 .007h-.081l-.919 11a3 3 0 0 1 -2.824 2.995l-.176 .005h-8c-1.598 0 -2.904 -1.249 -2.992 -2.75l-.005 -.167l-.923 -11.083h-.08a1 1 0 0 1 -.117 -1.993l.117 -.007zm-10 4a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1m4 0a1 1 0 0 0 -1 1v6a1 1 0 0 0 2 0v-6a1 1 0 0 0 -1 -1" /><path d="M14 2a2 2 0 0 1 2 2a1 1 0 0 1 -1.993 .117l-.007 -.117h-4l-.007 .117a1 1 0 0 1 -1.993 -.117a2 2 0 0 1 1.85 -1.995l.15 -.005z" /></svg> <p>Eliminar</p>'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-    }).join('');
-
-    updateSelectionButtons();
-}
-
-function formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
 function navigateTo(path) {
     loadFiles(path);
 }
 
-function handleFileClick(path, type) {
-    if (type === 'folder') {
-        navigateTo(path);
-    }
+function refreshpath() {
+    loadFiles(currentPath);
 }
 
-// Manejo de doble tap en móviles
-let lastTap = 0;
-function handleTouchEnd(event, path, type) {
-    const currentTime = new Date().getTime();
-    const tapLength = currentTime - lastTap;
-
-    if (tapLength < 500 && tapLength > 0) {
-        event.preventDefault();
-        handleFileClick(path, type);
-    }
-    lastTap = currentTime;
-}
-
+/**
+ * Crea una nueva carpeta.
+ */
 async function createFolder() {
     const name = document.getElementById('folderNameInput').value.trim();
     if (!name) {
@@ -188,33 +80,196 @@ async function createFolder() {
     }
 
     try {
-        const response = await axios.post(`${API_URL}/folder`, {
-            path: currentPath,
-            name
-        });
-
-        const data = response.data;
-        if (data.success) {
-            closeModal('createFolderModal');
+        const response = await FileService.createFolder(currentPath, name);
+        if (response.data.success) {
+            UILogic.closeModal('createFolderModal');
             document.getElementById('folderNameInput').value = '';
             loadFiles(currentPath);
         } else {
-            showToast(data.error, 'error');
+            showToast(response.data.error, 'error');
         }
     } catch (error) {
         showToast('Error al crear carpeta', 'error');
     }
 }
 
+/**
+ * Confirma el renombrado de un archivo.
+ */
+async function confirmRename() {
+    const newName = document.getElementById('renameInput').value.trim();
+    if (!newName) {
+        showToast('Por favor ingresa un nombre', 'warning');
+        return;
+    }
+
+    try {
+        await FileService.rename(currentRenameItem, newName);
+        UILogic.closeModal('renameModal');
+        loadFiles(currentPath);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+/**
+ * Elimina un archivo o carpeta.
+ */
+async function deleteFile(path, name) {
+    if (!confirm(`¿Estás seguro de eliminar "${name}"?`)) return;
+
+    try {
+        await FileService.delete(path);
+        loadFiles(currentPath);
+    } catch (error) {
+        console.error('Error al eliminar:', error);
+    }
+}
+
+/**
+ * Elimina los archivos seleccionados mediante checkbox.
+ */
+async function deleteSelectedFiles() {
+    const checkboxes = document.querySelectorAll('.file-checkbox:checked');
+    const paths = Array.from(checkboxes).map(checkbox => checkbox.dataset.path);
+
+    if (paths.length === 0) {
+        showToast('No se han seleccionado archivos', 'error');
+        return;
+    }
+
+    if (confirm(`¿Estás seguro de que quieres eliminar ${paths.length} archivos?`)) {
+        try {
+            await Promise.all(paths.map(path => FileService.delete(path)));
+            document.getElementById('btn-deleteSelectedFiles').style.display = 'none';
+            await loadFiles(currentPath);
+        } catch (error) {
+            console.error('Error al eliminar archivos:', error);
+            await loadFiles(currentPath);
+        }
+    }
+}
+
+/**
+ * Obtiene y actualiza la información de almacenamiento.
+ */
+async function getStorage() {
+    try {
+        const response = await FileService.getStorage();
+        const data = response.data;
+
+        document.getElementById('storageLimit').textContent = formatBytes(data.totalStorage);
+        document.getElementById('storageUsed').textContent = formatBytes(data.usedStorage);
+        document.getElementById('storageAvailable').textContent = formatBytes(data.availableStorage);
+
+        const barFill = document.querySelector('.bar-storage-fill');
+        if (barFill && data.totalStorage > 0) {
+            const percentage = (data.usedStorage / data.totalStorage) * 100;
+            barFill.style.width = `${Math.min(percentage, 100)}%`;
+            barFill.style.backgroundColor = percentage < 50 ? '#22c55e' : percentage < 80 ? '#f59e0b' : '#ef4444';
+        }
+    } catch (error) {
+        console.error('Error al obtener el límite de almacenamiento:', error);
+    }
+}
+
+function downloadFile(path) {
+    window.open(`${API_URL}/download?path=${encodeURIComponent(path)}`, '_blank');
+}
+
+/**
+ * Gestión de Permisos
+ */
+
+function showCurrentFolderPermissions() {
+    if (currentFolderData.id) {
+        showPermissionsModal(currentFolderData.id, currentFolderData.name || "Carpeta Actual");
+    } else {
+        showToast('No se puede gestionar los permisos de esta carpeta en este momento.', 'error');
+    }
+}
+
+function updateFolderPermissionButton() {
+    const btn = document.getElementById('btn-folderPermissions');
+    if (btn) {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const isAdmin = user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN');
+        btn.style.display = (currentFolderData.id || isAdmin) ? 'inline-flex' : 'none';
+    }
+}
+
+async function showPermissionsModal(fileId, fileName) {
+    currentPermissionFileId = fileId;
+    document.getElementById('permFileName').textContent = fileName;
+    document.getElementById('permissionsModal').classList.add('active');
+    await loadPermissions(fileId);
+}
+
+async function loadPermissions(fileId) {
+    const list = document.getElementById('permissionsList');
+    list.innerHTML = '<p>Cargando permisos...</p>';
+    try {
+        const response = await PermissionService.getFilePermissions(fileId);
+        const perms = response.data;
+
+        if (perms.length === 0) {
+            list.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No hay permisos adicionales otorgados.</p>';
+        } else {
+            list.innerHTML = perms.map(p => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+                    <div>
+                        <div style="font-weight: 500;">${p.user.email}</div>
+                        <div style="font-size: 0.8rem; color: #666;">Acceso: ${p.access}</div>
+                    </div>
+                    <button class="btn btn-danger" style="padding: 5px;" onclick="revokePermission('${p.id}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        list.innerHTML = '<p style="color: #ff5555;">Error al cargar permisos.</p>';
+    }
+}
+
+async function grantPermission() {
+    const targetUserId = document.getElementById('targetUserId').value.trim();
+    const access = document.getElementById('accessLevel').value;
+
+    if (!targetUserId) return showToast('Ingresa un ID de usuario o Email', 'warning');
+
+    try {
+        await PermissionService.grantPermission(currentPermissionFileId, targetUserId, access);
+        document.getElementById('targetUserId').value = '';
+        await loadPermissions(currentPermissionFileId);
+    } catch (error) {
+        showToast('Error: ' + (error.response?.data?.error || 'No se pudo otorgar el permiso'), 'error');
+    }
+}
+
+async function revokePermission(permissionId) {
+    if (!confirm('¿Revocar este permiso?')) return;
+    try {
+        await PermissionService.revokePermission(permissionId);
+        await loadPermissions(currentPermissionFileId);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+/**
+ * Gestión de Subida de Archivos
+ */
+
 async function uploadFiles(event) {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-
     await uploadFilesProcess(Array.from(files));
     event.target.value = '';
 }
-
-let activeUploads = [];
 
 async function uploadFilesProcess(files) {
     const progressEl = document.getElementById('uploadProgress');
@@ -231,7 +286,6 @@ async function uploadFilesProcess(files) {
     const totalFiles = files.length;
     let completedCount = 0;
     let totalBytes = files.reduce((acc, file) => acc + file.size, 0);
-    let loadedBytesMap = new Map();
     let startTime = Date.now();
 
     fileCount.textContent = `0/${totalFiles}`;
@@ -239,15 +293,9 @@ async function uploadFilesProcess(files) {
     totalProgressText.textContent = '0%';
     uploadSpeed.textContent = '0 KB/s';
 
-    // Crear elementos de progreso para cada archivo y preparar controladores
     files.forEach((file, index) => {
         const controller = new AbortController();
-        activeUploads.push({
-            file,
-            controller,
-            status: 'pending',
-            loaded: 0
-        });
+        activeUploads.push({ file, controller, status: 'pending', loaded: 0 });
 
         const progressItem = document.createElement('div');
         progressItem.className = 'progress-item';
@@ -262,46 +310,34 @@ async function uploadFilesProcess(files) {
                     </button>
                 </div>
             </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: 0%"></div>
-            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
         `;
         progressList.appendChild(progressItem);
     });
 
     const updateGlobalProgress = () => {
-        let totalLoaded = 0;
-        activeUploads.forEach(upload => {
-            totalLoaded += upload.loaded;
-        });
-
+        let totalLoaded = activeUploads.reduce((acc, u) => acc + u.loaded, 0);
         const percent = totalBytes > 0 ? Math.round((totalLoaded / totalBytes) * 100) : 100;
         totalProgressFill.style.width = percent + '%';
         totalProgressText.textContent = percent + '%';
 
-        // Calcular velocidad
         const timeElapsed = (Date.now() - startTime) / 1000;
         if (timeElapsed > 0) {
-            const speed = totalLoaded / timeElapsed;
-            uploadSpeed.textContent = formatBytes(speed) + '/s';
+            uploadSpeed.textContent = formatBytes(totalLoaded / timeElapsed) + '/s';
         }
-
         fileCount.textContent = `${completedCount}/${totalFiles}`;
     };
 
-    // Límite de concurrencia: 3 subidas simultáneas
     const CONCURRENCY_LIMIT = 3;
     let currentIndex = 0;
 
     const startNextUpload = async () => {
         if (currentIndex >= totalFiles) return;
-
         const index = currentIndex++;
         const upload = activeUploads[index];
         const progressItem = document.getElementById(`progress-${index}`);
         const progressFill = progressItem.querySelector('.progress-fill');
         const progressText = progressItem.querySelector('.progress-percent');
-        const cancelBtn = document.getElementById(`cancel-btn-${index}`);
 
         upload.status = 'uploading';
 
@@ -324,40 +360,28 @@ async function uploadFilesProcess(files) {
                 upload.status = 'completed';
                 upload.loaded = upload.file.size;
                 progressItem.classList.add('completed');
-                progressFill.style.width = '100%';
-                progressText.textContent = '100%';
             } else {
                 throw new Error(response.data.error || 'Error desconocido');
             }
         } catch (error) {
-            if (axios.isCancel(error)) {
-                upload.status = 'cancelled';
-                progressItem.classList.add('cancelled');
-                progressText.textContent = 'Cancelado';
-            } else {
-                upload.status = 'error';
-                progressItem.classList.add('error');
-                progressText.textContent = 'Error';
-                console.error(`Error subiendo ${upload.file.name}:`, error);
-            }
+            upload.status = axios.isCancel(error) ? 'cancelled' : 'error';
+            progressItem.classList.add(upload.status);
+            progressText.textContent = upload.status === 'cancelled' ? 'Cancelado' : 'Error';
         } finally {
+            const cancelBtn = document.getElementById(`cancel-btn-${index}`);
             if (cancelBtn) cancelBtn.style.display = 'none';
             completedCount++;
             updateGlobalProgress();
-            // Iniciar la siguiente subida en la cola
             await startNextUpload();
         }
     };
 
-    // Iniciar el pool de subidas inicial
-    const uploadPromises = [];
+    const initialPool = [];
     for (let i = 0; i < Math.min(CONCURRENCY_LIMIT, totalFiles); i++) {
-        uploadPromises.push(startNextUpload());
+        initialPool.push(startNextUpload());
     }
+    await Promise.all(initialPool);
 
-    await Promise.all(uploadPromises);
-
-    // Ocultar progreso y recargar después de 2 segundos si no hay más subidas activas
     setTimeout(() => {
         if (!activeUploads.some(u => u.status === 'uploading')) {
             progressEl.classList.remove('active');
@@ -373,306 +397,51 @@ function cancelUpload(index) {
 }
 
 function cancelAllUploads() {
-    activeUploads.forEach((upload, index) => {
-        if (upload.status === 'uploading' || upload.status === 'pending') {
-            upload.controller.abort();
-        }
-    });
+    activeUploads.forEach(u => (u.status === 'uploading' || u.status === 'pending') && u.controller.abort());
 }
 
+/**
+ * Listeners y Configuración Inicial
+ */
 
-// Configurar drag and drop
-function setupDragAndDrop() {
-    const uploadArea = document.getElementById('uploadArea');
-    if (!uploadArea) return;
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-        uploadArea.addEventListener(eventName, () => {
-            uploadArea.classList.add('drag-over');
-        }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        uploadArea.addEventListener(eventName, () => {
-            uploadArea.classList.remove('drag-over');
-        }, false);
-    });
-
-    uploadArea.addEventListener('drop', handleDrop, false);
+function toggleSelectAll(element) {
+    const isChecked = element.checked;
+    document.querySelectorAll('.file-checkbox').forEach(cb => cb.checked = isChecked);
+    Renderers.updateSelectionButtons();
 }
 
-// Listeners globales que solo se deben registrar una vez
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    document.body.addEventListener(eventName, preventDefaults, false);
+document.addEventListener('change', (e) => {
+    if (e.target?.classList.contains('file-checkbox')) {
+        Renderers.updateSelectionButtons();
+    }
 });
 
-function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-}
-
-function handleDrop(e) {
-    const dt = e.dataTransfer;
-    const files = Array.from(dt.files);
-
-    if (files.length > 0) {
-        uploadFilesProcess(files);
+document.addEventListener('keypress', (e) => {
+    if (e.target.id === 'searchInput' && e.key === 'Enter') {
+        searchFiles();
     }
-}
+});
 
-function showRenameModal(path, currentName) {
-    currentRenameItem = path;
-    document.getElementById('renameInput').value = currentName;
-    document.getElementById('renameModal').classList.add('active');
-}
-
-async function confirmRename() {
-    const newName = document.getElementById('renameInput').value.trim();
-    if (!newName) {
-        showToast('Por favor ingresa un nombre', 'warning');
-        return;
-    }
-
-    try {
-        await axios.put(`${API_URL}/rename`, {
-            oldPath: currentRenameItem,
-            newName
-        });
-        closeModal('renameModal');
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'F5') {
+        e.preventDefault();
         loadFiles(currentPath);
-    } catch (error) {
-        console.error(error);
     }
-}
+});
 
-async function deleteFile(path, name) {
-    if (!confirm(`¿Estás seguro de eliminar "${name}"?`)) return;
-
-    try {
-        await axios.delete(`${API_URL}/delete`, {
-            data: { path: path }
-        });
-        loadFiles(currentPath);
-    } catch (error) {
-        console.error('Error al eliminar:', error);
-    }
-}
-
-async function previewFile(path, name) {
-    currentPreviewPath = path;
-    const ext = name.split('.').pop().toLowerCase();
-    const previewContent = document.getElementById('previewContent');
-    const previewTitle = document.getElementById('previewTitle');
-    const modal = document.getElementById('previewModal');
-
-    previewTitle.innerHTML = getFileIcon(ext) + ' ' + escapeHTML(name);
-    previewContent.innerHTML = '<p>Cargando...</p>';
-
-    // Limpiar clases previas de tipo de archivo
-    modal.classList.remove('preview-pdf', 'preview-image', 'preview-text', 'preview-video', 'preview-audio');
-    modal.classList.add('active');
-
-    // Scroll al inicio del modal
-    modal.scrollTop = 0;
-
-    try {
-        const textExts = ['txt', 'md', 'json', 'js', 'css', 'html', 'xml', 'csv'];
-        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'];
-        const videoExts = ['mp4', 'webm', 'ogg'];
-        const audioExts = ['mp3', 'wav', 'ogg', 'm4a', 'flac'];
-        const pdfExts = ['pdf'];
-
-        if (textExts.includes(ext)) {
-            modal.classList.add('preview-text');
-            const response = await fetch(`${API_URL}/file-content?path=${encodeURIComponent(path)}`);
-            const data = await response.json();
-            previewContent.innerHTML = `<pre>${escapeHtml(data.content)}</pre>`;
-        } else if (imageExts.includes(ext)) {
-            modal.classList.add('preview-image');
-            previewContent.innerHTML = `<img src="${API_URL}/file-content?path=${encodeURIComponent(path)}" alt="${name}" loading="lazy">`;
-        } else if (videoExts.includes(ext)) {
-            modal.classList.add('preview-video');
-            previewContent.innerHTML = `<video controls preload="metadata"><source src="${API_URL}/file-content?path=${encodeURIComponent(path)}" type="video/${ext}"></video>`;
-        } else if (audioExts.includes(ext)) {
-            modal.classList.add('preview-audio');
-            previewContent.innerHTML = `<audio controls preload="metadata"><source src="${API_URL}/file-content?path=${encodeURIComponent(path)}" type="audio/${ext}"></audio>`;
-        } else if (pdfExts.includes(ext)) {
-            modal.classList.add('preview-pdf');
-            previewContent.innerHTML = `<iframe src="${API_URL}/file-content?path=${encodeURIComponent(path)}" type="application/pdf" class="pdfViewer"></iframe>`;
-        } else {
-            previewContent.innerHTML = '<p>Vista previa no disponible para este tipo de archivo. Puedes descargarlo.</p>';
-        }
-    } catch (error) {
-        console.error('Error al cargar vista previa:', error);
-        previewContent.innerHTML = '<p>Error al cargar la vista previa</p>';
-    }
-}
-
-//
-async function getStorage() {
-    try {
-        const response = await axios.get(`${API_URL}/getstorage`);
-        const data = response.data;
-
-        const format = (bytes) => {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        };
-
-        document.getElementById('storageLimit').textContent = format(data.totalStorage);
-        document.getElementById('storageUsed').textContent = format(data.usedStorage);
-        document.getElementById('storageAvailable').textContent = format(data.availableStorage);
-
-        const barFill = document.querySelector('.bar-storage-fill');
-        if (barFill && data.totalStorage > 0) {
-            const percentage = (data.usedStorage / data.totalStorage) * 100;
-            barFill.style.width = `${Math.min(percentage, 100)}%`;
-            barFill.style.backgroundColor = percentage < 50 ? '#22c55e' : percentage < 80 ? '#f59e0b' : '#ef4444';
-        }
-    } catch (error) {
-        console.error('Error al obtener el límite de almacenamiento:', error);
-    }
-}
-
-function downloadFile(path) {
-    window.open(`${API_URL}/download?path=${encodeURIComponent(path)}`, '_blank');
-}
-
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function showCreateFolderModal() {
-    document.getElementById('createFolderModal').classList.add('active');
-}
-
-
-
-function showCurrentFolderPermissions() {
-    if (currentFolderData.id) {
-        showPermissionsModal(currentFolderData.id, currentFolderData.name || "Carpeta Actual");
-    } else {
-        showToast('No se puede gestionar los permisos de esta carpeta en este momento.', 'error');
-    }
-}
-
-function updateFolderPermissionButton() {
-    const btn = document.getElementById('btn-folderPermissions');
-    if (btn) {
-        // Solo administradores o si estamos en una carpeta con ID válido
-        const user = JSON.parse(localStorage.getItem('user'));
-        const isAdmin = user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN');
-        btn.style.display = (currentFolderData.id || isAdmin) ? 'inline-flex' : 'none';
-    }
-}
-
-async function showPermissionsModal(fileId, fileName) {
-    currentPermissionFileId = fileId;
-    document.getElementById('permFileName').textContent = fileName;
-    document.getElementById('permissionsModal').classList.add('active');
-    await loadPermissions(fileId);
-}
-
-async function loadPermissions(fileId) {
-    const list = document.getElementById('permissionsList');
-    list.innerHTML = '<p>Cargando permisos...</p>';
-    try {
-        const response = await axios.get(`${API_URL}/permissions/file/${fileId}`);
-        const perms = response.data;
-
-        if (perms.length === 0) {
-            list.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No hay permisos adicionales otorgados.</p>';
-        } else {
-            list.innerHTML = perms.map(p => `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
-                    <div>
-                        <div style="font-weight: 500;">${p.user.email}</div>
-                        <div style="font-size: 0.8rem; color: #666;">Acceso: ${p.access}</div>
-                    </div>
-                    <button class="btn btn-danger" style="padding: 5px;" onclick="revokePermission('${p.id}')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                        </svg>
-                    </button>
-                </div>
-            `).join('');
-        }
-    } catch (error) {
-        list.innerHTML = '<p style="color: #ff5555;">Error al cargar permisos.</p>';
-    }
-}
-
-async function grantPermission() {
-    const targetUserId = document.getElementById('targetUserId').value.trim();
-    const access = document.getElementById('accessLevel').value;
-
-    if (!targetUserId) return showToast('Ingresa un ID de usuario o Email', 'warning');
-
-    try {
-        await axios.post(`${API_URL}/permissions/grant`, {
-            fileId: currentPermissionFileId,
-            targetUserId,
-            access
-        });
-        document.getElementById('targetUserId').value = '';
-        await loadPermissions(currentPermissionFileId);
-    } catch (error) {
-        showToast('Error: ' + (error.response?.data?.error || 'No se pudo otorgar el permiso'), 'error');
-    }
-}
-
-async function revokePermission(permissionId) {
-    if (!confirm('¿Revocar este permiso?')) return;
-    try {
-        await axios.delete(`${API_URL}/permissions/revoke/${permissionId}`);
-        await loadPermissions(currentPermissionFileId);
-    } catch (error) {
-        console.error(error);
-    }
-}
-
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.classList.remove('active');
-    // Limpiar clases de tipo de archivo si es el modal de preview
-    if (modalId === 'previewModal') {
-        modal.classList.remove('preview-pdf', 'preview-image', 'preview-text', 'preview-video', 'preview-audio');
-    }
-    const audio = document.querySelector('audio');
-    const video = document.querySelector('video');
-    if (audio) audio.pause();
-    if (video) video.pause();
-}
-
-// Cerrar modal al tocar fuera (mejorado para móvil)
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('modal')) {
-        e.target.classList.remove('active');
-        const audio = document.querySelector('audio');
-        const video = document.querySelector('video');
-        if (audio) audio.pause();
-        if (video) video.pause();
+        UILogic.closeModal(e.target.id);
     }
 });
 
-// Prevenir zoom en inputs en iOS
-document.addEventListener('touchstart', function () { }, { passive: true });
-
-// Inicialización dependiendo de la vista
+// Inicialización
 if (document.getElementById('fileList')) {
     loadFiles();
-    setupDragAndDrop();
+    UILogic.setupDragAndDrop();
     getStorage();
 }
 
-// Re-renderizar en cambio de tamaño para ajustar botones móviles
 let resizeTimer;
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
@@ -681,76 +450,22 @@ window.addEventListener('resize', () => {
     }, 250);
 });
 
-
-//eliminar los archivos con el checkbox seleccionado
-async function deleteSelectedFiles() {
-    const checkboxes = document.querySelectorAll('.file-checkbox:checked');
-    const paths = Array.from(checkboxes).map(checkbox => checkbox.dataset.path);
-    if (paths.length === 0) {
-        showToast('No se han seleccionado archivos', 'error');
-        return;
-    }
-    if (confirm(`¿Estás seguro de que quieres eliminar ${paths.length} archivos?`)) {
-        try {
-            await Promise.all(paths.map(path => axios.delete(`${API_URL}/delete`, { data: { path } })));
-
-            const btn = document.getElementById('btn-deleteSelectedFiles');
-            if (btn) btn.style.display = 'none';
-
-            await loadFiles(currentPath);
-        } catch (error) {
-            console.error('Error al eliminar archivos:', error);
-            await loadFiles(currentPath);
-        }
-    }
-}
-
-const btnDeleteSelectFiles = document.getElementById('btn-deleteSelectedFiles');
-
-function updateSelectionButtons() {
-    const totalCount = document.querySelectorAll('.file-checkbox').length;
-    const checkedCount = document.querySelectorAll('.file-checkbox:checked').length;
-
-    if (btnDeleteSelectFiles) {
-        btnDeleteSelectFiles.style.display = checkedCount > 0 ? 'inline-flex' : 'none';
-    }
-
-    const checkboxAll = document.getElementById('checkbox-all');
-    if (checkboxAll) {
-        checkboxAll.checked = (totalCount > 0 && checkedCount === totalCount);
-        checkboxAll.indeterminate = (checkedCount > 0 && checkedCount < totalCount);
-    }
-}
-
-// Inicializar estado oculto
-updateSelectionButtons();
-
-function toggleSelectAll(element) {
-    const isChecked = element.checked;
-    const checkboxes = document.querySelectorAll('.file-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = isChecked;
-    });
-    updateSelectionButtons();
-}
-
-// Delegación de eventos para capturar el cambio en los checkboxes dinámicos
-document.addEventListener('change', (e) => {
-    if (e.target && e.target.classList.contains('file-checkbox')) {
-        updateSelectionButtons();
-    }
-});
-
-//recargar lista de archivos de la ruta actual con F5
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'F5') {
-        e.preventDefault();
-        console.log("Lista actualizada:" + currentPath)
-        loadFiles(currentPath);
-    }
-});
-
-function refreshpath() {
-    console.log("Lista actualizada:" + currentPath)
-    loadFiles(currentPath);
-}
+// Exponer funciones globales necesarias
+window.loadFiles = loadFiles;
+window.searchFiles = searchFiles;
+window.navigateTo = navigateTo;
+window.refreshpath = refreshpath;
+window.createFolder = createFolder;
+window.confirmRename = confirmRename;
+window.deleteFile = deleteFile;
+window.deleteSelectedFiles = deleteSelectedFiles;
+window.downloadFile = downloadFile;
+window.toggleSelectAll = toggleSelectAll;
+window.uploadFiles = uploadFiles;
+window.uploadFilesProcess = uploadFilesProcess;
+window.cancelUpload = cancelUpload;
+window.cancelAllUploads = cancelAllUploads;
+window.showPermissionsModal = showPermissionsModal;
+window.revokePermission = revokePermission;
+window.grantPermission = grantPermission;
+window.showCurrentFolderPermissions = showCurrentFolderPermissions;

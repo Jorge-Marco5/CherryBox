@@ -283,7 +283,7 @@ export const getItemContentService = async (relativePath: string, userId: string
         return { type: 'text', content };
     }
 
-    const mediaExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.mp4', '.mp3', '.flac', '.wav', '.webm', '.ogg', '.m4a', '.pdf'];
+    const mediaExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.mp4', '.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac', '.wma', '.opus', '.webm', '.ogg', '.m4a', '.pdf'];
     if (mediaExtensions.includes(ext)) {
         return { type: 'media', fullPath };
     }

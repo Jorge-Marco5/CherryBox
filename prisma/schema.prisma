@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -13,39 +8,39 @@ datasource db {
 }
 
 model User {
-  id    String     @id @default(uuid())
-  email String  @unique
-  password String
-  role Role @default(USER)
-  is_blocked Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ownedFiles File[] @relation("OwnerRelation")
+  id          String           @id @default(uuid())
+  email       String           @unique
+  password    String
+  role        Role             @default(USER)
+  is_blocked  Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  ownedFiles  File[]           @relation("OwnerRelation")
   permissions FilePermission[]
 }
 
 model File {
-  id        String   @id @default(uuid())
-  name      String
-  path      String   @unique // Ruta relativa desde BASE_DIR
-  type      FileType
-  ownerId   String?
-  owner     User?     @relation("OwnerRelation", fields: [ownerId], references: [id])
-  parentId  String?
-  parent    File?    @relation("FolderHierarchy", fields: [parentId], references: [id])
-  children  File[]   @relation("FolderHierarchy")
+  id          String           @id @default(uuid())
+  name        String
+  path        String           @unique
+  type        FileType
+  ownerId     String?
+  parentId    String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  owner       User?            @relation("OwnerRelation", fields: [ownerId], references: [id])
+  parent      File?            @relation("FolderHierarchy", fields: [parentId], references: [id])
+  children    File[]           @relation("FolderHierarchy")
   permissions FilePermission[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model FilePermission {
-  id      String   @id @default(uuid())
-  fileId  String
-  file    File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  userId  String
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  access  AccessType
+  id     String     @id @default(uuid())
+  fileId String
+  userId String
+  access AccessType
+  file   File       @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum Role {
@@ -60,8 +55,8 @@ enum FileType {
 }
 
 enum AccessType {
-  READ      // Ver y descargar
-  WRITE     // Actualizar contenido, renombrar, mover
-  DELETE    // Eliminar archivo/carpeta
-  MANAGE    // Cambiar permisos
+  READ
+  WRITE
+  DELETE
+  MANAGE
 }
