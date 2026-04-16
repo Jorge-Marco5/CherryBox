@@ -24,13 +24,10 @@ async function loadFiles(path = '') {
 
         Renderers.updateBreadcrumb(currentPath);
         if (containsOnlyOneMusicFile(data.files)) {
-            console.log("Hay archivos de musica");
             document.getElementById('btn-music-player').style.display = 'inline-flex';
         } else {
-            console.log("No hay archivos de musica");
             document.getElementById('btn-music-player').style.display = 'none';
         }
-        console.log(data);
         Renderers.renderFiles(data.files);
         updateFolderPermissionButton();
     } catch (error) {

@@ -166,6 +166,12 @@ export const listItemsService = async (relativePath: string, userId: string, use
         files: results
             .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled' && r.value !== null)
             .map(r => r.value)
+            //ordena los resultados primero por tipo (folders y despues archivos) y despues por orden alfabetico
+            .sort((a, b) => {
+                if (a.type === 'folder' && b.type !== 'folder') return -1;
+                if (a.type !== 'folder' && b.type === 'folder') return 1;
+                return a.name.localeCompare(b.name);
+            })
     };
 };
 
