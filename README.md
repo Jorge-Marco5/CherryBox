@@ -1,175 +1,96 @@
-# 📁 Administrador de Archivos Web
+# 🍒 CherryBox
 
-Sistema completo de gestión de archivos con interfaz web responsive, compatible con móviles, tablets y computadoras.
-
-## 🚀 Instalación Rápida
-
-### 2. Instalar dependencias
-
-```bash
-npm install
-```
-
-### 3. Configurar carpeta a administrar
-
-En `src/persistent/config.json`, modifica la ruta según tu preferencia:
-
-```json
-{
-    "BASE_DIR": "/home/jorgemarcos/Documentos/archivos",
-    "STORAGE_DIR": "",
-    "LIMIT_STORAGE": 10737418240
-}
-```
-
-Ejemplos de rutas:
-
-- **Windows**: `'C:\\Users\\TuUsuario\\Documentos\\MisCarpetas'`
-- **Linux/Mac**: `'/home/usuario/documentos'`
-- **Relativa**: `path.join(__dirname, 'archivos')` (carpeta en el proyecto)
-
-### 4. Iniciar el servidor
-
-```bash
-npm start
-```
-
-El servidor se iniciará en `http://localhost:3000`
-
-### 5. Acceder a la aplicación
-
-- **Desde el mismo PC**: `http://localhost:3000`
-- **Desde otros dispositivos** (móvil, tablet): `http://[IP-DE-TU-PC]:3000`
-
-Para encontrar tu IP:
-
-- **Windows**: `ipconfig` (busca "Dirección IPv4")
-- **Linux/Mac**: `ifconfig` o `ip addr`
-
-## ✨ Características
-
-### Operaciones básicas
-
-- ✅ **Navegar**: Explora carpetas haciendo doble clic/tap
-- ✅ **Crear carpetas**: Organiza tus archivos
-- ✅ **Subir archivos**: Múltiples archivos a la vez
-- ✅ **Drag & Drop**: Arrastra archivos para subirlos
-- ✅ **Renombrar**: Cambia nombres de archivos y carpetas
-- ✅ **Eliminar**: Borra con confirmación
-- ✅ **Descargar**: Descarga cualquier archivo
-
-### Vista previa nativa
-
-- 📄 **Texto**: .txt, .md, .json, .js, .css, .html, .xml, .csv
-- 🖼️ **Imágenes**: .jpg, .jpeg, .png, .gif, .svg, .webp
-- 🎬 **Video**: .mp4, .webm, .ogg
-- 🎵 **Audio**: .mp3, .wav, .ogg, .m4a
-- 📕 **PDF**: Vista directa en el navegador
-
-### Responsive Design
-
-- 📱 **Móviles**: Interfaz optimizada con botones táctiles
-- 📲 **Tablets**: Diseño adaptativo intermedio
-- 💻 **Desktop**: Interfaz completa con hover effects
-
-## 🎯 Uso
-
-### En Computadora
-
-- **Navegar**: Doble clic en carpetas
-- **Subir**: Arrastra archivos o usa el botón "Subir Archivos"
-- **Acciones**: Botones con texto e iconos
-
-### En Móvil/Tablet
-
-- **Navegar**: Doble tap en carpetas
-- **Subir**: Toca el área de subida o botón
-- **Acciones**: Botones compactos con iconos
-
-## 🔧 Configuración Avanzada
-
-### Cambiar puerto
-
-En `server.js`, línea 9:
-
-```javascript
-const PORT = 3000; // Cambia a tu puerto preferido
-```
-
-### Límite de tamaño de archivo
-
-En `server.js`, línea 26:
-
-```javascript
-fileSize: 100 * 1024 * 1024; // 100MB por archivo
-```
-
-### Límite de archivos simultáneos
-
-En `server.js`, línea 74:
-
-```javascript
-app.post('/api/upload', upload.array('files', 20), // Máximo 20 archivos
-```
-
-## 🛡️ Seguridad
-
-- ✅ Validación de rutas para prevenir acceso fuera del directorio base
-- ✅ Verificación de existencia de archivos antes de operaciones
-- ✅ Límites de tamaño de archivo configurables
-- ⚠️ **Importante**: Para producción, agrega autenticación y cifrado HTTPS
-
-## 📱 Acceso desde dispositivos móviles
-
-### Asegurar que ambos dispositivos estén en la misma red WiFi
-
-1. Inicia el servidor en tu PC
-2. Encuentra la IP de tu PC (ver paso 5 arriba)
-3. En tu móvil/tablet, abre el navegador
-4. Accede a `http://[IP-DE-TU-PC]:3000`
-
-Ejemplo: `http://192.168.1.100:3000`
-
-## 🐛 Solución de Problemas
-
-### El servidor no inicia
-
-- Verifica que el puerto 3000 no esté en uso
-- Ejecuta `npm install` nuevamente
-- Revisa los logs en la consola
-
-### No puedo subir archivos
-
-- Verifica permisos de escritura en la carpeta `BASE_DIR`
-- Revisa el tamaño del archivo (límite: 100MB)
-- Abre la consola del navegador (F12) para ver errores
-
-### No puedo acceder desde móvil
-
-- Asegura que estén en la misma red WiFi
-- Verifica que el firewall no bloquee el puerto 3000
-- En Windows: Panel de Control → Firewall → Permitir aplicación
-
-### Los modales se salen de la pantalla
-
-- Ya está corregido con `100dvh`
-- Si persiste, actualiza el navegador
-- Reporta el navegador/dispositivo específico
-
-## 📝 Dependencias
-
-- **express**: Servidor web
-- **cors**: Soporte para peticiones cross-origin
-- **multer**: Manejo de subida de archivos
-
-## 📄 Licencia
-
-Proyecto educativo de código abierto. Úsalo y modifícalo libremente para tus necesidades.
-
-## 🤝 Contribuciones
-
-Este es un proyecto escolar. Siéntete libre de mejorarlo y adaptarlo a tus necesidades.
+**CherryBox** es un sistema inteligente y robusto de gestión de archivos y nube personal, diseñado con un enfoque en la seguridad, la auditoría y la experiencia de usuario. Permite no solo almacenar y organizar archivos, sino también controlar granularmente quién tiene acceso a ellos a través de un sistema avanzado de **Permisos ACL**.
 
 ---
 
-**Desarrollado como proyecto escolar** 🎓
+## 🌟 Características Principales
+
+### 📁 Gestión de Archivos Completa
+-   **Operaciones Inteligentes**: Navega, crea, renombra, elimina y descarga archivos o carpetas.
+-   **Descarga Masiva**: Selecciona múltiples archivos y descárgalos instantáneamente en un archivo `.zip` generado al vuelo (límite de 100MB).
+-   **Drag & Drop**: Sube archivos múltiples simplemente arrastrándolos a la interfaz.
+-   **Búsqueda Recursiva**: Encuentra cualquier archivo en segundos mediante el motor de búsqueda integrado.
+
+### 🛡️ Seguridad y Control de Acceso (ACL)
+-   **Roles de Usuario**:
+    -   🥇 **SUPERADMIN**: Control total del sistema, gestión de configuraciones globales y jerarquía suprema (intocable por otros administradores).
+    -   🥈 **ADMIN**: Gestión de usuarios y archivos. Acceso de solo lectura a configuraciones globales.
+    -   🥉 **USER**: Acceso restringido a archivos propios y compartidos.
+-   **Permisos Granulares**: Define permisos de `LECTURA`, `ESCRITURA`, `ELIMINACIÓN` o `GESTIÓN` para cualquier usuario en cualquier archivo o carpeta.
+-   **Bloqueo Visual Preventivo**: Sistema de "Guarda de Vistas" que bloquea el acceso a nivel de interfaz basado en el rol de `localStorage`, optimizado para despliegues con Nginx.
+
+### 📋 Auditoría y Monitoreo
+-   **Logs de Acciones**: Registro detallado de cada operación (Creación, Eliminación, Renombrado, Descarga).
+-   **Logs de Seguridad**: Seguimiento de intentos de inicio de sesión, accesos fallidos y bloqueos de cuenta.
+-   **Inspector de Logs**: Visualizador de logs integrado en la interfaz administrativa con resaltado de sintaxis.
+
+### 🖼️ Previsualización Nativa
+-   **Media**: Imágenes (jpg, png, gif, svg, webp), Video (mp4, webm) y Audio (mp3, wav, flac, aac).
+-   **Documentos**: PDF y archivos de texto plano (txt, md, js, css, etc.) con resaltado de código.
+
+---
+
+## 🚀 Instalación y Despliegue
+
+### 1. Requisitos Previos
+-   Node.js (v18+)
+-   PostgreSQL
+-   pnpm (Recomendado)
+
+### 2. Configuración Inicial
+Clona el repositorio y configura tu entorno:
+
+```bash
+git clone https://github.com/Jorge-Marco5/CherryBox.git
+cd CherryBox
+cp .env.example .env
+pnpm install
+```
+
+### 3. Configuración del Sistema
+Edita el archivo `.env` con tus credenciales de base de datos y secretos:
+-   `DATABASE_URL`: Conexión de Prisma a PostgreSQL.
+-   `JWT_SECRET`: Llave para el cifrado de sesiones.
+-   `MAX_FILE_SIZE`: Límite por archivo (default: 100MB).
+
+Para configurar la ruta física de los archivos, edita `src/persistent/config.json`:
+```json
+{
+  "BASE_DIR": "/ruta/a/tus/archivos",
+  "LIMIT_STORAGE": 10737418240
+}
+```
+
+### 4. Construcción y Ejecución
+**Modo Desarrollo:**
+```bash
+pnpm dev
+```
+
+**Producción:**
+```bash
+pnpm build
+pnpm start
+```
+
+---
+
+## 🛠️ Stack Tecnológico
+-   **Backend**: Node.js, Express.js (v5), TypeScript.
+-   **ORM**: Prisma con PostgreSQL.
+-   **Frontend**: Vanilla JavaScript (ES6+), CSS3 (Modern UI/UX).
+-   **Seguridad**: JWT (JSON Web Tokens), Bcrypt para hash de contraseñas.
+-   **Utilidades**: Archiver (Compresión ZIP), Winston (Logging avanzado), Zod (Validación de esquemas).
+
+---
+
+## 🛡️ Seguridad y Buenas Prácticas
+-   **Protección de Rutas**: Middlewares de autenticación robustos a nivel de API y de Vistas.
+-   **Auditoría de Navegación**: Cada acceso a una carpeta es registrado para control de fuga de información.
+-   **Integridad**: El sistema Admin/Superadmin garantiza que la infraestructura crítica no sea modificada por usuarios no autorizados.
+
+> ⚠️ **IMPORTANTE**: Para despliegues en producción, se recomienda encarecidamente el uso de HTTPS y un servidor proxy inverso como Nginx.
+
+---
+**CherryBox** - *Tu caja de herramientas para la gestión segura de archivos.* 🍒

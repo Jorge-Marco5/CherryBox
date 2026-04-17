@@ -11,7 +11,12 @@ import { downloadMultipleFiles } from "../controllers/files.controller";
 import { upload } from "../utils/multer";
 import { requireAuth } from "../middlewares/auth.middleware";
 
-import { uploadCleanupMiddleware } from "../middlewares/cleanup.middleware";
+import { uploadCleanupMiddleware } from "../middlewares/cleanup.middleware"
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const MAX_FILES = process.env.MAX_FILES || 10;
 
 const router = Router();
 
@@ -21,7 +26,7 @@ router.get('/search', requireAuth, searchFiles);
 
 router.post('/folder', requireAuth, createFolder);
 
-router.post('/upload', requireAuth, uploadCleanupMiddleware, upload.array('files', 10), uploadFiles);
+router.post('/upload', requireAuth, uploadCleanupMiddleware, upload.array('files', Number(MAX_FILES)), uploadFiles);
 
 router.put('/rename', requireAuth, renameFile);
 
