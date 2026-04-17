@@ -59,6 +59,10 @@ class MusicPlayerService {
             this.setVolume(e.target.value);
             this.updateSliderFill(e.target);
         });
+
+        //eventos de control de cambio de pista con dispositivos inalambricos y alambricos
+        navigator.mediaSession.setActionHandler('nexttrack', () => this.next());
+        navigator.mediaSession.setActionHandler('previoustrack', () => this.prev());
     }
 
     setPlaylist(files) {

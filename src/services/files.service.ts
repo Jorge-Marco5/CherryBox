@@ -311,7 +311,7 @@ export const verifyDownloadMultipleService = async (paths: string[], userId: str
 
     for (const relPath of paths) {
         if (!isValidPath(relPath)) throw new ValidationError(`Ruta no válida: ${relPath}`);
-        
+
         // Verificar READ
         await checkPermission(userId, userRole, relPath, "READ");
 
