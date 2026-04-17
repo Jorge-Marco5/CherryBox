@@ -305,3 +305,32 @@ export const registerUploadedFilesService = async (files: any[], relativePath: s
     }
 };
 
+export const verifyDownloadMultipleService = async (paths: string[], userId: string, userRole: string) => {
+    const filePaths: string[] = [];
+    let totalSize = 0;
+
+    for (const relPath of paths) {
+        if (!isValidPath(relPath)) throw new ValidationError(`Ruta no válida: ${relPath}`);
+        
+        // Verificar READ
+        await checkPermission(userId, userRole, relPath, "READ");
+
+        const fullPath = path.join(BASE_DIR, relPath);
+        const stats = await fs.stat(fullPath);
+
+        if (stats.isDirectory()) {
+            throw new ValidationError(`No se permite descargar carpetas en lote: ${relPath}`);
+        }
+
+        filePaths.push(fullPath);
+        totalSize += stats.size;
+    }
+
+    // Límite de 100MB (100 * 1024 * 1024 bytes)
+    const MAX_SIZE = 100 * 1024 * 1024;
+    if (totalSize > MAX_SIZE) {
+        throw new ValidationError(`El tamaño total (${(totalSize / 1024 / 1024).toFixed(2)}MB) excede el límite de 100MB.`);
+    }
+
+    return filePaths;
+};

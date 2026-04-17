@@ -57,6 +57,24 @@ const FileService = {
      */
     async getFileContent(path) {
         return await fetch(`${API_URL}/file-content?path=${encodeURIComponent(path)}`);
+    },
+
+    /**
+     * Descarga un archivo.
+     * @param {string} path - Ruta del archivo.
+     */
+    async download(path) {
+        return await fetch(`${API_URL}/download?path=${encodeURIComponent(path)}`);
+    },
+
+    /**
+     * Descarga múltiples archivos en un ZIP.
+     * @param {string[]} paths - Lista de rutas de archivos.
+     */
+    async downloadMultiple(paths) {
+        return await axios.post(`${API_URL}/download-multiple`, { paths }, {
+            responseType: 'blob'
+        });
     }
 };
 

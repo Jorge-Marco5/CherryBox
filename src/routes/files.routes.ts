@@ -7,6 +7,7 @@ import { renameFile } from "../controllers/files.controller";
 import { deleteFile } from "../controllers/files.controller";
 import { getFileContent } from "../controllers/files.controller";
 import { downloadFile } from "../controllers/files.controller";
+import { downloadMultipleFiles } from "../controllers/files.controller";
 import { upload } from "../utils/multer";
 import { requireAuth } from "../middlewares/auth.middleware";
 
@@ -29,6 +30,8 @@ router.delete('/delete', requireAuth, deleteFile);
 router.get('/file-content', requireAuth, getFileContent);
 
 router.get('/download', requireAuth, downloadFile);
+
+router.post('/download-multiple', requireAuth, downloadMultipleFiles);
 
 
 

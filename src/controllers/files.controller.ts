@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { logger } from "../utils/logger";
 import path from "path";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import archiver from "archiver";
 import {
   listItemsService,
   searchItemsService,
@@ -9,7 +10,8 @@ import {
   renameItemService,
   deleteItemService,
   getItemContentService,
-  registerUploadedFilesService
+  registerUploadedFilesService,
+  verifyDownloadMultipleService
 } from "../services/files.service";
 import { isValidPath } from "../utils/multer";
 import { getBaseDir } from "../utils/settings";
@@ -217,3 +219,42 @@ export const downloadFile = async (req: AuthRequest, res: Response) => {
 }
 
 
+/**
+ * Descarga múltiples archivos comprimidos en un archivo ZIP.
+ * 
+ * @param req Petición con array de paths en req.body.paths
+ * @param res Stream de descarga del archivo ZIP
+ */
+export const downloadMultipleFiles = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { paths } = req.body;
+    if (!paths || !Array.isArray(paths) || paths.length === 0) {
+      throw new ValidationError("Se requiere una lista de archivos para descargar");
+    }
+
+    const filePaths = await verifyDownloadMultipleService(paths, req.user!.id, req.user!.role);
+
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    
+    // Configurar cabeceras para la descarga
+    res.attachment(`cherrybox_download_${Date.now()}.zip`);
+
+    archive.on('error', (err) => {
+      logger.error('Error en archiver: ' + err.message);
+      throw err;
+    });
+
+    // Pipe del archive a la respuesta
+    archive.pipe(res);
+
+    for (const fullPath of filePaths) {
+      archive.file(fullPath, { name: path.basename(fullPath) });
+    }
+
+    logger.info(`[AUDIT] Usuario ${req.user?.id} DESCARGÓ ${paths.length} archivos en ZIP`);
+    await archive.finalize();
+
+  } catch (error: any) {
+    next(error);
+  }
+}

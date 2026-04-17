@@ -134,6 +134,9 @@ async function deleteSelectedFiles() {
     if (paths.length === 0) {
         showToast('No se han seleccionado archivos', 'error');
         return;
+    } else if (paths.length >= 10) {
+        showToast('No se pueden eliminar más de 10 archivos a la vez', 'error');
+        return;
     }
 
     if (confirm(`¿Estás seguro de que quieres eliminar ${paths.length} archivos?`)) {
@@ -144,6 +147,70 @@ async function deleteSelectedFiles() {
         } catch (error) {
             console.error('Error al eliminar archivos:', error);
             await loadFiles(currentPath);
+        }
+    }
+}
+
+/**
+ * Descarga los archivos seleccionados mediante checkbox.
+ */
+async function downloadSelectedFiles() {
+    const checkboxes = document.querySelectorAll('.file-checkbox:checked');
+    const paths = Array.from(checkboxes)
+        .filter(cb => cb.id !== 'checkbox-all')
+        .map(cb => cb.dataset.path);
+
+    if (paths.length === 0) {
+        showToast('No se han seleccionado archivos', 'error');
+        return;
+    }
+
+    try {
+        showToast('Preparando descarga...', 'info');
+        const response = await FileService.downloadMultiple(paths);
+
+        // Crear un objeto URL para el blob
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        
+        // Nombre del archivo con timestamp
+        const timestamp = new Date().getTime();
+        link.setAttribute('download', `cherrybox_download_${timestamp}.zip`);
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        // Limpieza
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        
+        document.getElementById('btn-downloadSelectedFiles').style.display = 'none';
+        showToast('Descarga iniciada', 'success');
+        
+        // Deseleccionar todo
+        const checkboxAll = document.getElementById('checkbox-all');
+        if (checkboxAll) checkboxAll.checked = false;
+        document.querySelectorAll('.file-checkbox').forEach(cb => cb.checked = false);
+        Renderers.updateSelectionButtons();
+
+    } catch (error) {
+        console.error('Error al descargar:', error);
+        
+        // Si el error viene de un blob, hay que leerlo como texto
+        if (error.response && error.response.data instanceof Blob) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const errData = JSON.parse(reader.result);
+                    showToast(errData.error || 'Error al descargar archivos', 'error');
+                } catch {
+                    showToast('Error al descargar archivos', 'error');
+                }
+            };
+            reader.readAsText(error.response.data);
+        } else {
+            showToast(error.response?.data?.error || 'Error en el servidor al procesar la descarga', 'error');
         }
     }
 }

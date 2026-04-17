@@ -49,7 +49,7 @@ axios.interceptors.response.use(
         if (status === 401 && window.location.pathname !== '/login') {
             window.location.href = '/login';
         } else {
-            showToast(message, 'error');
+            console.error(message);
         }
         return Promise.reject(error);
     }

@@ -69,10 +69,11 @@ const Renderers = {
             const escName = escapeJS(file.name);
             const escId = escapeJS(file.id);
             const attrPath = escapeHTML(file.path);
+            const attrType = escapeHTML(file.type);
 
             return `
                 <div class="file-item" onclick="${isFolder ? `navigateTo('${escPath}')` : `previewFile('${escPath}', '${escName}')`}">
-                    <input type="checkbox" id="checkbox-${attrPath}" class="file-checkbox" data-path="${attrPath}" onclick="event.stopPropagation();">
+                    <input onchange="updateSelectionButtons()" type="checkbox" id="checkbox-${attrPath}" class="file-checkbox" data-type="${attrType}" data-path="${attrPath}" onclick="event.stopPropagation();">
                     <label for="checkbox-${attrPath}" class="checkbox-label">
                         <div class="file-icon">${icon}</div>
                     </label>
@@ -106,12 +107,24 @@ const Renderers = {
      */
     updateSelectionButtons() {
         const btnDeleteSelected = document.getElementById('btn-deleteSelectedFiles');
+        const btnDownloadSelected = document.getElementById('btn-downloadSelectedFiles');
         const checkboxes = document.querySelectorAll('.file-checkbox');
         const checkedCount = document.querySelectorAll('.file-checkbox:checked').length;
         const totalCount = checkboxes.length;
 
         if (btnDeleteSelected) {
             btnDeleteSelected.style.display = checkedCount > 0 ? 'inline-flex' : 'none';
+        }
+
+        if (checkedCount > 0) {
+            const selectedCheckboxes = document.querySelectorAll('.file-checkbox:checked');
+            const hasFolder = Array.from(selectedCheckboxes).some(cb => cb.dataset.type === 'folder');
+            
+            if (btnDownloadSelected) {
+                btnDownloadSelected.style.display = !hasFolder ? 'inline-flex' : 'none';
+            }
+        } else if (btnDownloadSelected) {
+            btnDownloadSelected.style.display = 'none';
         }
 
         const checkboxAll = document.getElementById('checkbox-all');
