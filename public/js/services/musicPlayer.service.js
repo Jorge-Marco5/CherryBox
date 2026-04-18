@@ -9,17 +9,15 @@ class MusicPlayerService {
         this.playlist = [];
         this.currentIndex = -1;
         this.isPlaying = false;
+        this.currentArtworkUrl = null;
 
-        // Elementos de la UI
         this.playBtn = null;
         this.pauseBtn = null;
         this.progressBar = null;
         this.volumeBar = null;
 
-        // El ID del intervalo para el progreso
         this.progressInterval = null;
 
-        // Esperar a que el DOM esté listo para inicializar
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.init());
         } else {
@@ -60,9 +58,18 @@ class MusicPlayerService {
             this.updateSliderFill(e.target);
         });
 
-        //eventos de control de cambio de pista con dispositivos inalambricos y alambricos
-        navigator.mediaSession.setActionHandler('nexttrack', () => this.next());
-        navigator.mediaSession.setActionHandler('previoustrack', () => this.prev());
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.setActionHandler('play', () => this.play());
+            navigator.mediaSession.setActionHandler('pause', () => this.pause());
+            navigator.mediaSession.setActionHandler('stop', () => this.stop());
+            navigator.mediaSession.setActionHandler('nexttrack', () => this.next());
+            navigator.mediaSession.setActionHandler('previoustrack', () => this.prev());
+            navigator.mediaSession.setActionHandler('seekto', (details) => {
+                if (details.seekTime) {
+                    this.audio.currentTime = details.seekTime;
+                }
+            });
+        }
     }
 
     setPlaylist(files) {
@@ -77,11 +84,11 @@ class MusicPlayerService {
         this.currentIndex = index;
         const track = this.playlist[index];
         const contentUrl = `${API_URL}/file-content?path=${encodeURIComponent(track.path)}`;
-
         this.audio.src = contentUrl;
         this.audio.load();
         await this.play();
         this.highlightTrack(index);
+        await this.getMetadata(contentUrl);
     }
 
     async play() {
@@ -95,6 +102,83 @@ class MusicPlayerService {
             console.error('Error al reproducir audio:', error);
         }
     }
+
+    async getMetadata(trackUrl) {
+        if (this.currentArtworkUrl) {
+            URL.revokeObjectURL(this.currentArtworkUrl);
+            this.currentArtworkUrl = null;
+        }
+
+        try {
+            const response = await axios.get(trackUrl, {
+                responseType: 'blob',
+                headers: { 'Range': 'bytes=0-1000000' }
+            });
+
+            jsmediatags.read(response.data, {
+                onSuccess: async (tag) => {
+                    const metadata = await this.handleMetadata(tag);
+                    this.updateMediaSession(metadata);
+                },
+                onError: (error) => {
+                    console.warn('jsmediatags error:', error);
+                    const fallbackMetadata = {
+                        title: this.playlist[this.currentIndex]?.name.replace(/\.[^/.]+$/, "") || 'Desconocido',
+                        artist: 'Desconocido',
+                        album: 'Desconocido',
+                        artwork: []
+                    };
+                    this.updateMediaSession(fallbackMetadata);
+                }
+            });
+        } catch (error) {
+            console.error('Error al obtener el archivo para metadatos:', error);
+        }
+    }
+
+    async handleMetadata(data) {
+        const tags = data.tags;
+        const metadata = {};
+
+        let artworkUrl = '';
+        if (tags.picture && tags.picture.data) {
+            const byteArray = new Uint8Array(tags.picture.data);
+            const blob = new Blob([byteArray], { type: tags.picture.format });
+            artworkUrl = URL.createObjectURL(blob);
+            this.currentArtworkUrl = artworkUrl;
+        }
+
+        metadata.title = tags.title || this.playlist[this.currentIndex]?.name.replace(/\.[^/.]+$/, "") || 'Título Desconocido';
+        metadata.artist = tags.artist || 'Artista Desconocido';
+        metadata.album = tags.album || 'Álbum Desconocido';
+        metadata.artwork = artworkUrl ? [{
+            src: artworkUrl,
+            sizes: '512x512',
+            type: tags.picture.format
+        }] : [];
+
+        return metadata;
+    }
+
+    async updateMediaSession(data) {
+        if (!('mediaSession' in navigator)) return;
+
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: data.title,
+            artist: data.artist,
+            album: data.album,
+            artwork: data.artwork
+        });
+
+        this.updateMediaSessionPlaybackState();
+    }
+
+    updateMediaSessionPlaybackState() {
+        if (!('mediaSession' in navigator)) return;
+        navigator.mediaSession.playbackState = this.isPlaying ? 'playing' : 'paused';
+    }
+
+
 
     pause() {
         this.audio.pause();
@@ -156,6 +240,8 @@ class MusicPlayerService {
             playMusicEl.style.display = isPlaying ? 'none' : 'block';
             pauseMusicEl.style.display = isPlaying ? 'block' : 'none';
         }
+
+        this.updateMediaSessionPlaybackState();
     }
 
     highlightTrack(index) {

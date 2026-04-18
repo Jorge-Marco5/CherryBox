@@ -163,6 +163,9 @@ async function downloadSelectedFiles() {
     if (paths.length === 0) {
         showToast('No se han seleccionado archivos', 'error');
         return;
+    } else if (paths.length === 1) {
+        downloadFile(paths[0])
+        return;
     }
 
     try {
@@ -173,21 +176,21 @@ async function downloadSelectedFiles() {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');
         link.href = url;
-        
+
         // Nombre del archivo con timestamp
         const timestamp = new Date().getTime();
         link.setAttribute('download', `cherrybox_download_${timestamp}.zip`);
-        
+
         document.body.appendChild(link);
         link.click();
-        
+
         // Limpieza
         link.remove();
         window.URL.revokeObjectURL(url);
-        
+
         document.getElementById('btn-downloadSelectedFiles').style.display = 'none';
         showToast('Descarga iniciada', 'success');
-        
+
         // Deseleccionar todo
         const checkboxAll = document.getElementById('checkbox-all');
         if (checkboxAll) checkboxAll.checked = false;
@@ -196,7 +199,7 @@ async function downloadSelectedFiles() {
 
     } catch (error) {
         console.error('Error al descargar:', error);
-        
+
         // Si el error viene de un blob, hay que leerlo como texto
         if (error.response && error.response.data instanceof Blob) {
             const reader = new FileReader();
