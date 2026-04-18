@@ -38,6 +38,10 @@
     border-left-color: #ffc107;
 }
 
+.toast.info {
+    border-left-color: #17a2b8;
+}
+
 .toast.fade-out {
     opacity: 0;
     transform: translateX(100%);

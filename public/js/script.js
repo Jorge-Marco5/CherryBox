@@ -64,6 +64,7 @@ function navigateTo(path) {
 }
 
 function refreshpath() {
+    showToast('Carpeta actualizada', 'info');
     loadFiles(currentPath);
 }
 
@@ -493,7 +494,7 @@ document.addEventListener('keypress', (e) => {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'F5') {
         e.preventDefault();
-        loadFiles(currentPath);
+        refreshpath();
     }
 });
 
@@ -517,7 +518,6 @@ window.addEventListener('resize', () => {
         if (document.getElementById('fileList')) loadFiles(currentPath);
     }, 250);
 });
-
 // Exponer funciones globales necesarias
 window.loadFiles = loadFiles;
 window.searchFiles = searchFiles;

@@ -8,9 +8,25 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+/**
+ * Evalúa expresiones matemáticas simples de las variables de entorno (ej: "100 * 1024 * 1024")
+ */
+function evaluateEnvVar(value: string | undefined, defaultValue: number): number {
+  if (!value) return defaultValue;
+  try {
+    // Sanitizar y evaluar de forma segura (solo números y operadores básicos)
+    const sanitized = value.replace(/[^0-9*+\-/\s()]/g, '');
+    // eslint-disable-next-line no-new-func
+    return new Function(`return ${sanitized}`)();
+  } catch {
+    return defaultValue;
+  }
+}
+
 //Obtenemos el valor de la ruta de la carpeta donde se guardaran los archivos
 const BASE_DIR = getBaseDir();
-const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE) * 1024 * 1024;
+let MAX_FILE_SIZE = evaluateEnvVar(process.env.MAX_FILE_SIZE, 100) * 1024 * 1024;
+
 // Función para validar que la ruta esté dentro del directorio base
 export function isValidPath(requestedPath: string) {
   const normalizedBase = path.resolve(BASE_DIR);
@@ -23,19 +39,22 @@ export function isValidPath(requestedPath: string) {
 
 // Configuración de multer para subir archivos
 export const storage = multer.diskStorage({
-  destination: async (req: any, file: any, cb: any) => {
+  destination: (req: any, file: any, cb: any) => {
+    const uploadPath = req.query.path || '';
+
+    // Validación de seguridad para la ruta de subida
+    if (!isValidPath(uploadPath)) {
+      return cb(new ValidationError('Ruta de destino no válida'), null);
+    }
+
+    const fullPath = path.join(BASE_DIR, uploadPath);
+
+    // Crear directorio si no existe (sincrónico para evitar race conditions con busboy)
     try {
-      const uploadPath = req.query.path || '';
-
-      // Validación de seguridad para la ruta de subida
-      if (!isValidPath(uploadPath)) {
-        return cb(new ValidationError('Ruta de destino no válida'), null);
+      const fsSync = require('fs');
+      if (!fsSync.existsSync(fullPath)) {
+        fsSync.mkdirSync(fullPath, { recursive: true });
       }
-
-      const fullPath = path.join(BASE_DIR, uploadPath);
-
-      // Crear directorio si no existe
-      await fs.mkdir(fullPath, { recursive: true });
       cb(null, fullPath);
     } catch (error) {
       cb(error, null);

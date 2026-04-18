@@ -235,7 +235,7 @@ export const downloadMultipleFiles = async (req: AuthRequest, res: Response, nex
     const filePaths = await verifyDownloadMultipleService(paths, req.user!.id, req.user!.role);
 
     const archive = archiver('zip', { zlib: { level: 9 } });
-    
+
     // Configurar cabeceras para la descarga
     res.attachment(`cherrybox_download_${Date.now()}.zip`);
 

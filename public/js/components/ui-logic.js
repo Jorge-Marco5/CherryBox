@@ -97,28 +97,57 @@ const UILogic = {
      * Configura el manejo de archivos arrastrados.
      */
     setupDragAndDrop() {
-        const uploadArea = document.getElementById('uploadArea');
-        if (!uploadArea) return;
+        const dropOverlay = document.getElementById('drop-overlay');
+        let dragCounter = 0;
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, () => {
-                uploadArea.classList.add('drag-over');
-            }, false);
+        if (!dropOverlay) return;
+
+        // Prevenir comportamiento por defecto en toda la ventana
+        window.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
         });
 
-        ['dragleave', 'drop'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, () => {
-                uploadArea.classList.remove('drag-over');
-            }, false);
+        window.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dragCounter++;
+            if (dragCounter === 1) {
+                dropOverlay.classList.add('active');
+            }
         });
 
-        uploadArea.addEventListener('drop', (e) => {
+        window.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dragCounter--;
+            if (dragCounter === 0) {
+                dropOverlay.classList.remove('active');
+            }
+        });
+
+        window.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dragCounter = 0;
+            dropOverlay.classList.remove('active');
+
             const dt = e.dataTransfer;
             const files = Array.from(dt.files);
+
             if (files.length > 0) {
-                window.uploadFilesProcess(files);
+                if (typeof window.uploadFilesProcess === 'function') {
+                    window.uploadFilesProcess(files);
+                }
             }
-        }, false);
+        });
+
+        // Soporte para clics en la zona estática de subida
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#uploadArea')) {
+                document.getElementById('fileInput')?.click();
+            }
+        });
     },
 
     async readyPlayerMusic() {

@@ -147,11 +147,6 @@
             </button>
         </div>
         <div class="file-list" id="fileList">
-            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-                <div class="upload-icon">📤</div>
-                <div class="upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
-                <div class="upload-hint">Puedes subir múltiples archivos a la vez (máx. 100MB por archivo)</div>
-            </div>
         </div>
         <div class="toolbar" id="admin-actions" style="justify-content: end;">
             <a title="settings" class="btn btn-secondary" href="/settings">
@@ -394,8 +389,8 @@
                         <path d="M17 4h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h2a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2z" />
                     </svg>
                 </button>
-                <svg title="CherryJam" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-music" style="margin-left: 70px;">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M3 17a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
@@ -426,6 +421,9 @@
         </div>
     </div>
     <p id="userId" style="position: fixed; bottom: 5px; left: 5px; color: white; font-size: 0.7rem;">-</p>
+    <div id="drop-overlay">
+        <p>Suelta tus archivos aquí para subirlos a CherryBox</p>
+    </div>
     <div id="toast-container"></div>
     <script src="public/js/components/logger.js"></script>
     <script src="public/js/utils/formatBytes.js"></script>

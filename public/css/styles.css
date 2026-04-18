@@ -646,6 +646,18 @@ body {
     }
 }
 
+.upload-area-full {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+
 .upload-area.drag-over {
     border-color: #d2042d;
     background: #252525;
@@ -975,4 +987,98 @@ body {
 
 .hidden {
     display: none;
+}
+
+/* Drag & Drop Global Overlay */
+#drop-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+#drop-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+.drop-message {
+    text-align: center;
+    color: white;
+    background: rgba(30, 30, 30, 0.8);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+#drop-overlay.active .drop-message {
+    transform: translateY(0);
+}
+
+.drop-message p {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Global Drag & Drop Overlay */
+#drop-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    /* Negro opaco solicitado */
+    z-index: 10000;
+    /* Por encima de todo */
+    display: none;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    /* Dejar que pasen los eventos de drag si es necesario */
+}
+
+#drop-overlay.active {
+    display: flex;
+    pointer-events: auto;
+    /* Bloquear para recibir el drop */
+}
+
+.drop-message {
+    text-align: center;
+    color: white;
+}
+
+.drop-message svg {
+    margin-bottom: 20px;
+    color: #d2042d;
+}
+
+.drop-message p {
+    font-size: 1.5rem;
+    font-weight: 500;
 }

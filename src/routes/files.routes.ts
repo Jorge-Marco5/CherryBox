@@ -16,7 +16,16 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const MAX_FILES = process.env.MAX_FILES || 10;
+const MAX_FILES = (() => {
+    const val = process.env.MAX_FILES || '10';
+    try {
+        const sanitized = val.replace(/[^0-9*+\-/\s()]/g, '');
+        // eslint-disable-next-line no-new-func
+        return new Function(`return ${sanitized}`)() || 10;
+    } catch {
+        return 10;
+    }
+})();
 
 const router = Router();
 
