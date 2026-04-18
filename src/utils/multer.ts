@@ -10,7 +10,7 @@ dotenv.config();
 
 //Obtenemos el valor de la ruta de la carpeta donde se guardaran los archivos
 const BASE_DIR = getBaseDir();
-const MAX_FILE_SIZE = process.env.MAX_FILE_SIZE || 100 * 1024 * 1024;
+const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE) * 1024 * 1024;
 // Función para validar que la ruta esté dentro del directorio base
 export function isValidPath(requestedPath: string) {
   const normalizedBase = path.resolve(BASE_DIR);
