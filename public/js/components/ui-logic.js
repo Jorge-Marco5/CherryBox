@@ -74,7 +74,7 @@ const UILogic = {
                 previewContent.innerHTML = `<pre>${escapeHtml(data.content)}</pre>`;
             } else if (imageExts.includes(ext)) {
                 modal.classList.add('preview-image');
-                previewContent.innerHTML = `<img src="${contentUrl}" alt="${name}" loading="lazy">`;
+                previewContent.innerHTML = `<img src="${contentUrl}" alt="${name}" loading="lazy" draggable="false" ondragstart="return false;" oncontextmenu="return false;" onmousedown="return false;">`;
             } else if (videoExts.includes(ext)) {
                 modal.classList.add('preview-video');
                 previewContent.innerHTML = `<video controls preload="metadata"><source src="${contentUrl}" type="video/${ext}"></video>`;

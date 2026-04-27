@@ -423,7 +423,7 @@ body {
 
 @media (min-width: 768px) {
     .modal-header {
-        font-size: 20px;
+        font-size: 1rem;
     }
 }
 
@@ -505,19 +505,25 @@ body {
 
 @media (min-width: 768px) {
     .preview-content {
-        margin-top: 20px;
+        margin-top: 0px;
     }
 }
 
 .preview-content img {
     max-width: 100%;
     max-height: calc(95dvh - 200px);
-    /* Prevenir scroll vertical innecesario */
     width: auto;
     height: auto;
     border-radius: 8px;
     display: block;
     object-fit: contain;
+    /* Evitar que la imagen se pueda seleccionar o deslizar*/
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .preview-content video {
