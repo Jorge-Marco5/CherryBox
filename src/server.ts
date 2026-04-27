@@ -16,8 +16,9 @@ import permissionsRouter from './routes/permissions.routes';
 import { errorHandler } from "./middlewares/error.middleware";
 
 const app = express();
-const PORT = process.env.PORT || 7005;
-
+const PORT = process.env.PORT;
+const FRONTEND_URL = process.env.FRONTEND_URL;
+const NODE_ENV = process.env.NODE_ENV;
 app.use(cookieParser())
 
 // Configura esta ruta a la carpeta que deseas administrar
@@ -26,10 +27,17 @@ const BASE_DIR = getBaseDir();
 app.set('views', path.join(__dirname, 'views'));
 
 app.use('/public', express.static(path.join(__dirname, '../public')));
+//aplicar favicon para todas las paginas, en todas las rutas, incluida la API
+app.use((req, res, next) => {
+    if (req.url.startsWith('/api')) {
+        res.setHeader('favicon', '/favicon.ico');
+    }
+    next();
+});
 
 // Middleware
 app.use(cors({
-    origin: '*',
+    origin: NODE_ENV === 'development' ? '*' : FRONTEND_URL,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning']
 }));

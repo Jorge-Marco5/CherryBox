@@ -29,6 +29,10 @@ const MAX_FILES = (() => {
 
 const router = Router();
 
+router.get('/health', (req, res) => {
+    res.json({ service: 'CherryBox', version: '1.0.0', status: 'OK', timeStamp: new Date().toISOString() });
+});
+
 router.get('/files', requireAuth, listFiles);
 
 router.get('/search', requireAuth, searchFiles);

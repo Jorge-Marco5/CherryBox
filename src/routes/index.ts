@@ -2,6 +2,7 @@ import { Router } from "express";
 import { dashboard } from "../controllers/files.controller";
 import path from "path";
 import { requireAuthView, requireAdminView } from "../middlewares/auth.middleware";
+import { timeStamp } from "console";
 
 //vista dashboard
 const router = Router();
