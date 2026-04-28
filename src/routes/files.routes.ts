@@ -12,6 +12,8 @@ import { upload } from "../utils/multer";
 import { requireAuth } from "../middlewares/auth.middleware";
 
 import { uploadCleanupMiddleware } from "../middlewares/cleanup.middleware"
+import { checkStorageLimit } from "../middlewares/storage.middleware";
+
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -39,7 +41,7 @@ router.get('/search', requireAuth, searchFiles);
 
 router.post('/folder', requireAuth, createFolder);
 
-router.post('/upload', requireAuth, uploadCleanupMiddleware, upload.array('files', Number(MAX_FILES)), uploadFiles);
+router.post('/upload', requireAuth, checkStorageLimit, uploadCleanupMiddleware, upload.array('files', Number(MAX_FILES)), uploadFiles);
 
 router.put('/rename', requireAuth, renameFile);
 

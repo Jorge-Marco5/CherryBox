@@ -66,6 +66,9 @@ importers:
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
+      '@types/get-folder-size':
+        specifier: ^3.0.4
+        version: 3.0.4
       '@types/jsonwebtoken':
         specifier: ^9.0.10
         version: 9.0.10
@@ -326,6 +329,9 @@ packages:
 
   '@types/express@5.0.6':
     resolution: {integrity: sha512-sKYVuV7Sv9fbPIt/442koC7+IIwK5olP1KWeD88e/idgoJqDm3JV/YUiPwkoKK92ylff2MGxSz1CSjsXelx0YA==}
+
+  '@types/get-folder-size@3.0.4':
+    resolution: {integrity: sha512-tSf/k7Undx6jKRwpChR9tl+0ZPf0BVwkjBRtJ5qSnz6iWm2ZRYMAS2MktC2u7YaTAFHmxpL/LBxI85M7ioJCSg==}
 
   '@types/http-errors@2.0.5':
     resolution: {integrity: sha512-r8Tayk8HJnX0FztbZN7oVqGccWgw98T/0neJphO91KkmOzug1KkofZURD4UaD5uH8AqcFLfdPErnBod0u71/qg==}
@@ -2125,6 +2131,10 @@ snapshots:
       '@types/body-parser': 1.19.6
       '@types/express-serve-static-core': 5.1.0
       '@types/serve-static': 2.2.0
+
+  '@types/get-folder-size@3.0.4':
+    dependencies:
+      '@types/node': 25.0.3
 
   '@types/http-errors@2.0.5': {}
 

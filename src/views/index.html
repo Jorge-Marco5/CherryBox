@@ -36,9 +36,9 @@
         </div>
         <div class="card-storage">
             <div class="bar-storage-info">
-                <span id="storageLimit">-</span>
-                <span id="storageUsed">-</span>
-                <span id="storageAvailable">-</span>
+                <span id="storageLimit" title="Total">-</span>
+                <span id="storageUsed" title="Usado">-</span>
+                <span id="storageAvailable" title="Disponible">-</span>
             </div>
             <div class="bar-storage">
                 <div class="bar-storage-fill"></div>
@@ -122,7 +122,7 @@
                     <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
                 </svg>
             </button>
-            <button class="btn btn-secondary" title="Subir Archivo"
+            <button class="btn btn-secondary" id="btn-upload" title="Subir Archivo"
                 onclick="document.getElementById('fileInput').click()"><svg xmlns="http://www.w3.org/2000/svg"
                     width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round"

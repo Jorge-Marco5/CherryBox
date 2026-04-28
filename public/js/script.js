@@ -232,10 +232,30 @@ async function getStorage() {
         document.getElementById('storageAvailable').textContent = formatBytes(data.availableStorage);
 
         const barFill = document.querySelector('.bar-storage-fill');
+        const percentage = (data.usedStorage / data.totalStorage) * 100;
         if (barFill && data.totalStorage > 0) {
-            const percentage = (data.usedStorage / data.totalStorage) * 100;
             barFill.style.width = `${Math.min(percentage, 100)}%`;
             barFill.style.backgroundColor = percentage < 50 ? '#22c55e' : percentage < 80 ? '#f59e0b' : '#ef4444';
+        }
+        const warningText = document.getElementById('warning-text');
+        if (percentage >= 80) {
+            showToast('¡Atención! Has alcanzado el 80% de tu almacenamiento', 'warning');
+            warningText.style.display = 'block';
+            warningText.textContent = '¡Atención! Has alcanzado el 80% de tu almacenamiento';
+        }
+        if (percentage >= 90) {
+            warningText.style.display = 'block';
+            warningText.textContent = 'Has alcanzado el 90% de tu almacenamiento';
+            showToast('¡Atención! Has alcanzado el 90% de tu almacenamiento', 'error');
+        }
+        if (percentage >= 100) {
+            warningText.style.display = 'block';
+            warningText.textContent = 'Has alcanzado el límite de almacenamiento';
+            showToast('¡Atención! Has alcanzado el 100% de tu almacenamiento', 'error');
+            document.getElementById('btn-upload').style.display = 'none';
+        } else {
+            document.getElementById('btn-upload').style.display = 'inline-flex';
+            warningText.style.display = 'none';
         }
     } catch (error) {
         console.error('Error al obtener el límite de almacenamiento:', error);

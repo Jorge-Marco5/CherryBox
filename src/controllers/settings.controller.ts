@@ -8,27 +8,27 @@ import { prisma } from "../lib/prisma";
 import { ForbiddenError, ValidationError, AppError } from "../utils/errors";
 import { NextFunction } from "express";
 
-
 /**
  * Calcula de forma recursiva el tamaño total de un directorio en bytes.
  * 
  * @param dirPath Ruta absoluta del directorio a calcular
  * @returns Promesa con el tamaño total en bytes
  */
-const calculateDirSize = async (dirPath: string): Promise<number> => {
+export const calculateDirSize = async (dirPath: string): Promise<number> => {
     let size = 0;
     try {
         const files = await fs.readdir(dirPath, { withFileTypes: true });
 
-        await Promise.all(files.map(async (file) => {
-            const filePath = path.join(dirPath, file.name);
+        for (const file of files) {
+            const fullPath = path.join(dirPath, file.name);
             if (file.isDirectory()) {
-                size += await calculateDirSize(filePath);
+                size += await calculateDirSize(fullPath); // Recursión
             } else {
-                const stats = await fs.stat(filePath);
+                const stats = await fs.stat(fullPath);
                 size += stats.size;
             }
-        }));
+        }
+        return size
     } catch (error) {
         logger.error(`Error calculating size for ${dirPath}:`, error);
         // Continue despite errors in subdirectories/files to get partial size
@@ -60,6 +60,20 @@ export const getStorage = async (req: AuthRequest, res: Response, next: NextFunc
     }
 };
 
+export async function getStorageString() {
+    const storage = Number(getSetting("LIMIT_STORAGE"));
+    let baseDir = getBaseDir();
+
+    if (!storage || !baseDir) {
+        throw new AppError('No se encontró la configuración del almacenamiento');
+    }
+
+    const usedSize = await calculateDirSize(baseDir);
+    const availableSize = storage - usedSize;
+
+    return { totalStorage: storage, usedStorage: usedSize, availableStorage: availableSize };
+}
+
 /**
  * Actualiza una configuración global del sistema (ej. LIMIT_STORAGE).
  * Acción crítica que requiere registro de auditoría. Solo superadmin puede cambiar la configuración.
@@ -72,6 +86,16 @@ export const setSettings = async (req: AuthRequest, res: Response, next: NextFun
         const { setting, value } = req.body;
         if (!setting || value === undefined) {
             throw new ValidationError('Faltan parámetros (setting o value)');
+        }
+        if (setting === "LIMIT_STORAGE") {
+            const limitStorage = Number(value);
+            if (!limitStorage || limitStorage <= 0) {
+                throw new ValidationError('El límite de almacenamiento debe ser un número mayor a 0');
+            }
+            const usedSize = await calculateDirSize(getBaseDir());
+            if (limitStorage * 1024 * 1024 * 1024 < usedSize) {
+                throw new ValidationError('El límite de almacenamiento debe ser mayor o igual al tamaño actual de los archivos');
+            }
         }
         await setSetting(setting, value);
 
