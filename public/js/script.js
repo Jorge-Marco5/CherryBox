@@ -28,6 +28,7 @@ async function loadFiles(path = '') {
         } else {
             document.getElementById('btn-music-player').style.display = 'none';
         }
+        getStorage();
         Renderers.renderFiles(data.files);
         updateFolderPermissionButton();
     } catch (error) {
