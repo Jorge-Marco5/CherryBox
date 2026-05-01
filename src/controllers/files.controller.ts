@@ -13,6 +13,7 @@ import {
   registerUploadedFilesService,
   verifyDownloadMultipleService
 } from "../services/files.service";
+import { syncFiles } from "../services/sync-files.service";
 import { isValidPath } from "../utils/multer";
 import { getBaseDir } from "../utils/settings";
 import { ValidationError } from "../utils/errors";
@@ -254,6 +255,21 @@ export const downloadMultipleFiles = async (req: AuthRequest, res: Response, nex
     logger.info(`[AUDIT] Usuario ${req.user?.id} DESCARGÓ ${paths.length} archivos en ZIP`);
     await archive.finalize();
 
+  } catch (error: any) {
+    next(error);
+  }
+}
+
+/**
+ * Inicia manualmente la sincronización de archivos.
+ * @param req Petición vacía
+ * @param res Mensaje de confirmación
+ */
+export const manualSync = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    logger.info(`[AUDIT] Usuario ${req.user?.id} inició sincronización manual`);
+    await syncFiles();
+    res.json({ success: true, message: 'Sincronización completada exitosamente' });
   } catch (error: any) {
     next(error);
   }

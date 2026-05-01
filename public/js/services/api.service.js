@@ -75,6 +75,15 @@ const FileService = {
         return await axios.post(`${API_URL}/download-multiple`, { paths }, {
             responseType: 'blob'
         });
+    },
+
+    /**
+     * Sincroniza los archivos.
+     */
+    async sync() {
+        return await axios.post(`${API_URL}/sync`, {}, {
+            withCredentials: true
+        });
     }
 };
 

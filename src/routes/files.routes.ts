@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { manualSync } from "../controllers/files.controller";
 import { listFiles } from "../controllers/files.controller";
 import { searchFiles } from "../controllers/files.controller";
 import { createFolder } from "../controllers/files.controller";
@@ -9,7 +10,7 @@ import { getFileContent } from "../controllers/files.controller";
 import { downloadFile } from "../controllers/files.controller";
 import { downloadMultipleFiles } from "../controllers/files.controller";
 import { upload } from "../utils/multer";
-import { requireAuth } from "../middlewares/auth.middleware";
+import { requireAuth, requireSuperAdmin } from "../middlewares/auth.middleware";
 
 import { uploadCleanupMiddleware } from "../middlewares/cleanup.middleware"
 import { checkStorageLimit } from "../middlewares/storage.middleware";
@@ -53,6 +54,6 @@ router.get('/download', requireAuth, downloadFile);
 
 router.post('/download-multiple', requireAuth, downloadMultipleFiles);
 
-
+router.post('/sync', requireAuth, requireSuperAdmin, manualSync);
 
 export default router;

@@ -25,7 +25,7 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
     const token = req.cookies?.token
 
     if (!token) throw new UnauthorizedError("No autenticado");
-    
+
     try {
         const decoded = verifyToken(token) as { id: string, username: string }
 

@@ -1,14 +1,15 @@
-import { prisma } from "./src/lib/prisma";
+import { prisma } from "../lib/prisma";
 import fs from "fs/promises";
 import path from "path";
-import { getBaseDir } from "./src/utils/settings";
+import { getBaseDir } from "../utils/settings";
+import { logger } from "../utils/logger";
 
 const BASE_DIR = getBaseDir();
 
-async function sync() {
+export async function syncFiles() {
     const superadmin = await prisma.user.findFirst({ where: { role: "SUPERADMIN" } });
     if (!superadmin) {
-        console.error("No se encontró un SUPERADMIN para asignar la propiedad inicial.");
+        logger.error("[SyncFiles] No se encontró un SUPERADMIN para asignar la propiedad inicial.");
         return;
     }
 
@@ -44,11 +45,7 @@ async function sync() {
         }
     };
 
-    console.log("Iniciando sincronización de archivos...");
+    logger.debug("[SyncFiles] Iniciando sincronización de archivos...");
     await scan("");
-    console.log("Sincronización completada exitosamente.");
+    logger.debug("[SyncFiles] Sincronización completada exitosamente.");
 }
-
-sync()
-    .catch(err => console.error(err))
-    .finally(() => prisma.$disconnect());

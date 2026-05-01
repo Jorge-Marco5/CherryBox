@@ -75,12 +75,21 @@ document.addEventListener("DOMContentLoaded", () => {
 async function syncFiles() {
     const btn = document.getElementById("btn-sync");
     const originalContent = btn.innerHTML;
+    if (!confirm("Se sincronizaran todos los archivos en la BD, reseteo de permisos y etiquetas, no puedes deshacer esta accion!, ¿Continuar?")) return;
     try {
         btn.disabled = true;
         btn.innerHTML = '<span class="loader"></span> Sincronizando...';
-        const response = await axios.post("/api/syncFiles");
-        showToast(response.data.message, 'success');
+        const response = await fetch("/api/sync", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            credentials: "include"
+        });
+        const data = await response.json();
+        showToast(data.message, 'success');
     } catch (error) {
+        console.log(error);
         showToast(error.response?.data?.error || "Error en la sincronización", 'error');
     } finally {
         btn.disabled = false;

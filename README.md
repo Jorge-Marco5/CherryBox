@@ -74,6 +74,14 @@ pnpm build
 pnpm start
 ```
 
+### 5. Usuario SuperAdmin
+
+El usuario superadmin lo puedes definir en [prisma/seed.ts](prisma/seed.ts). Una vez creado el usuario puedes iniciar sesion en CherryBox y crear nuevos usuarios desde la interfaz. La cuenta superadmin tiene el control total del sistema, por lo que se recomienda tener solo una de ellas y usar el resto de cuentas para administracion o acceso a los archivos.
+
+### 6. Escaneo de archivos
+Si defines una carpeta fija con archivos y la usas como BASE_DIR
+puedes escanear la carpeta para cargar los archivos a la base de datos automaticamnente en la seccion *configuración > sincronizar archivos*.
+
 ---
 
 ## 🛠️ Stack Tecnológico
