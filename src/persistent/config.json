@@ -1,5 +1,6 @@
 {
   "BASE_DIR": "/home/jorgemarcos/Documentos/archivos",
   "LIMIT_STORAGE": 10737418240,
-  "SFTP_BASE_DIR": "/datos"
+  "CONNECTION_USED": "sftp",
+  "SFTP_BASE_DIR": "/"
 }
