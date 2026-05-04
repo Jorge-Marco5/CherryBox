@@ -13,3 +13,4 @@ logs
 generated
 *.sh
 docs
+cherrybox.conf

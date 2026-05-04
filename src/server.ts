@@ -48,7 +48,7 @@ Promise.all([
     fs.mkdir(BASE_DIR, { recursive: true })
 ]).then(() => {
     // Rutas
-    app.use('/', indexRouter);
+    NODE_ENV === 'development' ? app.use('/', indexRouter) : null;
     app.use('/api', filesRouter);
     app.use('/api', settingsRouter);
     app.use('/api', usersRouter);

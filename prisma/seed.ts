@@ -12,6 +12,7 @@ type UserSchema = {
     role: Role;
 }
 
+//Reemplaza estos datos con tu correo, contraseña, por defecto sera superadmin
 const user: UserSchema = {
     email: "email@example.com",
     password: "password1234",
