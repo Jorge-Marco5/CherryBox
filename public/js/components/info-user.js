@@ -10,7 +10,6 @@ if (userIdBtn && user) {
     userIdBtn.addEventListener('mouseleave', () => userIdBtn.style.color = 'white');
 
     userIdBtn.addEventListener('click', () => {
-        // Eliminar modal previo si existe
         const existingModal = document.querySelector('.info-user-modal');
         if (existingModal) existingModal.remove();
 
