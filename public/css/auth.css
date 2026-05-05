@@ -157,6 +157,29 @@ body {
     box-shadow: 0 0 0 3px rgba(210, 4, 45, 0.1);
 }
 
+.input-group {
+    display: flex;
+    align-items: center;
+    border: none;
+    background: transparent;
+}
+
+.toggle-password {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.toggle-password .icon {
+    stroke: var(--text-muted);
+    transition: stroke 0.3s ease;
+}
+
+.toggle-password:hover .icon {
+    stroke: var(--primary);
+}
+
 .btn {
     width: 100%;
     padding: 14px;
@@ -201,4 +224,10 @@ body {
 
 .auth-footer a:hover {
     text-decoration: underline;
+}
+
+.error-border {
+    border: 2px solid var(--primary);
+    background: #2a2a2a;
+    box-shadow: 0 0 0 3px rgba(210, 4, 45, 0.781);
 }
