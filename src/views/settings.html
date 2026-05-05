@@ -117,7 +117,15 @@
                             <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
                         </svg>Configuración general
                     </div>
-                    <p class="message-alert">Cambiar las configuraciones del sistema puede interrumpir algunas
+                    <p class="message-alert" style="display: flex; align-items: center; gap: 5px;"> <svg
+                            xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+                            <path d="M12 9h.01" />
+                            <path d="M11 12h1v4h1" />
+                        </svg> Cambiar las configuraciones del sistema puede interrumpir algunas
                         operaciones y el servicio momentaneamente, proceda con precaucion
                     </p>
                     <div class="form-group">
@@ -149,7 +157,16 @@
                                 style="color: #ffffff;">GB</span>
                         </div>
                     </div>
-                    <button type="submit" id="btn-save" class="btn btn-primary">Guardar</button>
+                    <button type="submit" id="btn-save" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                            <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                            <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                            <path d="M14 4l0 4l-6 0l0 -4" />
+                        </svg>
+                        Guardar</button>
                 </form>
                 <hr>
                 <div class="form-group">
@@ -162,7 +179,7 @@
                         Todos los archivos seran propiedad del usuario <strong>superadmin</strong>
                     </p>
                     <button class="btn btn-primary" id="btn-sync" onclick="syncFiles()"><svg
-                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                             class="icon icon-tabler icons-tabler-outline icon-tabler-refresh-alert">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -186,7 +203,7 @@
                     <p id="last-scan">Ultimo escaneo: <strong>No realizado</strong></p>
                     </p>
                     <button class="btn btn-primary" id="btn-analyze" onclick="analyzeFiles()">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                             class="icon icon-tabler icons-tabler-outline icon-tabler-virus">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />

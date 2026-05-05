@@ -315,7 +315,7 @@ pre#logs {
     background-color: #1c1c1c;
     border: 1px solid #333;
     border-top: 4px solid var(--primary);
-    padding: 0;
+    padding: 20px;
     border-radius: 12px;
     width: 90%;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
@@ -335,7 +335,6 @@ pre#logs {
 }
 
 .modal-header {
-    padding: 16px 20px;
     border-bottom: 1px solid #333;
     display: flex;
     justify-content: space-between;
@@ -361,10 +360,6 @@ pre#logs {
 }
 
 .modal-body {
-    padding: 20px;
-}
-
-form {
     padding: 20px;
 }
 
