@@ -40,7 +40,6 @@ const Renderers = {
                 </div>
             `;
             this.updateSelectionButtons();
-            UILogic.setupDragAndDrop();
             return;
         }
         const isMobile = window.innerWidth < 768;

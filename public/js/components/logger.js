@@ -37,7 +37,7 @@ if (user) {
 axios.interceptors.response.use(
     response => {
         // Mostrar toast de éxito si la respuesta tiene un mensaje y no es un GET
-        if (response.data && response.data.message && response.config.method !== 'get') {
+        if (response.data && response.data.message && response.config.method !== 'get' && !response.config.silent) {
             showToast(response.data.message, 'success');
         }
         return response;

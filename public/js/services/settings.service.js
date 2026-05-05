@@ -53,19 +53,20 @@ document.addEventListener("DOMContentLoaded", () => {
     generalSettings.addEventListener("submit", async (e) => {
         e.preventDefault();
         try {
+
             // Guardar Límite de Almacenamiento
             await axios.post("/api/setSettings", {
                 setting: "LIMIT_STORAGE",
                 value: limitStorage.value
-            });
+            }, { silent: true });
 
             // Guardar Directorio Base
             await axios.post("/api/setSettings", {
                 setting: "BASE_DIR",
                 value: baseDir.value
-            });
-
-            showToast("Configuración guardada exitosamente", 'success');
+            }, { silent: true });
+            //mostramos solo una notificaacio
+            showToast("Configuración guardada exitosamente", 'info');
         } catch (error) {
             showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
         }
@@ -79,15 +80,8 @@ async function syncFiles() {
     try {
         btn.disabled = true;
         btn.innerHTML = '<span class="loader"></span> Sincronizando...';
-        const response = await fetch("/api/sync", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            credentials: "include"
-        });
-        const data = await response.json();
-        showToast(data.message, 'success');
+        const response = await axios.post("/api/sync", {}, { silent: true });
+        showToast(response.data.message, 'success');
     } catch (error) {
         console.log(error);
         showToast(error.response?.data?.error || "Error en la sincronización", 'error');
@@ -103,8 +97,8 @@ async function analyzeFiles() {
     try {
         btn.disabled = true;
         btn.innerHTML = '<span class="loader"></span> Analizando...';
-        const response = await axios.post("/api/analyzeFiles");
-        showToast(response.data.message, 'success');
+        const response = await axios.post("/api/analyzeFiles", {}, { silent: true });
+        showToast(response.data.message, 'info');
     } catch (error) {
         showToast(error.response?.data?.error || "Error en el análisis", 'error');
     } finally {

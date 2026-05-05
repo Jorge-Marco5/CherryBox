@@ -97,6 +97,9 @@ const UILogic = {
      * Configura el manejo de archivos arrastrados.
      */
     setupDragAndDrop() {
+        if (this._dragAndDropSetup) return;
+        this._dragAndDropSetup = true;
+
         const dropOverlay = document.getElementById('drop-overlay');
         let dragCounter = 0;
 
@@ -141,15 +144,7 @@ const UILogic = {
                 }
             }
         });
-
-        // Soporte para clics en la zona estática de subida
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('#uploadArea')) {
-                document.getElementById('fileInput')?.click();
-            }
-        });
     },
-
     async readyPlayerMusic() {
         const musicFiles = await getMusicFiles(currentPath);
         MusicPlayer.setPlaylist(musicFiles);

@@ -34,7 +34,7 @@ if (registerForm) {
         }
 
         try {
-            const res = await axios.post('/api/auth/register', { email, password });
+            const res = await axios.post('/api/auth/register', { email, password }, { silent: true });
             showToast(res.data.message || 'Usuario registrado exitosamente', 'success');
             registerForm.reset();
         } catch (error) {
