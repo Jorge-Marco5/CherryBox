@@ -1,6 +1,11 @@
 @import url('header.css');
 @import url('toast.css');
 
+@font-face {
+    font-family: "Geist";
+    src: url(../fonts/Geist-Regular.ttf) format("truetype");
+}
+
 :root {
     --primary: #d2042d;
     --primary-dark: #800020;
@@ -11,7 +16,8 @@
     --border: #333333;
     --input-bg: #252525;
     --glass: rgba(26, 26, 26, 0.8);
-}
+    --font: "Geist", sans-serif;
+}   
 
 * {
     margin: 0;
@@ -20,7 +26,7 @@
 }
 
 body {
-    font-family: "Geist", sans-serif;
+    font-family: var(--font);
     background: var(--bg-dark);
     background-image:
         radial-gradient(at 0% 0%, rgba(210, 4, 45, 0.15) 0px, transparent 50%),
