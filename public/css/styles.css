@@ -1142,6 +1142,7 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .audio-preview-container {
     width: 100%;
+    min-width: 350px;
     margin: -15px auto;
     border-radius: 33px;
     overflow: hidden;
@@ -1156,7 +1157,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .video-preview-container video-skin {
-        display: block;
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;

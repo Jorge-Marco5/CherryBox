@@ -61,7 +61,7 @@ const PREVIEW_STRATEGIES = [
         </div>
       `;
       } else {
-        container.innerHTML = `<video controls preload="metadata"><source src="${contentUrl}" type="video/${ext}"></video>`;
+        container.innerHTML = `<video controls preload="metadata" controlsList="nodownload"><source src="${contentUrl}" type="video/${ext}"></video>`;
       }
     },
   },
@@ -73,19 +73,7 @@ const PREVIEW_STRATEGIES = [
       return "preview-audio";
     },
     async render(path, name, ext, contentUrl, container) {
-      if (navigator.onLine) {
-        container.innerHTML = `<div class="audio-preview-container">
-          <audio-player>
-            <audio-skin>
-              <audio src="${contentUrl}">
-                <source src="${contentUrl}" type="audio/${ext}">
-              </audio>
-            </audio-skin>
-          </audio-player>
-        </div>`;
-      } else {
-        container.innerHTML = `<audio controls preload="metadata"><source src="${contentUrl}" type="audio/${ext}"></audio>`;
-      }
+      container.innerHTML = `<audio controls preload="metadata" controlsList="nodownload"><source src="${contentUrl}" type="audio/${ext}"></audio>`;
     },
   },
   {
