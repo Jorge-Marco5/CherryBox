@@ -1,6 +1,117 @@
 /**
  * Lógica de interfaz de usuario, modales y previsualización.
  */
+// Estrategias de previsualización para el patrón Strategy
+const PREVIEW_STRATEGIES = [
+  {
+    accepts(ext) {
+      return codeExts.includes(ext);
+    },
+    getModalClass() {
+      return "preview-code";
+    },
+    async render(path, name, ext, contentUrl, container) {
+      const response = await FileService.getFileContent(path);
+      const data = await response.json();
+      container.innerHTML = `<pre>${escapeHtml(data.content)}</pre>`;
+    },
+  },
+  {
+    accepts(ext) {
+      return textExts.includes(ext);
+    },
+    getModalClass() {
+      return "preview-text";
+    },
+    async render(path, name, ext, contentUrl, container) {
+      const response = await FileService.getFileContent(path);
+      const data = await response.json();
+      container.innerHTML = `<pre class="text-content">${escapeHtml(data.content)}</pre>`;
+    },
+  },
+  {
+    accepts(ext) {
+      return imageExts.includes(ext);
+    },
+    getModalClass() {
+      return "preview-image";
+    },
+    async render(path, name, ext, contentUrl, container) {
+      container.innerHTML = `<img src="${contentUrl}" alt="${name}" loading="lazy" draggable="false" ondragstart="return false;" oncontextmenu="return false;" onmousedown="return false;">`;
+    },
+  },
+  {
+    accepts(ext) {
+      return videoExts.includes(ext);
+    },
+    getModalClass() {
+      return "preview-video";
+    },
+    async render(path, name, ext, contentUrl, container) {
+      if (navigator.onLine) {
+        container.innerHTML = `
+        <div class="video-preview-container">
+          <video-player>
+            <video-skin>
+              <video slot="media" preload="metadata" playsinline>
+                <source src="${contentUrl}" type="video/${ext}">
+              </video>
+            </video-skin>
+          </video-player>
+        </div>
+      `;
+      } else {
+        container.innerHTML = `<video controls preload="metadata"><source src="${contentUrl}" type="video/${ext}"></video>`;
+      }
+    },
+  },
+  {
+    accepts(ext) {
+      return audioExts.includes(ext);
+    },
+    getModalClass() {
+      return "preview-audio";
+    },
+    async render(path, name, ext, contentUrl, container) {
+      if (navigator.onLine) {
+        container.innerHTML = `<div class="audio-preview-container">
+          <audio-player>
+            <audio-skin>
+              <audio src="${contentUrl}">
+                <source src="${contentUrl}" type="audio/${ext}">
+              </audio>
+            </audio-skin>
+          </audio-player>
+        </div>`;
+      } else {
+        container.innerHTML = `<audio controls preload="metadata"><source src="${contentUrl}" type="audio/${ext}"></audio>`;
+      }
+    },
+  },
+  {
+    accepts(ext) {
+      return pdfExts.includes(ext);
+    },
+    getModalClass() {
+      return "preview-pdf";
+    },
+    async render(path, name, ext, contentUrl, container) {
+      container.innerHTML = `<iframe src="${contentUrl}" type="application/pdf" class="pdfViewer"></iframe>`;
+    },
+  },
+  {
+    accepts() {
+      return true;
+    }, // Estrategia por defecto (fallback)
+    getModalClass() {
+      return "";
+    },
+    async render(path, name, ext, contentUrl, container) {
+      container.innerHTML = "<p>Vista previa no disponible para este tipo de archivo. Puedes descargarlo.</p>";
+    },
+  },
+];
+
 const UILogic = {
   /**
    * Muestra el modal de renombrado.
@@ -32,8 +143,17 @@ const UILogic = {
     modal.classList.remove("active");
 
     if (modalId === "previewModal") {
-      modal.classList.remove("preview-pdf", "preview-image", "preview-text", "preview-video", "preview-audio");
+      modal.classList.remove(
+        "preview-pdf",
+        "preview-image",
+        "preview-text",
+        "preview-video",
+        "preview-audio",
+        "preview-code",
+      );
       pauseMedia();
+      const previewContent = document.getElementById("previewContent");
+      if (previewContent) previewContent.innerHTML = "";
     }
 
     if (modalId === "musicPlayerModal") {
@@ -60,37 +180,27 @@ const UILogic = {
     previewTitle.innerHTML = getFileIcon(ext) + " " + escapeHTML(name);
     previewContent.innerHTML = "<p>Cargando...</p>";
 
-    modal.classList.remove("preview-pdf", "preview-image", "preview-text", "preview-video", "preview-audio");
+    modal.classList.remove(
+      "preview-pdf",
+      "preview-image",
+      "preview-text",
+      "preview-video",
+      "preview-audio",
+      "preview-code",
+    );
     modal.classList.add("active");
     modal.scrollTop = 0;
 
     try {
       const contentUrl = `${API_URL}/file-content?path=${encodeURIComponent(path)}`;
 
-      if (codeExts.includes(ext)) {
-        modal.classList.add("preview-code");
-        const response = await FileService.getFileContent(path);
-        const data = await response.json();
-        previewContent.innerHTML = `<pre>${escapeHtml(data.content)}</pre>`;
-      } else if (textExts.includes(ext)) {
-        modal.classList.add("preview-text");
-        const response = await FileService.getFileContent(path);
-        const data = await response.json();
-        previewContent.innerHTML = `<pre class="text-content">${escapeHtml(data.content)}</pre>`;
-      } else if (imageExts.includes(ext)) {
-        modal.classList.add("preview-image");
-        previewContent.innerHTML = `<img src="${contentUrl}" alt="${name}" loading="lazy" draggable="false" ondragstart="return false;" oncontextmenu="return false;" onmousedown="return false;">`;
-      } else if (videoExts.includes(ext)) {
-        modal.classList.add("preview-video");
-        previewContent.innerHTML = `<video controls preload="metadata"><source src="${contentUrl}" type="video/${ext}"></video>`;
-      } else if (audioExts.includes(ext)) {
-        modal.classList.add("preview-audio");
-        previewContent.innerHTML = `<audio controls preload="metadata"><source src="${contentUrl}" type="audio/${ext}"></audio>`;
-      } else if (pdfExts.includes(ext)) {
-        modal.classList.add("preview-pdf");
-        previewContent.innerHTML = `<iframe src="${contentUrl}" type="application/pdf" class="pdfViewer"></iframe>`;
-      } else {
-        previewContent.innerHTML = "<p>Vista previa no disponible para este tipo de archivo. Puedes descargarlo.</p>";
+      const strategy = PREVIEW_STRATEGIES.find((s) => s.accepts(ext));
+      if (strategy) {
+        const modalClass = strategy.getModalClass();
+        if (modalClass) {
+          modal.classList.add(modalClass);
+        }
+        await strategy.render(path, name, ext, contentUrl, previewContent);
       }
     } catch (error) {
       console.error("Error al cargar vista previa:", error);
@@ -150,6 +260,7 @@ const UILogic = {
       }
     });
   },
+
   async readyPlayerMusic() {
     const musicFiles = await getMusicFiles(currentPath);
     MusicPlayer.setPlaylist(musicFiles);
@@ -182,3 +293,4 @@ window.closeModal = UILogic.closeModal;
 window.previewFile = UILogic.previewFile;
 window.setupDragAndDrop = UILogic.setupDragAndDrop;
 window.readyPlayerMusic = UILogic.readyPlayerMusic;
+window.handlerRenderVideo = UILogic.handlerRenderVideo;

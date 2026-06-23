@@ -5,6 +5,7 @@ yarn.lock
 
 /generated/prisma
 /public/js/lib/highlight
+/archivos
 /ideas
 dist
 build
