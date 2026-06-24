@@ -20,18 +20,19 @@ model User {
 }
 
 model File {
-  id          String           @id @default(uuid())
-  name        String
-  path        String           @unique
-  type        FileType
-  ownerId     String?
-  parentId    String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
-  owner       User?            @relation("OwnerRelation", fields: [ownerId], references: [id])
-  parent      File?            @relation("FolderHierarchy", fields: [parentId], references: [id])
-  children    File[]           @relation("FolderHierarchy")
-  permissions FilePermission[]
+  id           String           @id @default(uuid())
+  name         String
+  path         String           @unique
+  type         FileType
+  ownerId      String?
+  parentId     String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  folder_color String           @default("#FFE36C") @db.VarChar(50)
+  owner        User?            @relation("OwnerRelation", fields: [ownerId], references: [id])
+  parent       File?            @relation("FolderHierarchy", fields: [parentId], references: [id])
+  children     File[]           @relation("FolderHierarchy")
+  permissions  FilePermission[]
 }
 
 model FilePermission {

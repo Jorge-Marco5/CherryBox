@@ -166,9 +166,14 @@ const UILogic = {
    * @param {string} path - Ruta del archivo.
    * @param {string} currentName - Nombre actual.
    */
-  showRenameModal(path, currentName) {
+  showRenameModal(type, path, currentName, currentColor) {
     currentRenameItem = path;
     const input = document.getElementById("renameInput");
+    const colorFolderCustom = document.getElementById("colorFolderCustom");
+    if (type === "file") colorFolderCustom.style.display = "none";
+    else colorFolderCustom.style.display = "flex";
+    const colorInput = document.getElementById("renameColorInput");
+    colorInput.value = currentColor;
     if (input) input.value = currentName;
     document.getElementById("renameModal")?.classList.add("active");
   },

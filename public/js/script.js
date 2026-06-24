@@ -74,13 +74,15 @@ function refreshpath() {
  */
 async function createFolder() {
   const name = document.getElementById("folderNameInput").value.trim();
+  const color = document.getElementById("folderColorInput").value;
+
   if (!name) {
     showToast("Por favor ingresa un nombre", "warning");
     return;
   }
 
   try {
-    const response = await FileService.createFolder(currentPath, name);
+    const response = await FileService.createFolder(currentPath, name, color);
     if (response.data.success) {
       UILogic.closeModal("createFolderModal");
       document.getElementById("folderNameInput").value = "";
@@ -98,13 +100,15 @@ async function createFolder() {
  */
 async function confirmRename() {
   const newName = document.getElementById("renameInput").value.trim();
+  const newColor = document.getElementById("renameColorInput").value;
+
   if (!newName) {
     showToast("Por favor ingresa un nombre", "warning");
     return;
   }
 
   try {
-    await FileService.rename(currentRenameItem, newName);
+    await FileService.rename(currentRenameItem, newName, newColor);
     UILogic.closeModal("renameModal");
     loadFiles(currentPath);
   } catch (error) {

@@ -145,12 +145,13 @@ export const listItemsService = async (relativePath: string, userId: string, use
       try {
         const [stats, dbFile] = await Promise.all([
           fs.stat(path.join(fullPath, item.name)),
-          prisma.file.findUnique({ where: { path: relItemPath }, select: { id: true } }),
+          prisma.file.findUnique({ where: { path: relItemPath }, select: { id: true, folder_color: true } }),
         ]);
 
         return {
           id: dbFile?.id,
           name: item.name,
+          folder_color: dbFile?.folder_color,
           type: item.isDirectory() ? "folder" : "file",
           size: stats.size,
           modified: stats.mtime,
@@ -222,7 +223,13 @@ export const searchItemsService = async (query: string, userId: string, userRole
   return results;
 };
 
-export const createFolderService = async (relativePath: string, name: string, userId: string, userRole: string) => {
+export const createFolderService = async (
+  relativePath: string,
+  name: string,
+  folder_color: string,
+  userId: string,
+  userRole: string,
+) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
 
   // Necesita WRITE en la carpeta padre
@@ -232,11 +239,17 @@ export const createFolderService = async (relativePath: string, name: string, us
   const fullPath = path.join(BASE_DIR, newRelPath);
   await fs.mkdir(fullPath, { recursive: true });
 
-  await syncFileInDb(newRelPath, "CREATE", { type: "FOLDER", ownerId: userId });
+  await syncFileInDb(newRelPath, "CREATE", { type: "FOLDER", ownerId: userId, folder_color: folder_color });
   return { success: true, message: "Carpeta creada" };
 };
 
-export const renameItemService = async (oldPath: string, newName: string, userId: string, userRole: string) => {
+export const renameItemService = async (
+  oldPath: string,
+  newName: string,
+  folderColor: string,
+  userId: string,
+  userRole: string,
+) => {
   if (!isValidPath(oldPath)) throw new ValidationError("Ruta no válida");
 
   // Necesita WRITE en el ítem actual
@@ -254,6 +267,7 @@ export const renameItemService = async (oldPath: string, newName: string, userId
   await syncFileInDb(newRelPath, "CREATE", {
     type: oldFile?.type || "FILE",
     ownerId: oldFile?.ownerId || userId,
+    folder_color: folderColor,
   });
 
   return { success: true, message: "Renombrado exitosamente" };

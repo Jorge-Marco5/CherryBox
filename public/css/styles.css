@@ -474,6 +474,31 @@ body {
     appearance: none;
 }
 
+.form-group input[type="color"] {
+  -webkit-appearance: none;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px; /* Lo vuelve un círculo */
+  cursor: pointer;
+}
+
+/* Quita el borde interior en WebKit (Chrome/Safari) */
+.form-group input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.form-group input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+/* Quita el borde interior en Firefox */
+.form-group input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+
 @media (min-width: 768px) {
     .form-group input {
         font-size: 14px;

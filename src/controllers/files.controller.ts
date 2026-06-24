@@ -89,10 +89,10 @@ export const searchFiles = async (req: AuthRequest, res: Response, next: NextFun
  */
 export const createFolder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { path: relativePath, name } = req.body;
+    const { path: relativePath, name, folderColor } = req.body;
     if (!name) throw new ValidationError("El nombre de la carpeta es requerido");
 
-    const result = await createFolderService(relativePath, name, req.user!.id, req.user!.role);
+    const result = await createFolderService(relativePath, name, folderColor, req.user!.id, req.user!.role);
     logger.info(`[AUDIT] Usuario ${req.user?.id} creó la carpeta: ${path.join(relativePath, name)}`);
     res.json(result);
   } catch (error: any) {
@@ -137,11 +137,11 @@ export const uploadFiles = async (req: AuthRequest, res: Response, next: NextFun
  */
 export const renameFile = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { oldPath, newName } = req.body;
+    const { oldPath, newName, newFolderColor } = req.body;
     if (!oldPath || !newName) {
       throw new ValidationError("Faltan parámetros (oldPath o newName)");
     }
-    const result = await renameItemService(oldPath, newName, req.user!.id, req.user!.role);
+    const result = await renameItemService(oldPath, newName, newFolderColor, req.user!.id, req.user!.role);
     logger.info(`[AUDIT] Usuario ${req.user?.id} renombró: ${oldPath} -> ${newName}`);
     res.json(result);
   } catch (error: any) {
