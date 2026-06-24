@@ -408,7 +408,7 @@ body {
     /* Forzar ancho para PDFs y texto en desktop */
     .modal.preview-pdf .modal-content.preview-modal,
     .modal.preview-text .modal-content.preview-modal {
-        width: 85vw;
+        width: 95vw;
     }
 
     /* Ajustar ancho para videos en desktop si son muy grandes */
@@ -419,31 +419,37 @@ body {
 }
 
 .modal-header {
+    width: 100%;
+    height: auto;
     display: flex;
+    flex-direction: row;
     justify-content: start;
     gap: 10px;
     align-items: center;
     font-size: 18px;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     position: sticky;
     top: 0;
     background: #1E1E1E;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #333;
+    overflow: hidden;
+    padding-bottom: 5px;
     z-index: 1;
+}
+
+.modal-header svg{
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-header svg:hover {
+    transform: translateY(-1px);
 }
 
 @media (min-width: 768px) {
     .modal-header {
         font-size: 1rem;
     }
-}
-
-.pdfViewer {
-    width: 100%;
-    flex: 1;
-    min-height: 70dvh;
 }
 
 .form-group {
@@ -485,13 +491,12 @@ body {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
-    margin-top: 20px;
+    margin-top: 15px;
     flex-wrap: wrap;
     position: sticky;
     bottom: 0;
     background: #1E1E1E;
-    padding-top: 15px;
-    border-top: 1px solid #333;
+    padding-top: 5px;
 }
 
 .acction-text {
@@ -1123,13 +1128,12 @@ input[type="search"]::-webkit-search-cancel-button {
     width: 100%;
     max-width: 800px;
     aspect-ratio: 16 / 9;
-    margin: -15px auto;
+    margin: -10px auto;
     border-radius: 33px;
     overflow: hidden;
     background-image:
         radial-gradient(at 0% 0%, rgba(210, 4, 45, 0.15) 0px, transparent 50%),
         radial-gradient(at 100% 100%, rgba(128, 0, 32, 0.1) 0px, transparent 50%);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .video-preview-container video {
@@ -1138,22 +1142,6 @@ input[type="search"]::-webkit-search-cancel-button {
     height: 100%;
     object-fit: contain;
     object-position: center;
-}
-
-.audio-preview-container {
-    width: 100%;
-    min-width: 350px;
-    margin: -15px auto;
-    border-radius: 33px;
-    overflow: hidden;
-    background-image:
-        radial-gradient(at 0% 0%, rgba(210, 4, 45, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(128, 0, 32, 0.1) 0px, transparent 50%);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-.audio-preview-container audio{
-    display: none;
 }
 
 .video-preview-container video-skin {
@@ -1168,4 +1156,56 @@ input[type="search"]::-webkit-search-cancel-button {
     .video-preview-container {
         height: 110%;
     }
+}
+
+/* Modal Header Long Filename Truncation */
+.modal-header svg {
+    flex-shrink: 0;
+}
+
+.modal-title-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+}
+
+/* Mobile PDF Custom Horizontal Scroller */
+.pdf-horizontal-scroller {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 20px;
+    padding: 10px;
+    width: 100%;
+    height: 70dvh;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    align-items: center;
+    background: #121212;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.pdf-page-canvas {
+    scroll-snap-align: center;
+    max-height: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    background: white;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.pdf-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 70dvh;
+    color: #999;
+    font-size: 14px;
+    background: #121212;
+    border-radius: 8px;
 }
