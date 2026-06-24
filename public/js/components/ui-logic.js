@@ -81,7 +81,10 @@ const PREVIEW_STRATEGIES = [
     },
     async render(path, name, ext, contentUrl, container) {
       if (navigator.onLine) {
-        container.innerHTML = `
+        const device = getTypeDevice();
+        const isMobile = device === "movil";
+        if (!isMobile) {
+          container.innerHTML = `
         <div class="video-preview-container">
           <video-player>
             <video-skin>
@@ -92,6 +95,9 @@ const PREVIEW_STRATEGIES = [
           </video-player>
         </div>
       `;
+        } else {
+          container.innerHTML = `<video controls preload="metadata" controlsList="nodownload"><source src="${contentUrl}" type="video/${ext}"></video>`;
+        }
       } else {
         container.innerHTML = `<video controls preload="metadata" controlsList="nodownload"><source src="${contentUrl}" type="video/${ext}"></video>`;
       }
@@ -120,61 +126,21 @@ const PREVIEW_STRATEGIES = [
       const isMobile = device === "movil";
 
       if (navigator.onLine) {
-        if (isMobile) {
-          // Móvil + Online: Renderizar páginas horizontalmente con PDF.js en canvas
-          container.innerHTML = '<div class="pdf-loading"><p>Cargando vista previa móvil...</p></div>';
-          try {
-            await loadScript("https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js");
-            pdfjsLib.GlobalWorkerOptions.workerSrc =
-              "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+        // Desktop/Tablet + Online: Usar pdfjs-viewer-element (Funciones Completas)
+        if (!customElements.get("pdfjs-viewer-element")) {
+          const script = document.createElement("script");
+          script.type = "module";
+          script.src = "https://cdn.jsdelivr.net/npm/pdfjs-viewer-element/dist/pdfjs-viewer-element.js";
+          document.head.appendChild(script);
+        }
 
-            const pdf = await pdfjsLib.getDocument(contentUrl).promise;
-            container.innerHTML = "";
-
-            const scroller = document.createElement("div");
-            scroller.className = "pdf-horizontal-scroller";
-            container.appendChild(scroller);
-
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-              const page = await pdf.getPage(pageNum);
-              const viewport = page.getViewport({ scale: 1 });
-              const containerHeight = container.clientHeight || 450;
-              const scale = (containerHeight - 40) / viewport.height;
-              const scaledViewport = page.getViewport({ scale });
-
-              const canvas = document.createElement("canvas");
-              canvas.className = "pdf-page-canvas";
-              canvas.height = scaledViewport.height;
-              canvas.width = scaledViewport.width;
-              scroller.appendChild(canvas);
-
-              const context = canvas.getContext("2d");
-              await page.render({
-                canvasContext: context,
-                viewport: scaledViewport,
-              }).promise;
-            }
-          } catch (error) {
-            console.error("Error renderizando PDF en móvil:", error);
-            container.innerHTML = `<iframe src="${contentUrl}" type="application/pdf" class="pdfViewer"></iframe>`;
-          }
-        } else {
-          // Desktop/Tablet + Online: Usar pdfjs-viewer-element (Funciones Completas)
-          if (!customElements.get("pdfjs-viewer-element")) {
-            const script = document.createElement("script");
-            script.type = "module";
-            script.src = "https://cdn.jsdelivr.net/npm/pdfjs-viewer-element/dist/pdfjs-viewer-element.js";
-            document.head.appendChild(script);
-          }
-
-          container.innerHTML = `
+        container.innerHTML = `
             <pdfjs-viewer-element 
               src="${contentUrl}" 
               viewer-css-theme="DARK" 
-              style="height: 70dvh; width: 100%; display: block;">
+              style="height: 75dvh; width: 100%; display: block;">
             </pdfjs-viewer-element>
           `;
-        }
       } else {
         // Offline: iframe nativo
         container.innerHTML = `<iframe src="${contentUrl}" type="application/pdf" class="pdfViewer"></iframe>`;

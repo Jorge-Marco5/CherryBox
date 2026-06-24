@@ -246,10 +246,6 @@ function downloadFile(path) {
   window.open(`${API_URL}/download?path=${encodeURIComponent(path)}`, "_blank");
 }
 
-function openFullFile(path) {
-  window.open(`${API_URL}/file-content?path=${encodeURIComponent(path)}`, "_blank");
-}
-
 /**
  * Gestión de Permisos
  */
