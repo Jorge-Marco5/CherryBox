@@ -7,7 +7,7 @@
     "start": "node dist/server.js",
     "start:pm2": "pm2 start ecosystem.config.js",
     "dev": "nodemon src/server.ts",
-    "build": "tsc && cp .env.production dist/.env",
+    "build": "tsc && mkdir -p dist/views dist/persistent && cp -r src/views/* dist/views/ && cp -r src/persistent/* dist/persistent/",
     "build:web": "rm -rf build && mkdir -p build/public && cp -r public/* build/public && cp src/views/*.html build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

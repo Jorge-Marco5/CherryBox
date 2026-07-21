@@ -9,6 +9,9 @@ export const getSetting = (setting: keyof typeof config) => {
 }
 
 export const getBaseDir = () => {
+    if (process.env.BASE_DIR) {
+        return path.resolve(process.env.BASE_DIR);
+    }
     return path.resolve(__dirname, '../../', getSetting('BASE_DIR') as string);
 }
 
