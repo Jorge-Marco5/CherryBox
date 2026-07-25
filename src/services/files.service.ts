@@ -7,7 +7,7 @@ import { ForbiddenError, ValidationError } from "../utils/errors";
 import { isValidPath } from "../utils/multer";
 import { getBaseDir } from "../utils/settings";
 
-const BASE_DIR = getBaseDir();
+/**
 
 /**
  * Versión interna de checkPermission que devuelve booleano.
@@ -87,7 +87,7 @@ async function syncFileInDb(relativePath: string, action: "CREATE" | "DELETE" | 
 
 export const listItemsService = async (relativePath: string, userId: string, userRole: string) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-
+  const BASE_DIR = getBaseDir();
   // Asegurar que la raíz existe
   if (relativePath === "") {
     const superadmin = await prisma.user.findFirst({ where: { role: "SUPERADMIN" } });
@@ -179,10 +179,7 @@ export const listItemsService = async (relativePath: string, userId: string, use
 };
 
 export const searchItemsService = async (query: string, userId: string, userRole: string) => {
-  // Optimización: Si no es admin, obtener todos los IDs de archivos/carpetas a los que tiene acceso
-  // para filtrar la búsqueda en una sola pasada de base de datos si es posible,
-  // o al menos mitigar la recursividad infinita.
-
+  const BASE_DIR = getBaseDir();
   const results: any[] = [];
   const searchRecursive = async (currentDir: string) => {
     const fullPath = path.join(BASE_DIR, currentDir);
@@ -231,7 +228,7 @@ export const createFolderService = async (
   userRole: string,
 ) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-
+  const BASE_DIR = getBaseDir();
   // Necesita WRITE en la carpeta padre
   await checkPermission(userId, userRole, relativePath, "WRITE");
 
@@ -251,7 +248,7 @@ export const renameItemService = async (
   userRole: string,
 ) => {
   if (!isValidPath(oldPath)) throw new ValidationError("Ruta no válida");
-
+  const BASE_DIR = getBaseDir();
   // Necesita WRITE en el ítem actual
   await checkPermission(userId, userRole, oldPath, "WRITE");
 
@@ -275,20 +272,28 @@ export const renameItemService = async (
 
 export const deleteItemService = async (relativePath: string, userId: string, userRole: string) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-
+  const BASE_DIR = getBaseDir();
   // Necesita DELETE en el ítem
   await checkPermission(userId, userRole, relativePath, "DELETE");
 
   const fullPath = path.join(BASE_DIR, relativePath);
   const stats = await fs.stat(fullPath);
 
+  let sizeDeleted = 0;
   if (stats.isDirectory()) {
+    const { calculateDirSize } = require("../controllers/settings.controller");
+    sizeDeleted = await calculateDirSize(fullPath);
     await fs.rm(fullPath, { recursive: true, force: true });
   } else {
+    sizeDeleted = stats.size;
     await fs.unlink(fullPath);
   }
 
   await syncFileInDb(relativePath, "DELETE");
+
+  const { subtractUsedStorage } = require("../utils/settings");
+  await subtractUsedStorage(sizeDeleted);
+
   return { success: true, message: "Eliminado exitosamente", isDirectory: stats.isDirectory() };
 };
 
@@ -298,7 +303,7 @@ export const getFormatsAvailables = async () => {
 
 export const getItemContentService = async (relativePath: string, userId: string, userRole: string) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-
+  const BASE_DIR = getBaseDir();
   // Necesita READ
   await checkPermission(userId, userRole, relativePath, "READ");
 
@@ -329,7 +334,7 @@ export const registerUploadedFilesService = async (files: any[], relativePath: s
 export const verifyDownloadMultipleService = async (paths: string[], userId: string, userRole: string) => {
   const filePaths: string[] = [];
   let totalSize = 0;
-
+  const BASE_DIR = getBaseDir();
   for (const relPath of paths) {
     if (!isValidPath(relPath)) throw new ValidationError(`Ruta no válida: ${relPath}`);
 

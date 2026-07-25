@@ -12,7 +12,8 @@ export const getBaseDir = () => {
   if (process.env.BASE_DIR) {
     return path.resolve(process.env.BASE_DIR);
   }
-  return path.resolve(__dirname, "../../", getSetting("BASE_DIR") as string);
+  const base_dir = path.resolve(__dirname, "../../", getSetting("BASE_DIR") as string);
+  return base_dir;
 };
 
 /**
@@ -36,4 +37,50 @@ export const setSetting = async <K extends keyof typeof config>(setting: K, valu
     (config as any)[setting] = value;
   }
   await fs.writeFile(file_config, JSON.stringify(config, null, 2));
+};
+
+let cachedUsedStorage: number | null = null;
+
+/**
+ * Obtiene el almacenamiento actual usado en bytes (desde memoria caché o config.json).
+ */
+export const getUsedStorage = async (): Promise<number> => {
+  if (cachedUsedStorage !== null) {
+    return cachedUsedStorage;
+  }
+  const saved = config.USED_STORAGE;
+  if (typeof saved === "number") {
+    cachedUsedStorage = saved;
+    return cachedUsedStorage;
+  }
+  return 0;
+};
+
+/**
+ * Actualiza el almacenamiento usado tanto en memoria caché como en el archivo config.json.
+ */
+export const updateUsedStorage = async (newSize: number) => {
+  cachedUsedStorage = newSize;
+  (config as any).USED_STORAGE = newSize;
+  try {
+    await fs.writeFile(file_config, JSON.stringify(config, null, 2));
+  } catch (err) {
+    console.error("Error al escribir el archivo de configuración de almacenamiento:", err);
+  }
+};
+
+/**
+ * Suma bytes al almacenamiento actual usado.
+ */
+export const addUsedStorage = async (bytes: number) => {
+  const current = await getUsedStorage();
+  await updateUsedStorage(current + bytes);
+};
+
+/**
+ * Resta bytes del almacenamiento actual usado.
+ */
+export const subtractUsedStorage = async (bytes: number) => {
+  const current = await getUsedStorage();
+  await updateUsedStorage(Math.max(0, current - bytes));
 };

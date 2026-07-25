@@ -5,37 +5,71 @@ import { prisma } from "../lib/prisma";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError, ValidationError } from "../utils/errors";
 import { logger } from "../utils/logger";
-import { getBaseDir, getSetting, setSetting } from "../utils/settings";
+import { getBaseDir, getSetting, getUsedStorage, setSetting } from "../utils/settings";
+
+// Limitador de concurrencia para evitar el error EMFILE (too many open files) en cálculo de peso
+class ConcurrencyLimiter {
+  private active = 0;
+  private queue: (() => void)[] = [];
+  constructor(private limit: number) {}
+
+  async run<T>(fn: () => Promise<T>): Promise<T> {
+    if (this.active >= this.limit) {
+      await new Promise<void>((resolve) => this.queue.push(resolve));
+    }
+    this.active++;
+    try {
+      return await fn();
+    } finally {
+      this.active--;
+      const next = this.queue.shift();
+      if (next) next();
+    }
+  }
+}
 
 /**
- * Calcula de forma recursiva el tamaño total de un directorio en bytes.
+ * Calcula de forma paralela y recursiva el tamaño total de un directorio en bytes.
+ * Gestiona errores de permisos de archivos y carpetas individuales de forma independiente.
  *
  * @param dirPath Ruta absoluta del directorio a calcular
  * @returns Promesa con el tamaño total en bytes
  */
 export const calculateDirSize = async (dirPath: string): Promise<number> => {
-  let size = 0;
-  try {
-    const stats = await fs.stat(dirPath);
-    if (!stats.isDirectory()) {
-      return stats.size; // Si es un archivo, devuelve su tamaño directamente
-    }
+  const limiter = new ConcurrencyLimiter(150); // Límite global de operaciones FS concurrentes
 
-    const files = await fs.readdir(dirPath, { withFileTypes: true });
-    for (const file of files) {
-      const fullPath = path.join(dirPath, file.name);
-      if (file.isDirectory()) {
-        size += await calculateDirSize(fullPath);
-      } else {
-        const fileStats = await fs.stat(fullPath);
-        size += fileStats.size;
+  const worker = async (currentPath: string): Promise<number> => {
+    try {
+      const stats = await limiter.run(() => fs.stat(currentPath));
+      if (!stats.isDirectory()) {
+        return stats.size;
       }
+
+      const files = await limiter.run(() => fs.readdir(currentPath, { withFileTypes: true }));
+      const promises = files.map(async (file) => {
+        const fullPath = path.join(currentPath, file.name);
+        try {
+          if (file.isDirectory()) {
+            return await worker(fullPath);
+          } else if (file.isFile()) {
+            const fileStats = await limiter.run(() => fs.stat(fullPath));
+            return fileStats.size;
+          }
+        } catch {
+          // Ignorar archivos individuales ilegibles, sin permisos o enlaces rotos
+        }
+        return 0;
+      });
+
+      const sizes = await Promise.all(promises);
+      return sizes.reduce((acc, curr) => acc + curr, 0);
+    } catch {
+      // Ignorar directorios individuales inaccesibles (EACCES, EPERM)
+      return 0;
     }
-  } catch (error) {
-    //console.log(`Error calculating size for ${dirPath}:`, error);
-    return 0;
-  }
-  return size;
+  };
+
+  return worker(dirPath);
 };
 
 /**
@@ -53,7 +87,7 @@ export const getStorage = async (req: AuthRequest, res: Response, next: NextFunc
       throw new AppError("No se encontró la configuración del almacenamiento");
     }
 
-    const usedSize = await calculateDirSize(baseDir);
+    const usedSize = await getUsedStorage();
     const availableSize = storage - usedSize;
 
     return res.status(200).json({ totalStorage: storage, usedStorage: usedSize, availableStorage: availableSize });
@@ -70,7 +104,7 @@ export async function getStorageString() {
     throw new AppError("No se encontró la configuración del almacenamiento");
   }
 
-  const usedSize = await calculateDirSize(baseDir);
+  const usedSize = await getUsedStorage();
   const availableSize = storage - usedSize;
 
   return { totalStorage: storage, usedStorage: usedSize, availableStorage: availableSize };
@@ -94,7 +128,7 @@ export const setSettings = async (req: AuthRequest, res: Response, next: NextFun
       if (!limitStorage || limitStorage <= 0) {
         throw new ValidationError("El límite de almacenamiento debe ser un número mayor a 0");
       }
-      const usedSize = await calculateDirSize(getBaseDir());
+      const usedSize = await getUsedStorage();
       if (limitStorage * 1024 * 1024 * 1024 < usedSize) {
         throw new ValidationError(
           "El límite de almacenamiento debe ser mayor o igual al tamaño actual de los archivos",

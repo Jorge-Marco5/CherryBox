@@ -17,7 +17,7 @@ import { syncFiles } from "../services/sync-files.service";
 import { ValidationError } from "../utils/errors";
 import { logger } from "../utils/logger";
 import { isValidPath } from "../utils/multer";
-import { getBaseDir } from "../utils/settings";
+import { getBaseDir, addUsedStorage } from "../utils/settings";
 
 /**
  * Renderiza la vista principal del administrador de archivos.
@@ -120,6 +120,10 @@ export const uploadFiles = async (req: AuthRequest, res: Response, next: NextFun
 
     //Registro de los datos en la base de datos
     await registerUploadedFilesService(files, relativePath, user!.id);
+
+    // Actualizar tamaño de almacenamiento usado
+    const totalSize = files.reduce((acc, f) => acc + f.size, 0);
+    await addUsedStorage(totalSize);
 
     logger.info(`[AUDIT] Usuario ${user?.id} completó subida de ${files.length} archivo(s) a: ${relativePath}`);
     res.json({

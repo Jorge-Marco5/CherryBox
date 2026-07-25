@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { getBaseDir, getSetting } from '../utils/settings';
-import { calculateDirSize } from '../controllers/settings.controller';
+import { getSetting, getUsedStorage } from '../utils/settings';
 import { AppError } from '../utils/errors';
 
 export const checkStorageLimit = async (req: Request, res: Response, next: NextFunction) => {
@@ -12,12 +11,7 @@ export const checkStorageLimit = async (req: Request, res: Response, next: NextF
             return next(new AppError('No se ha configurado un límite de almacenamiento válido.', 500));
         }
 
-        const baseDir = getBaseDir();
-        if (!baseDir) {
-            return next(new AppError('No se ha configurado el directorio base.', 500));
-        }
-
-        const currentSize = await calculateDirSize(baseDir);
+        const currentSize = await getUsedStorage();
 
         // Approximate incoming file size from content-length if available
         const contentLength = Number(req.headers['content-length'] || 0);
