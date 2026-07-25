@@ -98,39 +98,41 @@
 
       <div class="toolbar">
         <div class="search-container">
-          <div class="search">
-            <input
-              type="search"
-              id="searchInput"
-              placeholder="Buscar archivos..."
-              list="searchHistory"
-            />
-            <button
-              class="btn btn-primary"
-              onclick="searchFiles()"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-search"
-              >
-                <path
-                  stroke="none"
-                  d="M0 0h24v24H0z"
-                  fill="none"
+          <form style="width:100%" id="search-form">
+              <div class="search">
+                <input
+                  type="search"
+                  id="searchInput"
+                  placeholder="Buscar archivos..."
+                  list="searchHistory"
                 />
-                <path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
-                <path d="M21 21l-6 -6" />
-              </svg>
-            </button>
-          </div>
+                <button
+                  class="btn btn-primary"
+                  type="submit"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-search"
+                  >
+                    <path
+                      stroke="none"
+                      d="M0 0h24v24H0z"
+                      fill="none"
+                    />
+                    <path d="M3 10a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                    <path d="M21 21l-6 -6" />
+                  </svg>
+                </button>
+              </div>
+            </form>
         </div>
         <div
           class="breadcrumb"
@@ -530,78 +532,80 @@
     >
       <div class="modal-content">
         <div class="modal-header">Nueva Carpeta</div>
-        <div class="form-group">
-          <label>Nombre de la carpeta:</label>
-          <input
-            type="text"
-            id="folderNameInput"
-            placeholder="Mi carpeta"
-          />
-        </div>
-        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center; gap: 10px">
-          <label>Color de la carpeta:</label>
-          <input
-            type="color"
-            id="folderColorInput"
-            placeholder="Mi carpeta"
-            value="#FFE36C"
-          />
-        </div>
-        <div class="modal-actions">
-          <button
-            class="btn"
-            onclick="closeModal('createFolderModal')"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-x"
+        <form action="" id="create-folder-form">
+          <div class="form-group">
+            <label>Nombre de la carpeta:</label>
+            <input
+              type="text"
+              id="folderNameInput"
+              placeholder="Mi carpeta"
+            />
+          </div>
+          <div class="form-group" style="display: flex; justify-content: space-between; align-items: center; gap: 10px">
+            <label>Color de la carpeta:</label>
+            <input
+              type="color"
+              id="folderColorInput"
+              placeholder="Mi carpeta"
+              value="#FFE36C"
+            />
+          </div>
+          <div class="modal-actions">
+            <button
+              class="btn"
+              onclick="closeModal('createFolderModal')"
             >
-              <path
-                stroke="none"
-                d="M0 0h24v24H0z"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
                 fill="none"
-              />
-              <path d="M18 6l-12 12" />
-              <path d="M6 6l12 12" />
-            </svg>
-            <p class="acction-text">Cancelar</p>
-          </button>
-          <button
-            class="btn btn-primary"
-            onclick="createFolder()"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-folder-plus"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-x"
+              >
+                <path
+                  stroke="none"
+                  d="M0 0h24v24H0z"
+                  fill="none"
+                />
+                <path d="M18 6l-12 12" />
+                <path d="M6 6l12 12" />
+              </svg>
+              <p class="acction-text">Cancelar</p>
+            </button>
+            <button
+              class="btn btn-primary"
+              type="submit"
             >
-              <path
-                stroke="none"
-                d="M0 0h24v24H0z"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
                 fill="none"
-              />
-              <path d="M12 19h-7a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v3.5" />
-              <path d="M16 19h6" />
-              <path d="M19 16v6" />
-            </svg>
-            <p class="acction-text">Crear</p>
-          </button>
-        </div>
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-folder-plus"
+              >
+                <path
+                  stroke="none"
+                  d="M0 0h24v24H0z"
+                  fill="none"
+                />
+                <path d="M12 19h-7a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v3.5" />
+                <path d="M16 19h6" />
+                <path d="M19 16v6" />
+              </svg>
+              <p class="acction-text">Crear</p>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -612,77 +616,79 @@
     >
       <div class="modal-content">
         <div class="modal-header">Renombrar</div>
-        <div class="form-group">
-          <label>Nuevo nombre:</label>
-          <input
-            type="text"
-            id="renameInput"
-          />
-        </div>
-        <div id="colorFolderCustom" class="form-group" style="display: flex; justify-content: space-between; align-items: center; gap: 10px">
-          <label>Color de la carpeta:</label>
-          <input
-            type="color"
-            id="renameColorInput"
-            placeholder="Mi carpeta"
-            value="#FFE36C"
-          />
-        </div>
-        <div class="modal-actions">
-          <button
-            class="btn"
-            onclick="closeModal('renameModal')"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-x"
-            >
-              <path
-                stroke="none"
-                d="M0 0h24v24H0z"
-                fill="none"
+        <form action="" id="rename-file-form">
+            <div class="form-group">
+              <label>Nuevo nombre:</label>
+              <input
+                type="text"
+                id="renameInput"
               />
-              <path d="M18 6l-12 12" />
-              <path d="M6 6l12 12" />
-            </svg>
-            <p class="acction-text">Cancelar</p>
-          </button>
-          <button
-            class="btn btn-primary"
-            onclick="confirmRename()"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy"
-            >
-              <path
-                stroke="none"
-                d="M0 0h24v24H0z"
-                fill="none"
+            </div>
+            <div id="colorFolderCustom" class="form-group" style="display: flex; justify-content: space-between; align-items: center; gap: 10px">
+              <label>Color de la carpeta:</label>
+              <input
+                type="color"
+                id="renameColorInput"
+                placeholder="Mi carpeta"
+                value="#FFE36C"
               />
-              <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
-              <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-              <path d="M14 4l0 4l-6 0l0 -4" />
-            </svg>
-            <p class="acction-text">Guardar</p>
-          </button>
-        </div>
+            </div>
+            <div class="modal-actions">
+              <button
+                class="btn"
+                onclick="closeModal('renameModal')"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon icon-tabler icons-tabler-outline icon-tabler-x"
+                >
+                  <path
+                    stroke="none"
+                    d="M0 0h24v24H0z"
+                    fill="none"
+                  />
+                  <path d="M18 6l-12 12" />
+                  <path d="M6 6l12 12" />
+                </svg>
+                <p class="acction-text">Cancelar</p>
+              </button>
+              <button
+                class="btn btn-primary"
+                onclick="confirmRename()"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy"
+                >
+                  <path
+                    stroke="none"
+                    d="M0 0h24v24H0z"
+                    fill="none"
+                  />
+                  <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                  <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                  <path d="M14 4l0 4l-6 0l0 -4" />
+                </svg>
+                <p class="acction-text">Guardar</p>
+              </button>
+            </div>
+        </form>
       </div>
     </div>
 
@@ -797,87 +803,91 @@
         >
           Añadir Acceso
         </div>
-        <div class="form-group">
-          <label>ID de Usuario o Email:</label>
-          <input
-            type="text"
-            id="targetUserId"
-            placeholder="ID del usuario o email"
-          />
-        </div>
-        <div class="form-group">
-          <label>Nivel de Acceso:</label>
-          <select
-            id="accessLevel"
-            class="btn btn-secondary"
-            style="width: 100%; text-align: left; padding: 10px"
-          >
-            <option value="READ">Lectura (Ver y descargar)</option>
-            <option value="WRITE">Escritura (Modificar y renombrar)</option>
-            <option value="DELETE">Eliminación (Borrar permanentemente)</option>
-            <option value="MANAGE">Administración (Gestionar permisos)</option>
-          </select>
-        </div>
+        <form id="permissions-form">
+          <div class="form-group">
+            <label>ID de Usuario o Email:</label>
+            <input
+              type="text"
+              id="targetUserId"
+              name="targetUserId"
+              placeholder="ID del usuario o email"
+            />
+          </div>
+          <div class="form-group">
+            <label>Nivel de Acceso:</label>
+            <select
+              id="accessLevel"
+              class="btn btn-secondary"
+              name="accessLevel"
+              style="width: 100%; text-align: left; padding: 10px"
+            >
+              <option value="READ">Lectura (Ver y descargar)</option>
+              <option value="WRITE">Escritura (Modificar y renombrar)</option>
+              <option value="DELETE">Eliminación (Borrar permanentemente)</option>
+              <option value="MANAGE">Administración (Gestionar permisos)</option>
+            </select>
+          </div>
 
-        <div
-          class="modal-actions"
-          style="margin-top: 20px"
-        >
-          <button
-            class="btn"
-            onclick="closeModal('permissionsModal')"
+          <div
+            class="modal-actions"
+            style="margin-top: 20px"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-x"
+            <button
+              class="btn"
+              onclick="closeModal('permissionsModal')"
             >
-              <path
-                stroke="none"
-                d="M0 0h24v24H0z"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
                 fill="none"
-              />
-              <path d="M18 6l-12 12" />
-              <path d="M6 6l12 12" />
-            </svg>
-            <p class="acction-text">Cerrar</p>
-          </button>
-          <button
-            class="btn btn-primary"
-            onclick="grantPermission()"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-user-plus"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-x"
+              >
+                <path
+                  stroke="none"
+                  d="M0 0h24v24H0z"
+                  fill="none"
+                />
+                <path d="M18 6l-12 12" />
+                <path d="M6 6l12 12" />
+              </svg>
+              <p class="acction-text">Cerrar</p>
+            </button>
+            <button
+              class="btn btn-primary"
+              type="submit"
             >
-              <path
-                stroke="none"
-                d="M0 0h24v24H0z"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
                 fill="none"
-              />
-              <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
-              <path d="M16 19h6" />
-              <path d="M19 16v6" />
-              <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.338 0 .659 .042 .965 .12" />
-            </svg>
-            <p class="acction-text">Otorgar</p>
-          </button>
-        </div>
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-user-plus"
+              >
+                <path
+                  stroke="none"
+                  d="M0 0h24v24H0z"
+                  fill="none"
+                />
+                <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                <path d="M16 19h6" />
+                <path d="M19 16v6" />
+                <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.338 0 .659 .042 .965 .12" />
+              </svg>
+              <p class="acction-text">Otorgar</p>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
     <div

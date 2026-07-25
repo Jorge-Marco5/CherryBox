@@ -240,7 +240,11 @@ export const getLogs = async (req: Request, res: Response, next: NextFunction) =
   try {
     const logPath = path.join(__dirname, "../logs/combined.log");
     const logs = await fs.readFile(logPath, "utf-8");
-    return res.status(200).json({ logs });
+    //enviar los ultimos 100 logs
+    const lines = logs.split("\n");
+    const last100Lines = lines.slice(-500);
+    const logsString = last100Lines.join("\n");
+    return res.status(200).json({ logs: logsString });
   } catch (error) {
     next(error);
   }

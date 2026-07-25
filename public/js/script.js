@@ -43,19 +43,27 @@ async function loadFiles(path = "") {
 /**
  * Busca archivos usando el campo de búsqueda.
  */
+const searchForm = document.getElementById("search-form");
+
+searchForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  searchFiles();
+});
+
 async function searchFiles() {
   const searchInput = document.getElementById("searchInput");
   const query = searchInput?.value.trim();
 
-  if (!query) {
-    await loadFiles(currentPath);
-    return;
+  if (query == "") {
+    loadFiles("");
   }
 
   try {
     const response = await FileService.searchFiles(query);
     Renderers.renderFiles(response.data);
+    isLoadingFiles = false;
   } catch (error) {
+    alert("Error al buscar archivos: " + error.message);
     location.href = "/error?code=" + error.response.status + "&message=" + error.response.data.error;
   }
 }
@@ -72,6 +80,12 @@ function refreshpath() {
 /**
  * Crea una nueva carpeta.
  */
+const createFolderForm = document.getElementById("create-folder-form");
+createFolderForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  createFolder();
+});
+
 async function createFolder() {
   const name = document.getElementById("folderNameInput").value.trim();
   const color = document.getElementById("folderColorInput").value;
@@ -98,6 +112,12 @@ async function createFolder() {
 /**
  * Confirma el renombrado de un archivo.
  */
+const renameForm = document.getElementById("rename-file-form");
+renameForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  confirmRename();
+});
+
 async function confirmRename() {
   const newName = document.getElementById("renameInput").value.trim();
   const newColor = document.getElementById("renameColorInput").value;
@@ -312,6 +332,13 @@ async function loadPermissions(fileId) {
     list.innerHTML = '<p style="color: #ff5555;">Error al cargar permisos.</p>';
   }
 }
+
+const permissionsForm = document.getElementById("permissions-form");
+
+permissionsForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  await grantPermission();
+});
 
 async function grantPermission() {
   const targetUserId = document.getElementById("targetUserId").value.trim();
