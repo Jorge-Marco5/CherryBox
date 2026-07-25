@@ -1,27 +1,39 @@
-import fs from 'fs/promises';
-import path from 'path';
-import config from '../persistent/config.json';
+import fs from "fs/promises";
+import path from "path";
+import config from "../persistent/config.json";
 
-const file_config = path.join(__dirname, '../persistent/config.json');
+const file_config = path.join(__dirname, "../persistent/config.json");
 
 export const getSetting = (setting: keyof typeof config) => {
-    return config[setting];
-}
+  return config[setting];
+};
 
 export const getBaseDir = () => {
-    if (process.env.BASE_DIR) {
-        return path.resolve(process.env.BASE_DIR);
-    }
-    return path.resolve(__dirname, '../../', getSetting('BASE_DIR') as string);
+  if (process.env.BASE_DIR) {
+    return path.resolve(process.env.BASE_DIR);
+  }
+  return path.resolve(__dirname, "../../", getSetting("BASE_DIR") as string);
+};
+
+/**
+ * Inicio de carpeta base para archivos, excepciones continuan para modificar ajuste en cliente
+ */
+export async function init_basedir() {
+  let baseDir = getBaseDir();
+  try {
+    await fs.access(baseDir);
+  } catch (error) {
+    await fs.mkdir(baseDir, { recursive: true });
+  }
 }
 
 // cambiar el valor de una confiuguracion
 export const setSetting = async <K extends keyof typeof config>(setting: K, value: (typeof config)[K]) => {
-    //si es limit storage convertir GB a bytes
-    if (setting === 'LIMIT_STORAGE') {
-        (config as any)[setting] = Number(value) * 1024 * 1024 * 1024;
-    } else {
-        (config as any)[setting] = value;
-    }
-    await fs.writeFile(file_config, JSON.stringify(config, null, 2));
-}
+  //si es limit storage convertir GB a bytes
+  if (setting === "LIMIT_STORAGE") {
+    (config as any)[setting] = Number(value) * 1024 * 1024 * 1024;
+  } else {
+    (config as any)[setting] = value;
+  }
+  await fs.writeFile(file_config, JSON.stringify(config, null, 2));
+};

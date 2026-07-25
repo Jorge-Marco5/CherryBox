@@ -5,6 +5,7 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 import {
   createFolderService,
   deleteItemService,
+  getFormatsAvailables,
   getItemContentService,
   listItemsService,
   registerUploadedFilesService,
@@ -57,7 +58,8 @@ export const listFiles = async (req: AuthRequest, res: Response, next: NextFunct
       req.user!.role,
     );
     res.json({ files, currentPath: relativePath, currentFolderId, currentFolderName });
-  } catch (error: any) {
+  } catch (error) {
+    console.error("Excepcion: " + error);
     next(error);
   }
 };
@@ -173,6 +175,16 @@ export const deleteFile = async (req: AuthRequest, res: Response) => {
         ? 404
         : 500;
     res.status(status).json({ error: error.message });
+  }
+};
+
+export const getFormatsAvailablesController = async (req: Request, res: Response) => {
+  try {
+    const formats = await getFormatsAvailables();
+    res.json(formats);
+  } catch (error: any) {
+    logger.error("Error al obtener formatos disponibles: " + error.message);
+    res.status(500).json({ error: error.message });
   }
 };
 

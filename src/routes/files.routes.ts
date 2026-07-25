@@ -5,6 +5,7 @@ import {
   downloadFile,
   downloadMultipleFiles,
   getFileContent,
+  getFormatsAvailablesController,
   listFiles,
   manualSync,
   renameFile,
@@ -56,6 +57,8 @@ router.post(
 router.put("/rename", requireAuth, renameFile);
 
 router.delete("/delete", requireAuth, deleteFile);
+
+router.get("/formats", requireAuth, requireSuperAdmin, getFormatsAvailablesController);
 
 router.get("/file-content", requireAuth, getFileContent);
 

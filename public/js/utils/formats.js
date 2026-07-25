@@ -1,8 +1,12 @@
-/**Helper para almacenar los formatos de archivos soportados para visualizacion */
+/**Helper para almacenar los formatos de archivos soportados para visualizacion en localstorage*/
+async function getFormats() {
+  const response = await FileService.getFormats();
+  localStorage.setItem("audioExts", JSON.stringify(response.data.audioExts));
+  localStorage.setItem("codeExts", JSON.stringify(response.data.codeExts));
+  localStorage.setItem("imageExts", JSON.stringify(response.data.imageExts));
+  localStorage.setItem("pdfExts", JSON.stringify(response.data.pdfExts));
+  localStorage.setItem("textExts", JSON.stringify(response.data.textExts));
+  localStorage.setItem("videoExts", JSON.stringify(response.data.videoExts));
+}
 
-const codeExts = ["json", "js", "css", "html", "xml", "csv"];
-const textExts = ["txt", "md"];
-const imageExts = ["jpg", "jpeg", "png", "gif", "svg", "webp"];
-const videoExts = ["mp4", "webm", "ogg"];
-const audioExts = ["mp3", "wav", "ogg", "m4a", "flac", "aac", "wma", "opus"];
-const pdfExts = ["pdf"];
+getFormats();

@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { AccessType } from "../generated/prisma/enums";
 import { prisma } from "../lib/prisma";
+import { audioExts, codeExts, imageExts, pdfExts, textExts, videoExts } from "../persistent/formats";
 import { ForbiddenError, ValidationError } from "../utils/errors";
 import { isValidPath } from "../utils/multer";
 import { getBaseDir } from "../utils/settings";
@@ -162,7 +163,6 @@ export const listItemsService = async (relativePath: string, userId: string, use
       }
     }),
   );
-
   return {
     currentFolderId: currentFolder?.id,
     currentFolderName: currentFolder?.name || "Inicio",
@@ -270,7 +270,7 @@ export const renameItemService = async (
     folder_color: folderColor,
   });
 
-  return { success: true, message: "Renombrado exitosamente" };
+  return { success: true, message: "Actualizado exitosamente" };
 };
 
 export const deleteItemService = async (relativePath: string, userId: string, userRole: string) => {
@@ -292,6 +292,10 @@ export const deleteItemService = async (relativePath: string, userId: string, us
   return { success: true, message: "Eliminado exitosamente", isDirectory: stats.isDirectory() };
 };
 
+export const getFormatsAvailables = async () => {
+  return { audioExts, codeExts, imageExts, pdfExts, textExts, videoExts };
+};
+
 export const getItemContentService = async (relativePath: string, userId: string, userRole: string) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
 
@@ -301,32 +305,13 @@ export const getItemContentService = async (relativePath: string, userId: string
   const fullPath = path.join(BASE_DIR, relativePath);
   const ext = path.extname(fullPath).toLowerCase();
 
-  const textExtensions = [".txt", ".md", ".json", ".js", ".css", ".html", ".xml", ".csv"];
+  const textExtensions = [...codeExts, ...textExts];
   if (textExtensions.includes(ext)) {
     const content = await fs.readFile(fullPath, "utf-8");
     return { type: "text", content };
   }
 
-  const mediaExtensions = [
-    ".jpg",
-    ".jpeg",
-    ".png",
-    ".gif",
-    ".mp4",
-    ".mp3",
-    ".wav",
-    ".ogg",
-    ".m4a",
-    ".flac",
-    ".aac",
-    ".wma",
-    ".opus",
-    ".webm",
-    ".webp",
-    ".ogg",
-    ".m4a",
-    ".pdf",
-  ];
+  const mediaExtensions = [...imageExts, ...pdfExts, ...audioExts, ...videoExts];
   if (mediaExtensions.includes(ext)) {
     return { type: "media", fullPath };
   }
@@ -334,7 +319,6 @@ export const getItemContentService = async (relativePath: string, userId: string
   throw new ValidationError("Tipo de archivo no soportado para vista previa");
 };
 
-// Nueva función para el controlador de subida (que multer maneja físicamente)
 export const registerUploadedFilesService = async (files: any[], relativePath: string, userId: string) => {
   for (const file of files) {
     const relPath = path.join(relativePath, file.filename);

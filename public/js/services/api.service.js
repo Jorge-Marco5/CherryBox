@@ -52,6 +52,13 @@ const FileService = {
   },
 
   /**
+   * Obtiene la lista de formatos de vista previa compatibles
+   */
+  async getFormats() {
+    return await axios.get(`${API_URL}/formats`);
+  },
+
+  /**
    * Obtiene el contenido de un archivo (para vista previa).
    * @param {string} path - Ruta del archivo.
    */

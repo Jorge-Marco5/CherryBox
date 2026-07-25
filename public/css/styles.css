@@ -26,6 +26,10 @@
     --glass: rgba(26, 26, 26, 0.8);
     --font: "Geist", sans-serif;
     --font-text-preview: "PT Serif";
+    --success: #22c55e;
+    --error: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
 }
 
 * {
@@ -475,12 +479,13 @@ body {
 }
 
 .form-group input[type="color"] {
-  -webkit-appearance: none;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px; /* Lo vuelve un círculo */
-  cursor: pointer;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px; /* Lo vuelve un círculo */
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
 /* Quita el borde interior en WebKit (Chrome/Safari) */
@@ -803,6 +808,12 @@ body {
     font-size: 14px;
 }
 
+.progress-detail{
+    font-size: 12px;
+    color: #a0a0a0;
+    width: 100%;
+}
+
 @media (min-width: 768px) {
     .progress-header {
         font-size: 15px;
@@ -824,7 +835,7 @@ body {
 }
 
 .progress-bar {
-    width: 100%;
+    width: 300px;
     height: 6px;
     background: #444;
     border-radius: 3px;

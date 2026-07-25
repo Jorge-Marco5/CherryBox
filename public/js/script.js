@@ -1,5 +1,3 @@
-const API_URL = "/api";
-
 // Estado global
 let currentPath = "";
 let currentRenameItem = null;
@@ -32,6 +30,8 @@ async function loadFiles(path = "") {
     Renderers.renderFiles(data.files);
     updateFolderPermissionButton();
   } catch (error) {
+    console.log(error);
+    showToast("Ha ocurrido un error al iniciar: " + error.response.data.error, "danger");
     if (error.response && error.response.status === 401) {
       location.href = "/login";
     }
@@ -352,6 +352,8 @@ async function uploadFiles(event) {
 async function uploadFilesProcess(files) {
   const progressEl = document.getElementById("uploadProgress");
   const progressList = document.getElementById("progressList");
+  const progressDetail = document.createElement("details");
+  progressDetail.className = "progress-detail";
   const fileCount = document.getElementById("fileCount");
   const totalProgressFill = document.getElementById("totalProgressFill");
   const totalProgressText = document.getElementById("totalProgressText");
@@ -359,6 +361,7 @@ async function uploadFilesProcess(files) {
 
   progressEl.classList.add("active");
   progressList.innerHTML = "";
+  progressDetail.innerHTML = "";
   activeUploads = [];
 
   const totalFiles = files.length;
@@ -370,6 +373,13 @@ async function uploadFilesProcess(files) {
   totalProgressFill.style.width = "0%";
   totalProgressText.textContent = "0%";
   uploadSpeed.textContent = "0 KB/s";
+
+  const filess = [
+    { name: "Another Day - MitiS, HALIENE, Abandoned.flac", size: 25420293 },
+    { name: "Another Day - MitiS, HALIENE, Abandoned.flac", size: 25420293 },
+    { name: "Island - Seven Lions, Wooli, Trivecta, Nevve.flac", size: 36638550 },
+    { name: "Waiting For You - Trivecta, Last Heroes, RUNN.flac|", size: 33281038 },
+  ];
 
   files.forEach((file, index) => {
     const controller = new AbortController();
@@ -390,8 +400,9 @@ async function uploadFilesProcess(files) {
             </div>
             <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
         `;
-    progressList.appendChild(progressItem);
+    progressDetail.appendChild(progressItem);
   });
+  progressList.appendChild(progressDetail);
 
   const updateGlobalProgress = () => {
     let totalLoaded = activeUploads.reduce((acc, u) => acc + u.loaded, 0);

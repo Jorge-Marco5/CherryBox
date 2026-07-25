@@ -1,3 +1,11 @@
+//formatos de archivos de localStorage
+const codeExts = localStorage.getItem("codeExts") ? JSON.parse(localStorage.getItem("codeExts")) : [];
+const textExts = localStorage.getItem("textExts") ? JSON.parse(localStorage.getItem("textExts")) : [];
+const imageExts = localStorage.getItem("imageExts") ? JSON.parse(localStorage.getItem("imageExts")) : [];
+const videoExts = localStorage.getItem("videoExts") ? JSON.parse(localStorage.getItem("videoExts")) : [];
+const audioExts = localStorage.getItem("audioExts") ? JSON.parse(localStorage.getItem("audioExts")) : [];
+const pdfExts = localStorage.getItem("pdfExts") ? JSON.parse(localStorage.getItem("pdfExts")) : [];
+
 //retorna el tipo de dispositivo [movil, tablet, desktop]
 function getTypeDevice() {
   const userAgent = navigator.userAgent;
@@ -247,7 +255,7 @@ const UILogic = {
     try {
       const contentUrl = `${API_URL}/file-content?path=${encodeURIComponent(path)}`;
 
-      const strategy = PREVIEW_STRATEGIES.find((s) => s.accepts(ext));
+      const strategy = PREVIEW_STRATEGIES.find((s) => s.accepts("." + ext));
       if (strategy) {
         const modalClass = strategy.getModalClass();
         if (modalClass) {
