@@ -254,7 +254,10 @@ export const getErrorLogs = async (req: Request, res: Response, next: NextFuncti
   try {
     const logPath = path.join(__dirname, "../logs/error.log");
     const logs = await fs.readFile(logPath, "utf-8");
-    return res.status(200).json({ logs });
+    const lines = logs.split("\n");
+    const last100Lines = lines.slice(-500);
+    const logsString = last100Lines.join("\n");
+    return res.status(200).json({ logs: logsString });
   } catch (error) {
     next(error);
   }

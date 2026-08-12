@@ -176,6 +176,7 @@ const UILogic = {
    */
   showRenameModal(type, path, currentName, currentColor) {
     currentRenameItem = path;
+    currentModalActive = "renameModal";
     const input = document.getElementById("renameInput");
     const colorFolderCustom = document.getElementById("colorFolderCustom");
     if (type === "file") colorFolderCustom.style.display = "none";
@@ -183,14 +184,15 @@ const UILogic = {
     const colorInput = document.getElementById("renameColorInput");
     colorInput.value = currentColor;
     if (input) input.value = currentName;
-    document.getElementById("renameModal")?.classList.add("active");
+    document.getElementById(currentModalActive)?.classList.add("active");
   },
 
   /**
    * Muestra el modal para crear carpeta.
    */
   showCreateFolderModal() {
-    document.getElementById("createFolderModal")?.classList.add("active");
+    currentModalActive = 'createFolderModal';
+    document.getElementById(currentModalActive)?.classList.add("active");
   },
 
   /**
@@ -231,10 +233,11 @@ const UILogic = {
    */
   async previewFile(path, name) {
     currentPreviewPath = path;
+    currentModalActive = "previewModal";
     const ext = name.split(".").pop().toLowerCase();
     const previewContent = document.getElementById("previewContent");
     const previewTitle = document.getElementById("previewTitle");
-    const modal = document.getElementById("previewModal");
+    const modal = document.getElementById(currentModalActive);
 
     if (!modal || !previewContent || !previewTitle) return;
 

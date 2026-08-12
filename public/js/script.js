@@ -6,6 +6,7 @@ let currentPermissionFileId = null;
 let currentFolderData = { id: null, name: "" };
 let isLoadingFiles = false;
 let activeUploads = [];
+let currentModalActive = '';
 
 /**
  * Carga los archivos de una ruta específica.
@@ -98,7 +99,7 @@ async function createFolder() {
   try {
     const response = await FileService.createFolder(currentPath, name, color);
     if (response.data.success) {
-      UILogic.closeModal("createFolderModal");
+      UILogic.closeModal(currentModalActive);
       document.getElementById("folderNameInput").value = "";
       loadFiles(currentPath);
     } else {
@@ -129,7 +130,7 @@ async function confirmRename() {
 
   try {
     await FileService.rename(currentRenameItem, newName, newColor);
-    UILogic.closeModal("renameModal");
+    UILogic.closeModal(currentModalActive);
     loadFiles(currentPath);
   } catch (error) {
     console.error(error);
@@ -293,8 +294,9 @@ function updateFolderPermissionButton() {
 
 async function showPermissionsModal(fileId, fileName) {
   currentPermissionFileId = fileId;
+  currentModalActive = "permissionsModal";
   document.getElementById("permFileName").textContent = fileName;
-  document.getElementById("permissionsModal").classList.add("active");
+  document.getElementById(currentModalActive).classList.add("active");
   await loadPermissions(fileId);
 }
 
@@ -543,13 +545,17 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     refreshpath();
   }
+
+  if (e.key === "Escape") {
+    console.log(e.target);
+    UILogic.closeModal(currentModalActive);
+  }
 });
 
 document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("modal")) {
-    UILogic.closeModal(e.target.id);
-  }
+  if (e.target.classList.contains("modal")) UILogic.closeModal(e.target.id);
 });
+
 
 // Inicialización
 if (document.getElementById("fileList")) {

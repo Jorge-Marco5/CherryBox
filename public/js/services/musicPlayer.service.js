@@ -32,10 +32,13 @@ class MusicPlayerService {
     this.volumeBar = document.getElementById("volumeBar");
 
     // Configurar volumen inicial y fill
+    let vol = localStorage.getItem("volume") || 70;
     if (this.volumeBar) {
-      this.audio.volume = this.volumeBar.value / 100;
+      this.volumeBar.value = vol;
+      this.audio.volume = vol / 100;
       this.updateSliderFill(this.volumeBar);
     }
+
     if (this.progressBar) {
       this.updateSliderFill(this.progressBar);
     }
@@ -55,6 +58,7 @@ class MusicPlayerService {
     });
     this.volumeBar?.addEventListener("input", (e) => {
       this.setVolume(e.target.value);
+      localStorage.setItem("volume", e.target.value);
       this.updateSliderFill(e.target);
     });
 
@@ -154,12 +158,12 @@ class MusicPlayerService {
     metadata.album = tags.album || "Álbum Desconocido";
     metadata.artwork = artworkUrl
       ? [
-          {
-            src: artworkUrl,
-            sizes: "512x512",
-            type: tags.picture.format,
-          },
-        ]
+        {
+          src: artworkUrl,
+          sizes: "512x512",
+          type: tags.picture.format,
+        },
+      ]
       : [];
 
     return metadata;
@@ -236,6 +240,7 @@ class MusicPlayerService {
 
   setPlayingState(isPlaying) {
     this.isPlaying = isPlaying;
+    console.log(this.isPlaying);
     const playMusicEl = document.getElementById("playMusic");
     const pauseMusicEl = document.getElementById("pauseMusic");
 
