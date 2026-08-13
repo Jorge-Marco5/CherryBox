@@ -34,7 +34,7 @@ async function seed() {
 
 seed()
   .then(() => {
-    console.log("Seed completo");
+    ("Seed completo");
     process.exit(0);
   })
   .catch((error) => {

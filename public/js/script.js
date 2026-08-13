@@ -31,8 +31,7 @@ async function loadFiles(path = "") {
     Renderers.renderFiles(data.files);
     updateFolderPermissionButton();
   } catch (error) {
-    console.log(error);
-    showToast("Ha ocurrido un error al iniciar: " + error.response.data.error, "danger");
+    showToast("Ha ocurrido un error al iniciar", "danger");
     if (error.response && error.response.status === 401) {
       location.href = "/login";
     }
@@ -474,10 +473,9 @@ async function uploadFilesProcess(files) {
         throw new Error(response.data.error || "Error desconocido");
       }
     } catch (error) {
-      console.log(error);
       upload.status = axios.isCancel(error) ? "cancelled" : "error";
       progressItem.classList.add(upload.status);
-      progressText.textContent = upload.status === "cancelled" ? "Cancelado" : "Error";
+      progressText.textContent = upload.status === "cancelled" ? "Cancelado" : "Error al subir archivo";
     } finally {
       const cancelBtn = document.getElementById(`cancel-btn-${index}`);
       if (cancelBtn) cancelBtn.style.display = "none";

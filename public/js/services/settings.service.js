@@ -83,7 +83,6 @@ async function syncFiles() {
         const response = await axios.post("/api/sync", {}, { silent: true });
         showToast(response.data.message, 'success');
     } catch (error) {
-        console.log(error);
         showToast(error.response?.data?.error || "Error en la sincronización", 'error');
     } finally {
         btn.disabled = false;

@@ -226,11 +226,9 @@ const UILogic = {
     if (modalId === "musicPlayerModal") {
       MusicPlayer.cherryJamActive = false;
       if (MusicPlayer.isPlaying) {
-        console.log("Ocultando cherryjam, mostrando miniplayer");
         MusicPlayer.player.classList.remove("hide");
         MusicPlayer.player.classList.add("show");
       } else {
-        console.log("Ocultando cherryjam y miniplayer, ya que no hay musica sonando");
         MusicPlayer.player.classList.remove("hide", "show");
       }
     }

@@ -63,7 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 tbody.appendChild(tr);
             });
         } catch (error) {
-            console.log(error.response.data.error);
             if (error.response && error.response.status === 403) {
                 usersTable.parentElement.innerHTML = `
                 <div style="text-align: center; padding: 50px; color: #ff4d4d; background: var(--card-bg); border-radius: 15px;">
