@@ -334,9 +334,7 @@ const UILogic = {
   },
 
   async readyPlayerMusic(scannFiles = false) {
-    //verificamos si hay una playlist cargada, si no, cargamos la playlist de la carpeta actual
     let playlist = MusicPlayer.playlist;
-
     if (playlist.length == 0 || scannFiles) {
       playlist = await getMusicFiles(currentPath);
       if (!containsOnlyOneMusicFile(playlist)) {
@@ -344,6 +342,7 @@ const UILogic = {
         showToast("Sin musica en ruta actual", "info");
         return;
       }
+      MusicPlayer.currentIndex = -1
       showToast("Musica cargada", "success");
     }
     MusicPlayer.setPlaylist(playlist);
@@ -353,7 +352,7 @@ const UILogic = {
     playlist.forEach((file, index) => {
       const p = document.createElement("p");
       p.textContent = file.name;
-      p.onclick = () => MusicPlayer.playTrack(index);
+      p.onclick = async () => await MusicPlayer.playTrack(index, file.path);
       playlistContainer.appendChild(p);
     });
 
@@ -361,6 +360,7 @@ const UILogic = {
       MusicPlayer.player.classList.remove("show", "hide");
     }
     document.getElementById("musicPlayerModal").classList.add("active");
+    MusicPlayer.highlightTrack(MusicPlayer.currentIndex);
     MusicPlayer.cherryJamActive = true;
   },
 };

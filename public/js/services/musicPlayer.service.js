@@ -10,7 +10,7 @@ class MusicPlayerService {
     this.playlist = [];
     this.currentIndex = -1;
     this.isPlaying = false;
-    this.currentArtworkUrl = "public/img/vinyl.png";
+    this.currentArtworkUrl = "public/img/back.png";
 
     this.playBtn = null;
     this.pauseBtn = null;
@@ -21,8 +21,8 @@ class MusicPlayerService {
 
     this.progressInterval = null;
 
-    this.miniTitle = document.querySelector(".marqee-miniplayer-title");
-    this.miniArtist = document.querySelector(".marqee-miniplayer-artist");
+    this.miniTitle = document.querySelector(".miniplayer-title");
+    this.miniArtist = document.querySelector(".miniplayer-artist");
     this.miniImg = document.querySelector(".miniplayer-artwork img");
     this.player = document.getElementById('miniplayer');
 
@@ -98,16 +98,14 @@ class MusicPlayerService {
     this.playlist = files;
   }
 
-  async playTrack(index) {
+  async playTrack(index, path) {
     if (index < 0 || index >= this.playlist.length) return;
-
     this.currentIndex = index;
-    const track = this.playlist[index];
-    const contentUrl = `${API_URL}/file-content?path=${encodeURIComponent(track.path)}`;
+    const contentUrl = `${API_URL}/file-content?path=${encodeURIComponent(path)}`;
     this.audio.src = contentUrl;
     this.audio.load();
-    await this.play();
-    this.highlightTrack(index);
+    this.play();
+    await this.highlightTrack(index);
     await this.getMetadata(contentUrl);
   }
 
@@ -124,19 +122,11 @@ class MusicPlayerService {
   }
 
   async getMetadata(trackUrl) {
-    if (this.currentArtworkUrl && this.currentArtworkUrl !== "public/img/vinyl.png") {
+    if (this.currentArtworkUrl && this.currentArtworkUrl !== "public/img/back.png") {
       URL.revokeObjectURL(this.currentArtworkUrl);
       this.currentArtworkUrl = null;
     }
     this.updateMiniplayerUI({ title: "Cargando metadatos...", artist: "..." });
-
-    const currentTrack = this.playlist[this.currentIndex];
-    const fallbackMetadata = {
-      title: currentTrack?.name ? currentTrack.name.replace(/\.[^/.]+$/, "") : "Desconocido",
-      artist: "Desconocido",
-      album: "Desconocido",
-      artwork: [],
-    };
 
     const readTags = (target) => {
       return new Promise((resolve, reject) => {
@@ -147,40 +137,69 @@ class MusicPlayerService {
       });
     };
 
+    const fullUrl = trackUrl.startsWith("http://") || trackUrl.startsWith("https://") ? trackUrl : window.location.origin + (trackUrl.startsWith("/") ? "" : "/") + trackUrl;
+
     try {
       let tagResult = null;
 
-      // 1. Intentar lectura por URL con Range requests nativos de jsmediatags
       try {
-        tagResult = await readTags(trackUrl);
+        tagResult = await readTags(fullUrl);
       } catch (urlError) {
-        console.warn("jsmediatags lectura URL falló, probando Blob:", urlError);
+        console.warn("jsmediatags lectura directa por URL falló, intentando respaldo con Blob:", urlError);
       }
 
-      // 2. Si no obtuvo tags (ej: .m4a con moov al final del archivo o XHR parcial incompleto), solicitar Blob completo
       if (!tagResult || !tagResult.tags || Object.keys(tagResult.tags).length === 0) {
         const response = await axios.get(trackUrl, { responseType: "blob" });
         tagResult = await readTags(response.data);
       }
 
-      if (tagResult && tagResult.tags && Object.keys(tagResult.tags).length > 0) {
-        const metadata = await this.handleMetadata(tagResult);
-        this.updateMediaSession(metadata);
-        this.updateMiniplayerUI(metadata);
-      } else {
-        console.warn("No se encontraron metadatos en el archivo.");
-        this.updateMediaSession(fallbackMetadata);
-        this.updateMiniplayerUI(fallbackMetadata);
-      }
+      return await this.handleMetadata(tagResult);
     } catch (error) {
-      console.error("Error al obtener metadatos del archivo:", error);
-      this.updateMediaSession(fallbackMetadata);
-      this.updateMiniplayerUI(fallbackMetadata);
+      console.warn("Error al obtener metadatos del archivo:", error);
+      return await this.handleMetadata(null);
     }
   }
 
+  async updateCaratuleBackground(artwork) {
+    const targetSrc = artwork || "public/img/back.png";
+    const imgFront = document.getElementById("playerImage");
+    const imgBack = document.getElementById("playerImageBack");
+
+    if (!imgFront) return;
+
+    if (!imgBack) {
+      if (imgFront.src === targetSrc || imgFront.src.endsWith(targetSrc)) return;
+      imgFront.classList.remove("active");
+      setTimeout(() => {
+        imgFront.src = targetSrc;
+        imgFront.classList.add("active");
+      }, 300);
+      return;
+    }
+
+    const currentActive = imgFront.classList.contains("active") ? imgFront : imgBack;
+    const currentInactive = currentActive === imgFront ? imgBack : imgFront;
+
+    if (currentActive.src === targetSrc || (targetSrc.startsWith("public/") && currentActive.src.endsWith(targetSrc))) {
+      return;
+    }
+
+    const tempImg = new Image();
+    tempImg.onload = () => {
+      currentInactive.src = targetSrc;
+      currentInactive.classList.add("active");
+      currentActive.classList.remove("active");
+    };
+    tempImg.onerror = () => {
+      currentInactive.src = "public/img/back.png";
+      currentInactive.classList.add("active");
+      currentActive.classList.remove("active");
+    };
+    tempImg.src = targetSrc;
+  }
+
   async handleMetadata(data) {
-    const tags = data.tags || {};
+    const tags = data?.tags || {};
     const metadata = {};
 
     let artworkUrl = "";
@@ -214,6 +233,10 @@ class MusicPlayerService {
         },
       ]
       : [];
+
+    await this.updateMediaSession(metadata);
+    await this.updateCaratuleBackground(artworkUrl);
+    await this.updateMiniplayerUI(metadata);
 
     return metadata;
   }
@@ -308,7 +331,7 @@ class MusicPlayerService {
     this.updateMediaSessionPlaybackState();
   }
 
-  highlightTrack(index) {
+  async highlightTrack(index) {
     const playlistEl = document.getElementById("playlist");
     if (!playlistEl) return;
 
@@ -325,6 +348,7 @@ class MusicPlayerService {
   miniplayerHandler() {
     if (!this.isPlaying) {
       this.player.classList.remove("show", "hide");
+      this.destroyMusicPlayer();
       return;
     }
 
@@ -337,7 +361,7 @@ class MusicPlayerService {
     }
   }
 
-  updateMiniplayerUI(metadata) {
+  async updateMiniplayerUI(metadata) {
     if (this.miniTitle) {
       this.miniTitle.textContent = metadata.title || "Título Desconocido";
     }
@@ -345,8 +369,25 @@ class MusicPlayerService {
       this.miniArtist.textContent = metadata.artist || "Artista Desconocido";
     }
     if (this.miniImg) {
-      this.miniImg.src = this.currentArtworkUrl || "public/img/vinyl.png";
+      this.miniImg.src = this.currentArtworkUrl || "public/img/back.png";
     }
+  }
+
+  //destructor
+  destroyMusicPlayer() {
+    this.playlist = [];
+    this.currentIndex = -1;
+    this.isPlaying = false;
+    this.currentArtworkUrl = "public/img/back.png";
+
+    this.playBtn = null;
+    this.pauseBtn = null;
+    this.progressBar = null;
+    this.volumeBar = null;
+
+    this.cherryJamActive = false;
+
+    this.progressInterval = null;
   }
 
 }
