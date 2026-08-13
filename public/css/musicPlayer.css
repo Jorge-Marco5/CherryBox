@@ -192,7 +192,6 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
 }
 
 .miniplayer-artwork {
@@ -273,6 +272,10 @@
     height: 24px;
 }
 
+.miniplayer-controls .btn-player {
+    padding: 6px;
+}
+
 .miniplayer-slider {
     display: flex;
     align-items: center;
@@ -284,5 +287,6 @@
 }
 
 .miniplayer-slider:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+    color: rgb(177, 177, 177);
+    transition: color 0.2s ease;
 }
