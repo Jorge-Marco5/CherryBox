@@ -10,7 +10,7 @@ class MusicPlayerService {
     this.playlist = [];
     this.currentIndex = -1;
     this.isPlaying = false;
-    this.currentArtworkUrl = null;
+    this.currentArtworkUrl = "public/img/vinyl.png";
 
     this.playBtn = null;
     this.pauseBtn = null;
@@ -132,7 +132,7 @@ class MusicPlayerService {
     try {
       const response = await axios.get(trackUrl, {
         responseType: "blob",
-        headers: { Range: "bytes=0-1000000" },
+        headers: { Range: "bytes=0-10000000" },
       });
 
       jsmediatags.read(response.data, {

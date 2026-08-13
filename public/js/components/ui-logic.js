@@ -218,7 +218,9 @@ const UILogic = {
       );
       pauseMedia();
       const previewContent = document.getElementById("previewContent");
-      if (previewContent) previewContent.innerHTML = "";
+      setTimeout(() => {
+        if (previewContent) previewContent.innerHTML = "";
+      }, 300);
     }
 
     if (modalId === "musicPlayerModal") {
@@ -250,7 +252,7 @@ const UILogic = {
     if (!modal || !previewContent || !previewTitle) return;
 
     previewTitle.innerHTML = `${getFileIcon(ext)} <span class="modal-title-text">${escapeHTML(name)}</span>`;
-    previewContent.innerHTML = "<p>Cargando...</p>";
+    previewContent.innerHTML = `<div class="preview-loading"></div>`;
 
     modal.classList.remove(
       "preview-pdf",
@@ -272,7 +274,7 @@ const UILogic = {
         if (modalClass) {
           modal.classList.add(modalClass);
         }
-        await strategy.render(path, name, ext, contentUrl, previewContent);
+        strategy.render(path, name, ext, contentUrl, previewContent);
       }
     } catch (error) {
       console.error("Error al cargar vista previa:", error);
@@ -339,10 +341,14 @@ const UILogic = {
 
     if (playlist.length == 0 || scannFiles) {
       playlist = await getMusicFiles(currentPath);
+      if (!containsOnlyOneMusicFile(playlist)) {
+        UILogic.closeModal("musicPlayerModal");
+        showToast("Sin musica en ruta actual", "info");
+        return;
+      }
+      showToast("Musica cargada", "success");
     }
-
     MusicPlayer.setPlaylist(playlist);
-
     const playlistContainer = document.getElementById("playlist");
     playlistContainer.innerHTML = "";
 
