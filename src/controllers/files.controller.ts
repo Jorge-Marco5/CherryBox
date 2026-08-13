@@ -211,7 +211,7 @@ export const getFileContent = async (req: AuthRequest, res: Response) => {
     if (result.type === "text") {
       return res.json(result);
     } else {
-      return res.sendFile(result.fullPath!);
+      return res.sendFile(result.fullPath!, { acceptRanges: true });
     }
   } catch (error: any) {
     logger.error(`Error al obtener contenido (Usuario: ${req.user?.id}): ` + error.message);

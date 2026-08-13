@@ -554,13 +554,7 @@ if (document.getElementById("fileList")) {
   getStorage();
 }
 
-let resizeTimer;
-window.addEventListener("resize", () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    if (document.getElementById("fileList")) loadFiles(currentPath);
-  }, 250);
-});
+
 // Exponer funciones globales necesarias
 window.loadFiles = loadFiles;
 window.searchFiles = searchFiles;

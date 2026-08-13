@@ -124,54 +124,85 @@ class MusicPlayerService {
   }
 
   async getMetadata(trackUrl) {
-    if (this.currentArtworkUrl) {
+    if (this.currentArtworkUrl && this.currentArtworkUrl !== "public/img/vinyl.png") {
       URL.revokeObjectURL(this.currentArtworkUrl);
       this.currentArtworkUrl = null;
     }
     this.updateMiniplayerUI({ title: "Cargando metadatos...", artist: "..." });
-    try {
-      const response = await axios.get(trackUrl, {
-        responseType: "blob",
-        headers: { Range: "bytes=0-10000000" },
-      });
 
-      jsmediatags.read(response.data, {
-        onSuccess: async (tag) => {
-          const metadata = await this.handleMetadata(tag);
-          this.updateMediaSession(metadata);
-          this.updateMiniplayerUI(metadata);
-        },
-        onError: (error) => {
-          console.warn("jsmediatags error:", error);
-          const fallbackMetadata = {
-            title: this.playlist[this.currentIndex]?.name.replace(/\.[^/.]+$/, "") || "Desconocido",
-            artist: "Desconocido",
-            album: "Desconocido",
-            artwork: [],
-          };
-          this.updateMediaSession(fallbackMetadata);
-          this.updateMiniplayerUI(fallbackMetadata);
-        },
+    const currentTrack = this.playlist[this.currentIndex];
+    const fallbackMetadata = {
+      title: currentTrack?.name ? currentTrack.name.replace(/\.[^/.]+$/, "") : "Desconocido",
+      artist: "Desconocido",
+      album: "Desconocido",
+      artwork: [],
+    };
+
+    const readTags = (target) => {
+      return new Promise((resolve, reject) => {
+        jsmediatags.read(target, {
+          onSuccess: (tag) => resolve(tag),
+          onError: (error) => reject(error),
+        });
       });
+    };
+
+    try {
+      let tagResult = null;
+
+      // 1. Intentar lectura por URL con Range requests nativos de jsmediatags
+      try {
+        tagResult = await readTags(trackUrl);
+      } catch (urlError) {
+        console.warn("jsmediatags lectura URL falló, probando Blob:", urlError);
+      }
+
+      // 2. Si no obtuvo tags (ej: .m4a con moov al final del archivo o XHR parcial incompleto), solicitar Blob completo
+      if (!tagResult || !tagResult.tags || Object.keys(tagResult.tags).length === 0) {
+        const response = await axios.get(trackUrl, { responseType: "blob" });
+        tagResult = await readTags(response.data);
+      }
+
+      if (tagResult && tagResult.tags && Object.keys(tagResult.tags).length > 0) {
+        const metadata = await this.handleMetadata(tagResult);
+        this.updateMediaSession(metadata);
+        this.updateMiniplayerUI(metadata);
+      } else {
+        console.warn("No se encontraron metadatos en el archivo.");
+        this.updateMediaSession(fallbackMetadata);
+        this.updateMiniplayerUI(fallbackMetadata);
+      }
     } catch (error) {
-      console.error("Error al obtener el archivo para metadatos:", error);
+      console.error("Error al obtener metadatos del archivo:", error);
+      this.updateMediaSession(fallbackMetadata);
+      this.updateMiniplayerUI(fallbackMetadata);
     }
   }
 
   async handleMetadata(data) {
-    const tags = data.tags;
+    const tags = data.tags || {};
     const metadata = {};
 
     let artworkUrl = "";
-    if (tags.picture && tags.picture.data) {
-      const byteArray = new Uint8Array(tags.picture.data);
-      const blob = new Blob([byteArray], { type: tags.picture.format });
-      artworkUrl = URL.createObjectURL(blob);
-      this.currentArtworkUrl = artworkUrl;
+    if (tags.picture && tags.picture.data && tags.picture.data.length > 0) {
+      try {
+        const byteArray = new Uint8Array(tags.picture.data);
+        let mimeType = tags.picture.format || "image/jpeg";
+        if (!mimeType.includes("/")) {
+          mimeType = mimeType.toLowerCase().includes("png") ? "image/png" : "image/jpeg";
+        }
+        const blob = new Blob([byteArray], { type: mimeType });
+        artworkUrl = URL.createObjectURL(blob);
+        this.currentArtworkUrl = artworkUrl;
+      } catch (e) {
+        console.warn("Error al procesar carátula:", e);
+      }
     }
 
-    metadata.title =
-      tags.title || this.playlist[this.currentIndex]?.name.replace(/\.[^/.]+$/, "") || "Título Desconocido";
+    const currentTrack = this.playlist[this.currentIndex];
+    const fallbackTitle = currentTrack?.name ? currentTrack.name.replace(/\.[^/.]+$/, "") : "Título Desconocido";
+
+    metadata.title = tags.title || fallbackTitle;
     metadata.artist = tags.artist || "Artista Desconocido";
     metadata.album = tags.album || "Álbum Desconocido";
     metadata.artwork = artworkUrl
@@ -179,7 +210,7 @@ class MusicPlayerService {
         {
           src: artworkUrl,
           sizes: "512x512",
-          type: tags.picture.format,
+          type: tags.picture?.format && tags.picture.format.includes("/") ? tags.picture.format : "image/jpeg",
         },
       ]
       : [];
