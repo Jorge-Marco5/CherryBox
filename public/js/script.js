@@ -403,13 +403,6 @@ async function uploadFilesProcess(files) {
   totalProgressText.textContent = "0%";
   uploadSpeed.textContent = "0 KB/s";
 
-  const filess = [
-    { name: "Another Day - MitiS, HALIENE, Abandoned.flac", size: 25420293 },
-    { name: "Another Day - MitiS, HALIENE, Abandoned.flac", size: 25420293 },
-    { name: "Island - Seven Lions, Wooli, Trivecta, Nevve.flac", size: 36638550 },
-    { name: "Waiting For You - Trivecta, Last Heroes, RUNN.flac|", size: 33281038 },
-  ];
-
   files.forEach((file, index) => {
     const controller = new AbortController();
     activeUploads.push({ file, controller, status: "pending", loaded: 0 });
@@ -547,7 +540,6 @@ document.addEventListener("keydown", (e) => {
   }
 
   if (e.key === "Escape") {
-    console.log(e.target);
     UILogic.closeModal(currentModalActive);
   }
 });

@@ -3,6 +3,7 @@ const audioPlayerExts = localStorage.getItem("audioExts") ? JSON.parse(localStor
 /**
  * Servicio encargado de la reproducción de audio, gestión de listas y sincronización de UI.
  */
+
 class MusicPlayerService {
   constructor() {
     this.audio = new Audio();
@@ -16,7 +17,14 @@ class MusicPlayerService {
     this.progressBar = null;
     this.volumeBar = null;
 
+    this.cherryJamActive = false;
+
     this.progressInterval = null;
+
+    this.miniTitle = document.querySelector(".marqee-miniplayer-title");
+    this.miniArtist = document.querySelector(".marqee-miniplayer-artist");
+    this.miniImg = document.querySelector(".miniplayer-artwork img");
+    this.player = document.getElementById('miniplayer');
 
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", () => this.init());
@@ -52,6 +60,16 @@ class MusicPlayerService {
     // Eventos de controles UI
     this.playBtn?.addEventListener("click", () => this.play());
     this.pauseBtn?.addEventListener("click", () => this.pause());
+
+    // Controles del miniplayer
+    const miniPlayBtn = document.getElementById("miniplayerPlay");
+    const miniPauseBtn = document.getElementById("miniplayerPause");
+    const miniplayerShow = document.getElementById("miniplayerShow");
+
+    miniPlayBtn?.addEventListener("click", () => this.play());
+    miniPauseBtn?.addEventListener("click", () => this.pause());
+    miniplayerShow?.addEventListener("click", () => this.miniplayerHandler());
+
     this.progressBar?.addEventListener("input", (e) => {
       this.seek(e.target.value);
       this.updateSliderFill(e.target);
@@ -78,8 +96,6 @@ class MusicPlayerService {
 
   setPlaylist(files) {
     this.playlist = files;
-    this.currentIndex = -1;
-    this.stop();
   }
 
   async playTrack(index) {
@@ -112,7 +128,7 @@ class MusicPlayerService {
       URL.revokeObjectURL(this.currentArtworkUrl);
       this.currentArtworkUrl = null;
     }
-
+    this.updateMiniplayerUI({ title: "Cargando metadatos...", artist: "..." });
     try {
       const response = await axios.get(trackUrl, {
         responseType: "blob",
@@ -123,6 +139,7 @@ class MusicPlayerService {
         onSuccess: async (tag) => {
           const metadata = await this.handleMetadata(tag);
           this.updateMediaSession(metadata);
+          this.updateMiniplayerUI(metadata);
         },
         onError: (error) => {
           console.warn("jsmediatags error:", error);
@@ -133,6 +150,7 @@ class MusicPlayerService {
             artwork: [],
           };
           this.updateMediaSession(fallbackMetadata);
+          this.updateMiniplayerUI(fallbackMetadata);
         },
       });
     } catch (error) {
@@ -240,13 +258,20 @@ class MusicPlayerService {
 
   setPlayingState(isPlaying) {
     this.isPlaying = isPlaying;
-    console.log(this.isPlaying);
     const playMusicEl = document.getElementById("playMusic");
     const pauseMusicEl = document.getElementById("pauseMusic");
 
     if (playMusicEl && pauseMusicEl) {
       playMusicEl.style.display = isPlaying ? "none" : "block";
       pauseMusicEl.style.display = isPlaying ? "block" : "none";
+    }
+
+    // Sincronizar botones del miniplayer
+    const miniPlayEl = document.getElementById("miniplayerPlay");
+    const miniPauseEl = document.getElementById("miniplayerPause");
+    if (miniPlayEl && miniPauseEl) {
+      miniPlayEl.style.display = isPlaying ? "none" : "block";
+      miniPauseEl.style.display = isPlaying ? "block" : "none";
     }
 
     this.updateMediaSessionPlaybackState();
@@ -265,6 +290,34 @@ class MusicPlayerService {
       }
     });
   }
+
+  miniplayerHandler() {
+    if (!this.isPlaying) {
+      this.player.classList.remove("show", "hide");
+      return;
+    }
+
+    if (this.player.classList.contains("show")) {
+      this.player.classList.remove("show");
+      this.player.classList.add("hide");
+    } else {
+      this.player.classList.remove("hide");
+      this.player.classList.add("show");
+    }
+  }
+
+  updateMiniplayerUI(metadata) {
+    if (this.miniTitle) {
+      this.miniTitle.textContent = metadata.title || "Título Desconocido";
+    }
+    if (this.miniArtist) {
+      this.miniArtist.textContent = metadata.artist || "Artista Desconocido";
+    }
+    if (this.miniImg) {
+      this.miniImg.src = this.currentArtworkUrl || "public/img/vinyl.png";
+    }
+  }
+
 }
 
 // Singleton del servicio

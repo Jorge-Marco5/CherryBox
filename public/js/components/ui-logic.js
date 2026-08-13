@@ -88,6 +88,7 @@ const PREVIEW_STRATEGIES = [
       return "preview-video";
     },
     async render(path, name, ext, contentUrl, container) {
+      MusicPlayer.pause();
       if (navigator.onLine) {
         const device = getTypeDevice();
         const isMobile = device === "movil";
@@ -119,6 +120,7 @@ const PREVIEW_STRATEGIES = [
       return "preview-audio";
     },
     async render(path, name, ext, contentUrl, container) {
+      MusicPlayer.pause();
       container.innerHTML = `<audio controls preload="metadata" controlsList="nodownload"><source src="${contentUrl}" type="audio/${ext}"></audio>`;
     },
   },
@@ -220,8 +222,14 @@ const UILogic = {
     }
 
     if (modalId === "musicPlayerModal") {
-      if (window.MusicPlayer) {
-        window.MusicPlayer.pause();
+      MusicPlayer.cherryJamActive = false;
+      if (MusicPlayer.isPlaying) {
+        console.log("Ocultando cherryjam, mostrando miniplayer");
+        MusicPlayer.player.classList.remove("hide");
+        MusicPlayer.player.classList.add("show");
+      } else {
+        console.log("Ocultando cherryjam y miniplayer, ya que no hay musica sonando");
+        MusicPlayer.player.classList.remove("hide", "show");
       }
     }
   },
@@ -325,21 +333,31 @@ const UILogic = {
     });
   },
 
-  async readyPlayerMusic() {
-    const musicFiles = await getMusicFiles(currentPath);
-    MusicPlayer.setPlaylist(musicFiles);
+  async readyPlayerMusic(scannFiles = false) {
+    //verificamos si hay una playlist cargada, si no, cargamos la playlist de la carpeta actual
+    let playlist = MusicPlayer.playlist;
 
-    const playlist = document.getElementById("playlist");
-    playlist.innerHTML = "";
+    if (playlist.length == 0 || scannFiles) {
+      playlist = await getMusicFiles(currentPath);
+    }
 
-    musicFiles.forEach((file, index) => {
+    MusicPlayer.setPlaylist(playlist);
+
+    const playlistContainer = document.getElementById("playlist");
+    playlistContainer.innerHTML = "";
+
+    playlist.forEach((file, index) => {
       const p = document.createElement("p");
       p.textContent = file.name;
       p.onclick = () => MusicPlayer.playTrack(index);
-      playlist.appendChild(p);
+      playlistContainer.appendChild(p);
     });
 
+    if (MusicPlayer.player) {
+      MusicPlayer.player.classList.remove("show", "hide");
+    }
     document.getElementById("musicPlayerModal").classList.add("active");
+    MusicPlayer.cherryJamActive = true;
   },
 };
 

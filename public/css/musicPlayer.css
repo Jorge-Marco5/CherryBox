@@ -155,3 +155,134 @@
     border-radius: 4px;
     padding: 2px 5px;
 }
+
+.miniplayer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    bottom: 30px;
+    width: 290px;
+    background-color: #1B2026;
+    border-radius: 0 10px 10px 0;
+    padding: 8px 4px 8px 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    left: -320px;
+    /* Totalmente fuera de pantalla por defecto */
+    transition: left 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), border-radius 0.35s ease;
+}
+
+.miniplayer.hide {
+    left: -250px;
+    /* Oculto parcialmente dejando el grip visible */
+    border-radius: 0 10px 10px 0;
+}
+
+.miniplayer.show {
+    left: 10px;
+    /* Totalmente visible */
+    border-radius: 10px;
+}
+
+
+
+.miniplayer-content {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.miniplayer-artwork {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.miniplayer-artwork:hover {
+    transform: scale(1.05);
+}
+
+.miniplayer-artwork img {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, #e794b2, #7a545d);
+    aspect-ratio: 1/1;
+    object-fit: cover;
+}
+
+.miniplayer-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.miniplayer-title {
+    width: 150px;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #ededed;
+    overflow: hidden;
+}
+
+.marqee-miniplayer-title {
+    display: flex;
+    width: max-content;
+    animation: bucle-infinito 15s linear infinite;
+}
+
+.miniplayer-artist {
+    width: 150px;
+    font-size: 0.75rem;
+    color: #ededed;
+    overflow: hidden;
+}
+
+.marqee-miniplayer-artist {
+    display: flex;
+    width: max-content;
+    animation: bucle-infinito 15s linear infinite;
+}
+
+.miniplayer-artist:hover .marqee-miniplayer-artist {
+    animation-play-state: paused;
+}
+
+@keyframes bucle-infinito {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+        /* Se desplaza exactamente la mitad (el primer texto) */
+    }
+}
+
+.miniplayer-controls {
+    display: flex;
+    align-items: center;
+}
+
+.btn-player svg {
+    width: 24px;
+    height: 24px;
+}
+
+.miniplayer-slider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.miniplayer-slider:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
