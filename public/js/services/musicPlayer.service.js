@@ -248,7 +248,7 @@ class MusicPlayerService {
     metadata.title = tags.title || fallbackTitle;
     metadata.artist = tags.artist || "Artista Desconocido";
     metadata.album = tags.album || "Álbum Desconocido";
-    metadata.artwork = artworkBase64
+    metadata.artwork = artworkBase64 || "public/img/back.png"
       ? [
         {
           src: artworkBase64,
