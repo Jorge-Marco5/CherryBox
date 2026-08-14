@@ -121,8 +121,30 @@ class MusicPlayerService {
     }
   }
 
+  pictureToDataBase64(picture) {
+    if (!picture || !picture.data || picture.data.length === 0) return null;
+    try {
+      const byteArray = new Uint8Array(picture.data);
+      let binary = "";
+      const chunkSize = 0x8000;
+      for (let i = 0; i < byteArray.length; i += chunkSize) {
+        const subArray = byteArray.subarray(i, i + chunkSize);
+        binary += String.fromCharCode.apply(null, subArray);
+      }
+      const base64 = btoa(binary);
+      let mimeType = picture.format || "image/jpeg";
+      if (!mimeType.includes("/")) {
+        mimeType = mimeType.toLowerCase().includes("png") ? "image/png" : "image/jpeg";
+      }
+      return `data:${mimeType};base64,${base64}`;
+    } catch (e) {
+      console.warn("Error al convertir carátula a Base64:", e);
+      return null;
+    }
+  }
+
   async getMetadata(trackUrl) {
-    if (this.currentArtworkUrl && this.currentArtworkUrl !== "public/img/back.png") {
+    if (this.currentArtworkUrl && this.currentArtworkUrl.startsWith("blob:")) {
       URL.revokeObjectURL(this.currentArtworkUrl);
       this.currentArtworkUrl = null;
     }
@@ -160,15 +182,15 @@ class MusicPlayerService {
     }
   }
 
-  async updateCaratuleBackground(artwork) {
-    const targetSrc = artwork || "public/img/back.png";
+  async updateCaratuleBackground(artworkSrc) {
+    const targetSrc = artworkSrc || "public/img/back.png";
     const imgFront = document.getElementById("playerImage");
     const imgBack = document.getElementById("playerImageBack");
 
     if (!imgFront) return;
 
     if (!imgBack) {
-      if (imgFront.src === targetSrc || imgFront.src.endsWith(targetSrc)) return;
+      if (imgFront.src === targetSrc) return;
       imgFront.classList.remove("active");
       setTimeout(() => {
         imgFront.src = targetSrc;
@@ -180,9 +202,7 @@ class MusicPlayerService {
     const currentActive = imgFront.classList.contains("active") ? imgFront : imgBack;
     const currentInactive = currentActive === imgFront ? imgBack : imgFront;
 
-    if (currentActive.src === targetSrc || (targetSrc.startsWith("public/") && currentActive.src.endsWith(targetSrc))) {
-      return;
-    }
+    if (currentActive.src === targetSrc) return;
 
     const tempImg = new Image();
     tempImg.onload = () => {
@@ -201,22 +221,26 @@ class MusicPlayerService {
   async handleMetadata(data) {
     const tags = data?.tags || {};
     const metadata = {};
-
     let artworkUrl = "";
+    let artworkBase64 = "";
+
     if (tags.picture && tags.picture.data && tags.picture.data.length > 0) {
       try {
-        const byteArray = new Uint8Array(tags.picture.data);
         let mimeType = tags.picture.format || "image/jpeg";
         if (!mimeType.includes("/")) {
           mimeType = mimeType.toLowerCase().includes("png") ? "image/png" : "image/jpeg";
         }
+
+        const byteArray = new Uint8Array(tags.picture.data);
         const blob = new Blob([byteArray], { type: mimeType });
         artworkUrl = URL.createObjectURL(blob);
-        this.currentArtworkUrl = artworkUrl;
+        artworkBase64 = this.pictureToDataBase64(tags.picture) || "";
       } catch (e) {
         console.warn("Error al procesar carátula:", e);
       }
     }
+
+    this.currentArtworkUrl = artworkUrl || "public/img/back.png";
 
     const currentTrack = this.playlist[this.currentIndex];
     const fallbackTitle = currentTrack?.name ? currentTrack.name.replace(/\.[^/.]+$/, "") : "Título Desconocido";
@@ -224,18 +248,19 @@ class MusicPlayerService {
     metadata.title = tags.title || fallbackTitle;
     metadata.artist = tags.artist || "Artista Desconocido";
     metadata.album = tags.album || "Álbum Desconocido";
-    metadata.artwork = artworkUrl
+    metadata.artwork = artworkBase64
       ? [
         {
-          src: artworkUrl,
+          src: artworkBase64,
           sizes: "512x512",
           type: tags.picture?.format && tags.picture.format.includes("/") ? tags.picture.format : "image/jpeg",
         },
       ]
       : [];
+    metadata.artworkUrl = artworkBase64;
 
     await this.updateMediaSession(metadata);
-    await this.updateCaratuleBackground(artworkUrl);
+    await this.updateCaratuleBackground(artworkBase64);
     await this.updateMiniplayerUI(metadata);
 
     return metadata;
@@ -243,7 +268,10 @@ class MusicPlayerService {
 
   async updateMediaSession(data) {
     if (!("mediaSession" in navigator)) return;
-
+    //si MediaImage src excede el tamaño maximo de url permitido
+    if (data.artwork[0].src.length > 128 * 1024) {
+      data.artwork[0].src = this.currentArtworkUrl;
+    }
     navigator.mediaSession.metadata = new MediaMetadata({
       title: data.title,
       artist: data.artist,
@@ -252,6 +280,7 @@ class MusicPlayerService {
     });
 
     this.updateMediaSessionPlaybackState();
+    this.currentArtworkUrl = "public/img/back.png";
   }
 
   updateMediaSessionPlaybackState() {
@@ -369,12 +398,15 @@ class MusicPlayerService {
       this.miniArtist.textContent = metadata.artist || "Artista Desconocido";
     }
     if (this.miniImg) {
-      this.miniImg.src = this.currentArtworkUrl || "public/img/back.png";
+      this.miniImg.src = metadata.artworkUrl || "public/img/back.png";
     }
   }
 
   //destructor
   destroyMusicPlayer() {
+    if (this.currentArtworkUrl && this.currentArtworkUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(this.currentArtworkUrl);
+    }
     this.playlist = [];
     this.currentIndex = -1;
     this.isPlaying = false;
