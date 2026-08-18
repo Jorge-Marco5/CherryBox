@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="public/css/styles.css" />
   <script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/video.js"></script>
   <script src="public/js/lib/axios.min.js"></script>
+  <script src="public/js/lib/masonry.pkgd.min.js"></script>
+  <script src="public/js/lib/imagesloaded.pkgd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"
     integrity="sha512-YsR46MmyChktsyMMou+Bs74oCa/CDdwft7rJ5wlnmDzMj1mzqncsfJamEEf99Nk7IB0JpTMo5hS8rxB49FUktQ=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -151,7 +153,10 @@
         </svg>
       </button>
     </div>
-    <div class="file-list" id="fileList"></div>
+    <div class="files-container" id="filesContainer">
+      <div class="file-list" id="fileList"></div>
+      <div class="image-list" id="imageList"></div>
+    </div>
     <div class="toolbar" id="admin-actions" style="justify-content: end">
       <a title="settings" class="btn btn-secondary" href="/settings">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -403,11 +408,13 @@
     </div>
   </div>
   <div class="modal" id="musicPlayerModal">
-    <div class="modal-content-player" style="max-width: 500px">
+    <div class="player-content-image">
       <div class="player-image-container">
         <img id="playerImageBack" src="public/img/back.png" alt="" class="player-image">
         <img id="playerImage" src="public/img/back.png" alt="" loading="lazy" class="player-image active">
       </div>
+    </div>
+    <div class="modal-content-player">
       <div class="modal-header-player">
         <button id="playMusic" class="btn-player">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"

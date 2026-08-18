@@ -98,10 +98,11 @@ class MusicPlayerService {
     this.playlist = files;
   }
 
-  async playTrack(index, path) {
+  async playTrack(index) {
     if (index < 0 || index >= this.playlist.length) return;
     this.currentIndex = index;
-    const contentUrl = `${API_URL}/file-content?path=${encodeURIComponent(path)}`;
+    const track = this.playlist[index];
+    const contentUrl = `${API_URL}/file-content?path=${encodeURIComponent(track.path)}`;
     this.audio.src = contentUrl;
     this.audio.load();
     this.play();

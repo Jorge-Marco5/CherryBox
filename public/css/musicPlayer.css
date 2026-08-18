@@ -7,42 +7,61 @@
     color: #ededed;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0px 20px rgba(0, 0, 0, 0.7);
     overflow: hidden;
 }
 
-.player-image-container {
-    position: absolute;
+.player-content-image {
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 150%;
-    height: 150%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    z-index: -2;
+    pointer-events: none;
+}
+
+.player-image-container {
+    width: 900px;
+    height: 900px;
+    max-width: 100vw;
+    max-height: 100vh;
+    aspect-ratio: 1/1;
+    display: flex;
+    justify-content: center;
+    background-color: transparent;
+    align-items: center;
     z-index: -1;
     overflow: hidden;
-    border-radius: 12px;
+    mask-image: radial-gradient(circle at center, black 0%, rgba(0, 0, 0, 0.45) 55%, rgba(0, 0, 0, 0.1) 80%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle at center, black 0%, rgba(0, 0, 0, 0.45) 55%, rgba(0, 0, 0, 0.1) 80%, transparent 100%);
 }
 
 .player-image {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    width: 500px;
+    height: 500px;
     object-fit: cover;
-    filter: blur(80px);
+    filter: blur(100px) saturate(150%) brightness(1.05);
     opacity: 0;
     transition: opacity 0.8s ease-in-out;
-    animation: rotation 20s linear infinite;
+    animation: rotation 10s linear infinite;
+    transform-origin: center;
 }
 
 .player-image.active {
-    opacity: 0.6;
+    opacity: 0.7;
 }
 
 @media (max-width: 768px) {
     .modal-content-player {
-        max-width: 95dvw;
+        max-width: 500px;
         max-height: 95dvh;
         min-width: auto;
     }
@@ -50,11 +69,11 @@
 
 @keyframes rotation {
     0% {
-        transform: rotate(0deg);
+        transform: rotate(0deg) scale(1.08);
     }
 
     100% {
-        transform: rotate(360deg);
+        transform: rotate(360deg) scale(1.08);
     }
 }
 
@@ -82,7 +101,7 @@
     flex-direction: column;
     font-size: 1rem;
     gap: 10px;
-    color: var(--text-muted);
+    color: #dfdfdf;
     font-weight: 700;
     text-align: center;
     overflow-y: auto;

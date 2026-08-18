@@ -207,9 +207,14 @@ body {
     transform: translateY(1px);
 }
 
-.file-list {
+.files-container {
+    height: 85%;
     max-height: calc(100dvh - 240px);
+    padding: 0 5px;
     overflow: auto;
+}
+
+.file-list {
     padding: 15px;
 }
 
@@ -229,10 +234,90 @@ body {
     gap: 10px;
 }
 
+/* Galería Masonry estilo Pinterest */
+.image-list {
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* Sizers y elementos de imagen con columnas adaptativas según pantalla */
+.grid-sizer,
+.image-file {
+    width: calc(50% - 8px);
+    /* 2 columnas en móviles (<540px) */
+    margin-bottom: 16px;
+    box-sizing: border-box;
+}
+
+.gutter-sizer {
+    width: 16px;
+}
+
+/* 3 columnas en móviles grandes / phablets */
+@media (min-width: 540px) {
+
+    .grid-sizer,
+    .image-file {
+        width: calc(33.333% - 10.666px);
+    }
+}
+
+/* 4 columnas en tablets */
 @media (min-width: 768px) {
     .file-item {
         padding: 15px;
     }
+
+    .grid-sizer,
+    .image-file {
+        width: calc(25% - 12px);
+    }
+}
+
+/* 5 columnas en escritorios */
+@media (min-width: 1200px) {
+
+    .grid-sizer,
+    .image-file {
+        width: calc(20% - 12.8px);
+    }
+}
+
+/* 6 columnas en pantallas ultrawide */
+@media (min-width: 1600px) {
+
+    .grid-sizer,
+    .image-file {
+        width: calc(16.666% - 13.333px);
+    }
+}
+
+.image-file {
+    min-height: 90px;
+    background: var(--card-bg, #1E1E1E);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.image-file:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+    border-color: var(--primary, #FF146C);
+}
+
+.image-file img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    object-fit: cover;
+    image-rendering: optimizeQuality;
 }
 
 .file-item:hover {
@@ -241,6 +326,35 @@ body {
 
 .file-item:active {
     background: #333;
+}
+
+.image-actions {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.image-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.image-buttons button {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    background-color: #00000062;
+    color: #ffffff;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
 
 .file-icon {

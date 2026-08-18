@@ -28,7 +28,9 @@ async function loadFiles(path = "") {
       document.getElementById("btn-music-player").style.display = "none";
     }
     getStorage();
+
     Renderers.renderFiles(data.files);
+    Renderers.renderImages();
     updateFolderPermissionButton();
   } catch (error) {
     showToast("Ha ocurrido un error al iniciar", "danger");

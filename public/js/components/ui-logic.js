@@ -352,7 +352,7 @@ const UILogic = {
     playlist.forEach((file, index) => {
       const p = document.createElement("p");
       p.textContent = file.name;
-      p.onclick = async () => await MusicPlayer.playTrack(index, file.path);
+      p.onclick = async () => await MusicPlayer.playTrack(index);
       playlistContainer.appendChild(p);
     });
 

@@ -210,7 +210,7 @@ export const searchItemsService = async (query: string, userId: string, userRole
             modified: stats.mtime,
             path: relPath,
           });
-        } catch {}
+        } catch { }
       }
       if (item.isDirectory()) await searchRecursive(relPath);
     }
