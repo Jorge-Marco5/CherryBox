@@ -591,10 +591,11 @@ body {
     align-items: center;
     font-size: 18px;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 0px;
+    padding: 10px 0;
     position: sticky;
     top: 0;
-    background: #1E1E1E;
+    background-color: #1E1E1E;
     padding-bottom: 5px;
     z-index: 1;
 }
@@ -612,6 +613,13 @@ body {
     .modal-header {
         font-size: 1rem;
     }
+}
+
+.modal-body {
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 70dvh;
 }
 
 .form-group {
@@ -791,6 +799,36 @@ body {
     border: none;
     border-radius: 8px;
     min-height: 70dvh;
+}
+
+.permission-guide table {
+    margin: 8px 0 15px;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #333;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.permission-guide td {
+    padding: 8px 10px;
+    border: 1px solid #333;
+    color: #ddd;
+}
+
+.permission-guide th {
+    padding: 8px 10px;
+    border: 1px solid #333;
+    background: #252525;
+    color: var(--primary, #FF146C);
+    font-weight: 600;
+    text-align: left;
+}
+
+.permission-guide tr:nth-child(even) {
+    background: #1A1A1A;
 }
 
 .empty-state {

@@ -357,54 +357,136 @@
             "></span>
       </div>
 
-      <div id="permissionsList" style="margin-bottom: 20px; max-height: 200px; overflow-y: auto">
-        <!-- Lista de permisos cargada dinámicamente -->
-      </div>
-
-      <div class="modal-header" style="font-size: 1rem; border-bottom: none; padding-bottom: 5px">
-        Añadir Acceso
-      </div>
-      <form id="permissions-form">
-        <div class="form-group">
-          <label>ID de Usuario o Email:</label>
-          <input type="text" id="targetUserId" name="targetUserId" placeholder="ID del usuario o email" />
-        </div>
-        <div class="form-group">
-          <label>Nivel de Acceso:</label>
-          <select id="accessLevel" class="btn btn-secondary" name="accessLevel"
-            style="width: 100%; text-align: left; padding: 10px">
-            <option value="READ">Lectura (Ver y descargar)</option>
-            <option value="WRITE">Escritura (Modificar y renombrar)</option>
-            <option value="DELETE">Eliminación (Borrar permanentemente)</option>
-            <option value="MANAGE">Administración (Gestionar permisos)</option>
-          </select>
+      <div class="modal-body">
+        <div id="permissionsList" style="margin-bottom: 20px; max-height: 200px; overflow-y: auto">
+          <!-- Lista de permisos cargada dinámicamente -->
         </div>
 
-        <div class="modal-actions" style="margin-top: 20px">
-          <button class="btn" onclick="closeModal(currentModalActive)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-x">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M18 6l-12 12" />
-              <path d="M6 6l12 12" />
-            </svg>
-            <p class="acction-text">Cerrar</p>
-          </button>
-          <button class="btn btn-primary" type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-user-plus">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
-              <path d="M16 19h6" />
-              <path d="M19 16v6" />
-              <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.338 0 .659 .042 .965 .12" />
-            </svg>
-            <p class="acction-text">Otorgar</p>
-          </button>
+        <div class="modal-header" style="font-size: 1rem; border-bottom: none; padding-bottom: 5px">
+          Añadir Acceso
         </div>
-      </form>
+        <form id="permissions-form">
+          <div class="form-group">
+            <label>ID de Usuario o Email:</label>
+            <input type="text" id="targetUserId" name="targetUserId" placeholder="ID del usuario o email" />
+          </div>
+          <div class="form-group">
+            <label>Nivel de Acceso:</label>
+            <select id="accessLevel" class="btn btn-secondary" name="accessLevel"
+              style="width: 100%; text-align: left; padding: 10px">
+              <option value="READ">READ (Ver y descargar)</option>
+              <option value="WRITE">WRITE (Modificar, renombrar y subir)</option>
+              <option value="DELETE">DELETE (Borrar y leer)</option>
+              <option value="MANAGE">MANAGE (Gestionar todo el contenido)</option>
+            </select>
+          </div>
+          <details style="margin-top: 15px;">
+            <summary style="font-weight: 500; cursor: pointer; margin-bottom: 10px; color: var(--primary, #FF146C);">
+              Guía de Permisos y Roles del Sistema
+            </summary>
+            <div class="permission-guide">
+              <h4 style="margin: 10px 0 5px; font-size: 0.85rem; color: #ededed;">1. Niveles de Permiso Granulares</h4>
+              <p style="font-size: 0.75rem; color: #aaa; margin-bottom: 8px;">
+                Permisos asignables individualmente sobre un archivo o carpeta compartida:
+              </p>
+              <table>
+                <caption>Tabla de Permisos Granulares</caption>
+                <thead>
+                  <tr>
+                    <th>Permiso</th>
+                    <th>Acciones y Descripción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>READ</strong></td>
+                    <td>Permite <strong>ver</strong> y <strong>descargar</strong> el contenido del archivo o carpeta. No
+                      permite modificar, renombrar, subir ni eliminar elementos. <em>Recomendado para invitados o
+                        lectores.</em></td>
+                  </tr>
+                  <tr>
+                    <td><strong>WRITE</strong></td>
+                    <td>Permite <strong>crear</strong>, <strong>modificar</strong> y <strong>subir</strong> archivos
+                      dentro de una carpeta, o editar el contenido de un archivo. Por seguridad, no permite modificar o
+                      sobrescribir archivos pertenecientes a otros usuarios a menos que posea permiso de gestión.
+                      <em>Recomendado para colaboradores.</em>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><strong>DELETE</strong></td>
+                    <td>Permite <strong>eliminar</strong>, <strong>ver</strong> y <strong>descargar</strong> el archivo
+                      o los elementos dentro de una carpeta compartida. No concede permiso para crear o modificar
+                      contenido ajeno. <em>Recomendado para tareas de depuración o limpieza.</em></td>
+                  </tr>
+                  <tr>
+                    <td><strong>MANAGE</strong></td>
+                    <td>Concede <strong>control total</strong> sobre la carpeta o archivo. Permite crear, editar,
+                      eliminar y <strong>otorgar o revocar permisos</strong> a otros usuarios sobre dicho elemento
+                      (excepto sobre archivos del Superadministrador).</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <h4 style="margin: 15px 0 5px; font-size: 0.85rem; color: #ededed;">2. Jerarquía de Roles del Sistema</h4>
+              <p style="font-size: 0.75rem; color: #aaa; margin-bottom: 8px;">
+                Reglas globales de acceso asignadas al tipo de cuenta de usuario:
+              </p>
+              <table>
+                <caption>Tabla de Roles Globales</caption>
+                <thead>
+                  <tr>
+                    <th>Rol</th>
+                    <th>Alcance y Privilegios</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>USER</strong></td>
+                    <td><strong>Usuario Estándar:</strong> Administra sus propios archivos y aquellos elementos
+                      compartidos donde posea permiso explícito (READ, WRITE, DELETE, MANAGE).</td>
+                  </tr>
+                  <tr>
+                    <td><strong>ADMIN</strong></td>
+                    <td><strong>Administrador:</strong> Posee permiso <code>MANAGE</code> por defecto en todo el
+                      sistema. Puede gestionar sus propios archivos y los de usuarios estándar. <em>Regla de
+                        Seguridad:</em> No puede modificar, eliminar ni gestionar permisos en archivos propiedad de un
+                      Superadministrador.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>SUPERADMIN</strong></td>
+                    <td><strong>Superadministrador:</strong> Rol supremo e intocable. Cuenta con acceso total,
+                      incondicional e irrestricto sobre todos los archivos, carpetas y permisos del sistema.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+          <div class="modal-actions" style="margin-top: 20px">
+            <button class="btn" onclick="closeModal(currentModalActive)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M18 6l-12 12" />
+                <path d="M6 6l12 12" />
+              </svg>
+              <p class="acction-text">Cerrar</p>
+            </button>
+            <button class="btn btn-primary" type="submit">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-user-plus">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                <path d="M16 19h6" />
+                <path d="M19 16v6" />
+                <path d="M6 21v-2a4 4 0 0 1 4 -4h4c.338 0 .659 .042 .965 .12" />
+              </svg>
+              <p class="acction-text">Otorgar</p>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
   <div class="modal" id="musicPlayerModal">

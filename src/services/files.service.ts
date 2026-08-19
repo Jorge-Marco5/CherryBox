@@ -10,11 +10,23 @@ import { getBaseDir } from "../utils/settings";
 /**
 
 /**
+ * Evalúa si un nivel de acceso concedido satisface la acción solicitada.
+ * Implementa una jerarquía implícita donde:
+ * - Cualquier permiso (READ, WRITE, DELETE, MANAGE) incluye lectura (READ).
+ * - MANAGE tiene acceso total a cualquier acción.
+ */
+function satisfiesAccess(granted: AccessType, requested: AccessType): boolean {
+  if (granted === "MANAGE") return true;
+  if (requested === "READ") return true; // Cualquier permiso otorgado permite leer
+  if (requested === "WRITE" && granted === "WRITE") return true;
+  if (requested === "DELETE" && granted === "DELETE") return true;
+  return false;
+}
+
+/**
  * Versión interna de checkPermission que devuelve booleano.
  */
-async function hasAccess(userId: string, userRole: string, relativePath: string, access: AccessType): Promise<boolean> {
-  if (userRole === "ADMIN" || userRole === "SUPERADMIN") return true;
-
+export async function hasAccess(userId: string, userRole: string, relativePath: string, access: AccessType): Promise<boolean> {
   const parts = relativePath.split(path.sep).filter((p) => p !== "");
   const pathsToCheck = [""];
   let current = "";
@@ -28,20 +40,57 @@ async function hasAccess(userId: string, userRole: string, relativePath: string,
     include: { permissions: { where: { userId } } },
   });
 
-  // REGLA DE SEGURIDAD: Los ADMIN no pueden modificar (WRITE/DELETE) archivos del SUPERADMIN
-  // El Superadmin es intocable según las reglas globales.
-  if (userRole === "ADMIN" && (access === "WRITE" || access === "DELETE")) {
-    const targetFile = filesInPath.find((f) => f.path === relativePath);
-    if (targetFile && targetFile.ownerId) {
-      const owner = await prisma.user.findUnique({ where: { id: targetFile.ownerId } });
-      if (owner?.role === "SUPERADMIN") return false;
+  const targetFile = filesInPath.find((f) => f.path === relativePath);
+
+  // 1. Si el usuario es dueño directo de algún elemento en la ruta, tiene acceso
+  const ownedFile = filesInPath.find((f) => f.ownerId === userId);
+  if (ownedFile) return true;
+
+  // 2. Si tiene un permiso explícito otorgado en la ruta que satisface la acción
+  const hasExplicitPermission = filesInPath.some((file) =>
+    file.permissions.some((p) => {
+      // Caso especial: si se requiere READ, pero el permiso otorgado es WRITE o DELETE (Drop Box/Blind Submit):
+      // Solo permitimos la lectura de la carpeta raíz (para navegación) o si es dueño directo del archivo.
+      if (access === "READ" && (p.access === "WRITE" || p.access === "DELETE")) {
+        const isDirectory = targetFile?.type === "FOLDER" || !targetFile;
+        const isOwner = targetFile?.ownerId === userId;
+        return isDirectory || isOwner;
+      }
+      return satisfiesAccess(p.access, access);
+    })
+  );
+  if (hasExplicitPermission) return true;
+
+  // 3. Bloquear sobreescritura de archivos de otros usuarios en carpetas compartidas con WRITE (Drop Box)
+  if (access === "WRITE" && targetFile && targetFile.ownerId !== userId && userRole === "USER") {
+    const hasManageOnTarget = targetFile.permissions.some(p => p.access === "MANAGE");
+    if (!hasManageOnTarget) {
+      return false;
     }
   }
 
-  for (const file of filesInPath) {
-    if (file.ownerId === userId) return true;
-    const hasExactAccess = file.permissions.some((p) => p.access === access || p.access === "MANAGE");
-    if (hasExactAccess) return true;
+  // 4. Si no es dueño ni tiene permiso explícito, validamos según el rol:
+  // - El SUPERADMIN tiene acceso total por defecto
+  if (userRole === "SUPERADMIN") return true;
+
+  // - El ADMIN tiene acceso total por defecto, EXCEPTO en archivos propiedad del SUPERADMIN
+  if (userRole === "ADMIN") {
+    if (access === "WRITE" || access === "DELETE" || access === "MANAGE") {
+      let checkFile = targetFile;
+      if (!checkFile && parts.length > 0) {
+        const parentPath = path.dirname(relativePath);
+        const resolvedParentPath = parentPath === "." || parentPath === "/" ? "" : parentPath;
+        checkFile = filesInPath.find((f) => f.path === resolvedParentPath);
+      }
+
+      if (checkFile && checkFile.ownerId) {
+        const owner = await prisma.user.findUnique({ where: { id: checkFile.ownerId } });
+        if (owner?.role === "SUPERADMIN") {
+          return false; // Bloqueado: el Superadmin es intocable sin permiso explícito
+        }
+      }
+    }
+    return true; // Permitido para otros archivos
   }
 
   return false;
@@ -50,7 +99,7 @@ async function hasAccess(userId: string, userRole: string, relativePath: string,
 /**
  * Valida si un usuario tiene el permiso necesario. Lanza error si no.
  */
-async function checkPermission(userId: string, userRole: string, relativePath: string, access: AccessType) {
+export async function checkPermission(userId: string, userRole: string, relativePath: string, access: AccessType) {
   const allowed = await hasAccess(userId, userRole, relativePath, access);
   if (!allowed) throw new ForbiddenError(`Permiso denegado: se requiere ${access} para esta ruta.`);
 }
@@ -116,6 +165,25 @@ export const listItemsService = async (relativePath: string, userId: string, use
 
   if (!isPathDiscoverable) throw new ForbiddenError("Permiso denegado: no tienes acceso a esta ubicación.");
 
+  // Obtener ancestros para verificar si el usuario tiene permiso explícito READ o MANAGE
+  const parts = relativePath.split(path.sep).filter((p) => p !== "");
+  const pathsToCheck = [""];
+  let current = "";
+  for (const part of parts) {
+    current = path.join(current, part);
+    pathsToCheck.push(current);
+  }
+
+  const filesInPathForList = await prisma.file.findMany({
+    where: { path: { in: pathsToCheck } },
+    include: { permissions: { where: { userId } } },
+  });
+
+  const hasReadOrManage = userRole === "SUPERADMIN" || userRole === "ADMIN" || filesInPathForList.some(file =>
+    file.ownerId === userId ||
+    file.permissions.some(p => p.access === "READ" || p.access === "MANAGE")
+  );
+
   const fullPath = path.join(BASE_DIR, relativePath);
   const items = await fs.readdir(fullPath, { withFileTypes: true });
   const currentFolder = await prisma.file.findUnique({
@@ -146,8 +214,16 @@ export const listItemsService = async (relativePath: string, userId: string, use
       try {
         const [stats, dbFile] = await Promise.all([
           fs.stat(path.join(fullPath, item.name)),
-          prisma.file.findUnique({ where: { path: relItemPath }, select: { id: true, folder_color: true } }),
+          prisma.file.findUnique({ where: { path: relItemPath }, select: { id: true, folder_color: true, ownerId: true } }),
         ]);
+
+        // Si el usuario no tiene READ o MANAGE (es decir, solo tiene WRITE o DELETE en la carpeta),
+        // solo puede ver y listar sus propios archivos/carpetas creadas por él.
+        if (!hasReadOrManage && userRole === "USER") {
+          if (dbFile?.ownerId !== userId) {
+            return null; // Ocultar archivos y carpetas de otros usuarios
+          }
+        }
 
         return {
           id: dbFile?.id,
@@ -249,7 +325,20 @@ export const renameItemService = async (
 ) => {
   if (!isValidPath(oldPath)) throw new ValidationError("Ruta no válida");
   const BASE_DIR = getBaseDir();
-  // Necesita WRITE en el ítem actual
+
+  const oldFile = await prisma.file.findUnique({ where: { path: oldPath } });
+  if (!oldFile) throw new ValidationError("El archivo o carpeta no existe");
+
+  if (oldFile.ownerId) {
+    const owner = await prisma.user.findUnique({ where: { id: oldFile.ownerId } });
+    if (owner?.role === "SUPERADMIN" && userRole !== "SUPERADMIN") {
+      throw new ForbiddenError("No tienes permiso para renombrar este archivo.");
+    }
+  }
+
+  if (userRole === "USER" && oldFile.ownerId !== userId) {
+    throw new ForbiddenError("Solo puedes renombrar archivos y carpetas creados por ti.");
+  }
   await checkPermission(userId, userRole, oldPath, "WRITE");
 
   const oldFullPath = path.join(BASE_DIR, oldPath);
@@ -259,11 +348,10 @@ export const renameItemService = async (
   await fs.rename(oldFullPath, newFullPath);
 
   // Sincronizar (Borrar viejo, Crear nuevo)
-  const oldFile = await prisma.file.findUnique({ where: { path: oldPath } });
   await syncFileInDb(oldPath, "DELETE");
   await syncFileInDb(newRelPath, "CREATE", {
-    type: oldFile?.type || "FILE",
-    ownerId: oldFile?.ownerId || userId,
+    type: oldFile.type,
+    ownerId: oldFile.ownerId,
     folder_color: folderColor,
   });
 
@@ -273,7 +361,21 @@ export const renameItemService = async (
 export const deleteItemService = async (relativePath: string, userId: string, userRole: string) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
   const BASE_DIR = getBaseDir();
-  // Necesita DELETE en el ítem
+
+  const file = await prisma.file.findUnique({ where: { path: relativePath } });
+  if (!file) throw new ValidationError("El archivo o carpeta no existe");
+
+  if (file.ownerId) {
+    const owner = await prisma.user.findUnique({ where: { id: file.ownerId } });
+    if (owner?.role === "SUPERADMIN" && userRole !== "SUPERADMIN") {
+      throw new ForbiddenError("No tienes permiso para eliminar este archivo.");
+    }
+  }
+
+  if (userRole === "USER" && file.ownerId !== userId) {
+    throw new ForbiddenError("Solo puedes eliminar archivos y carpetas creados por ti.");
+  }
+
   await checkPermission(userId, userRole, relativePath, "DELETE");
 
   const fullPath = path.join(BASE_DIR, relativePath);

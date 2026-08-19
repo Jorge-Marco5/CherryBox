@@ -15,7 +15,7 @@ const validateUserAction = async (requester: { id: string, role: string }, targe
 
     // 1. Superadmin es intocable
     if (target.role === "SUPERADMIN") {
-        throw new ForbiddenError("No se permite realizar esta acción sobre el Superadministrador");
+        throw new ForbiddenError("No se permite realizar esta acción sobre este usuario");
     }
 
     // 2. Si el solicitante es ADMIN, solo puede gestionar USERS
@@ -48,11 +48,11 @@ export const deleteUserService = async (targetId: string, requester: { id: strin
 
 export const updateUserService = async (targetId: string, data: any, requester: { id: string, role: string }) => {
     const target = await validateUserAction(requester, targetId);
-    
+
     // Si es un cambio de rol, validar restricciones adicionales
     if (data.role) {
         if (data.role === "SUPERADMIN") {
-            throw new ValidationError("No es posible asignar el rol de Superadministrador");
+            throw new ValidationError("No es posible asignar el rol al usuario");
         }
         // Admins solo pueden promover/demoter a USER <-> ADMIN
         if (requester.role === "ADMIN" && (data.role !== "USER" && data.role !== "ADMIN")) {
@@ -66,9 +66,9 @@ export const updateUserService = async (targetId: string, data: any, requester: 
 
 export const blockUserService = async (targetId: string, requester: { id: string, role: string }) => {
     const target = await validateUserAction(requester, targetId);
-    const user = await prisma.user.update({ 
-        where: { id: targetId }, 
-        data: { is_blocked: !target.is_blocked } 
+    const user = await prisma.user.update({
+        where: { id: targetId },
+        data: { is_blocked: !target.is_blocked }
     });
     return user;
 }

@@ -14,9 +14,15 @@ export const grantPermissionHandler = async (req: AuthRequest, res: Response, ne
         const { fileId, targetUserId, access } = req.body;
         const requesterId = req.user!.id;
 
-        // 1. Verificar que el archivo existe
         const file = await prisma.file.findUnique({ where: { id: fileId } });
         if (!file) throw new NotFoundError("Archivo no encontrado");
+
+        if (file.ownerId) {
+            const owner = await prisma.user.findUnique({ where: { id: file.ownerId } });
+            if (owner?.role === "SUPERADMIN" && req.user!.role !== "SUPERADMIN") {
+                throw new ForbiddenError("No tienes permiso para gestionar los permisos de un archivo del SUPERADMIN.");
+            }
+        }
 
         // Buscar usuario por ID o Email
         let targetUser = await prisma.user.findFirst({
@@ -45,7 +51,7 @@ export const grantPermissionHandler = async (req: AuthRequest, res: Response, ne
 
         // 3. Upsert del permiso
         const permission = await prisma.filePermission.upsert({
-            where: { 
+            where: {
                 id: (await prisma.filePermission.findFirst({ where: { fileId, userId: finalTargetId } }))?.id || "new-uuid"
             },
             update: { access },
@@ -74,11 +80,18 @@ export const revokePermissionHandler = async (req: AuthRequest, res: Response, n
 
         if (!permission) return res.status(404).json({ error: "Permiso no encontrado" });
 
+        if (permission.file.ownerId) {
+            const owner = await prisma.user.findUnique({ where: { id: permission.file.ownerId } });
+            if (owner?.role === "SUPERADMIN" && req.user!.role !== "SUPERADMIN") {
+                throw new ForbiddenError("No tienes permiso para gestionar los permisos de un archivo del SUPERADMIN.");
+            }
+        }
+
         const isOwner = permission.file.ownerId === requesterId;
         const isAdmin = req.user!.role === "ADMIN" || req.user!.role === "SUPERADMIN";
 
         if (!isOwner && !isAdmin) {
-             throw new ForbiddenError("Permiso denegado");
+            throw new ForbiddenError("Permiso denegado");
         }
 
         await prisma.filePermission.delete({ where: { id: permissionId } });
@@ -94,6 +107,16 @@ export const revokePermissionHandler = async (req: AuthRequest, res: Response, n
 export const getFilePermissionsHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
         const { fileId } = req.params;
+
+        const file = await prisma.file.findUnique({ where: { id: fileId } });
+        if (!file) throw new NotFoundError("Archivo no encontrado");
+
+        const { hasAccess } = require("../services/files.service");
+        const allowed = await hasAccess(req.user!.id, req.user!.role, file.path, "READ");
+        if (!allowed) {
+            throw new ForbiddenError("No tienes permiso para ver los permisos de este archivo.");
+        }
+
         const permissions = await prisma.filePermission.findMany({
             where: { fileId },
             include: { user: { select: { email: true, id: true } } }

@@ -16,7 +16,7 @@ import { requireAuth, requireSuperAdmin } from "../middlewares/auth.middleware";
 import { upload } from "../utils/multer";
 
 import { uploadCleanupMiddleware } from "../middlewares/cleanup.middleware";
-import { checkStorageLimit } from "../middlewares/storage.middleware";
+import { checkStorageLimit, checkUploadPermission } from "../middlewares/storage.middleware";
 
 import dotenv from "dotenv";
 
@@ -48,6 +48,7 @@ router.post("/folder", requireAuth, createFolder);
 router.post(
   "/upload",
   requireAuth,
+  checkUploadPermission,
   checkStorageLimit,
   uploadCleanupMiddleware,
   upload.array("files", Number(MAX_FILES)),
