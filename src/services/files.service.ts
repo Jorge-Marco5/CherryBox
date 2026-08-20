@@ -6,8 +6,7 @@ import { audioExts, codeExts, imageExts, pdfExts, textExts, videoExts } from "..
 import { ForbiddenError, ValidationError } from "../utils/errors";
 import { isValidPath } from "../utils/multer";
 import { getBaseDir } from "../utils/settings";
-
-/**
+import videoHandler from "./videostream.service";
 
 /**
  * Evalúa si un nivel de acceso concedido satisface la acción solicitada.
@@ -403,7 +402,7 @@ export const getFormatsAvailables = async () => {
   return { audioExts, codeExts, imageExts, pdfExts, textExts, videoExts };
 };
 
-export const getItemContentService = async (relativePath: string, userId: string, userRole: string) => {
+export const getItemContentService = async (relativePath: string, range: string | undefined, userId: string, userRole: string) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
   const BASE_DIR = getBaseDir();
   // Necesita READ
@@ -418,9 +417,15 @@ export const getItemContentService = async (relativePath: string, userId: string
     return { type: "text", content };
   }
 
-  const mediaExtensions = [...imageExts, ...pdfExts, ...audioExts, ...videoExts];
+  const mediaExtensions = [...imageExts, ...pdfExts, ...audioExts];
   if (mediaExtensions.includes(ext)) {
     return { type: "media", fullPath };
+  }
+
+  const videoExtensions = [...videoExts];
+  if (videoExtensions.includes(ext)) {
+    const content = await videoHandler(fullPath, range);
+    return { type: "video", content }
   }
 
   throw new ValidationError("Tipo de archivo no soportado para vista previa");

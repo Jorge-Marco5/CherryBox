@@ -18,6 +18,7 @@ import { ValidationError } from "../utils/errors";
 import { logger } from "../utils/logger";
 import { isValidPath } from "../utils/multer";
 import { getBaseDir, addUsedStorage } from "../utils/settings";
+import { VideoStreamResult } from "../services/videostream.service";
 
 /**
  * Renderiza la vista principal del administrador de archivos.
@@ -202,16 +203,24 @@ export const getFormatsAvailablesController = async (req: Request, res: Response
 export const getFileContent = async (req: AuthRequest, res: Response) => {
   try {
     const relativePath = (req.query.path as string) || "";
-    const result = await getItemContentService(relativePath, req.user!.id, req.user!.role);
-
-    if (!req.headers.range) {
-      logger.info(`[AUDIT] Usuario ${req.user?.id} previsualizó el archivo: ${relativePath}`);
-    }
+    const rangeHeader = req.headers.range;
+    const result = await getItemContentService(relativePath, rangeHeader, req.user!.id, req.user!.role);
 
     if (result.type === "text") {
       return res.json(result);
-    } else {
+    } else if (result.type === "media") {
       return res.sendFile(result.fullPath!, { acceptRanges: true });
+    } else if (result.type === "video") {
+      const videoResult = result.content as VideoStreamResult;
+      res.writeHead(videoResult.status, videoResult.headers);
+      if (videoResult.stream) {
+        videoResult.stream.pipe(res);
+        res.on("close", () => {
+          videoResult.stream?.destroy();
+        });
+      } else {
+        res.end();
+      }
     }
   } catch (error: any) {
     logger.error(`Error al obtener contenido (Usuario: ${req.user?.id}): ` + error.message);

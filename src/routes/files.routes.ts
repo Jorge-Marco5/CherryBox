@@ -59,7 +59,7 @@ router.put("/rename", requireAuth, renameFile);
 
 router.delete("/delete", requireAuth, deleteFile);
 
-router.get("/formats", requireAuth, requireSuperAdmin, getFormatsAvailablesController);
+router.get("/formats", requireAuth, getFormatsAvailablesController);
 
 router.get("/file-content", requireAuth, getFileContent);
 

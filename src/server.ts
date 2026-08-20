@@ -15,7 +15,7 @@ import settingsRouter from "./routes/settings.routes";
 import usersRouter from "./routes/users.routes";
 import { formatBytes } from "./utils/formatBytes";
 import { getBaseDir, init_basedir, updateUsedStorage } from "./utils/settings";
-
+console.clear();
 const app = express();
 const PORT = process.env.PORT;
 const FRONTEND_URL = process.env.FRONTEND_URL;

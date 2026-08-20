@@ -26,6 +26,7 @@ function evaluateEnvVar(value: string | undefined, defaultValue: number): number
 //Obtenemos el valor de la ruta de la carpeta donde se guardaran los archivos
 const BASE_DIR = getBaseDir();
 let MAX_FILE_SIZE = evaluateEnvVar(process.env.MAX_FILE_SIZE, 100) * 1024 * 1024;
+console.log("Max file size: " + MAX_FILE_SIZE);
 
 // Función para validar que la ruta esté dentro del directorio base
 export function isValidPath(requestedPath: string) {
