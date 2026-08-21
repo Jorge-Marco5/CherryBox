@@ -2,8 +2,9 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
-import { getBaseDir } from './settings';
+import { getBaseDir, getSetting } from './settings';
 import { ValidationError } from './errors';
+import { sanitizeName, decodePath } from './sanitize';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -25,8 +26,8 @@ function evaluateEnvVar(value: string | undefined, defaultValue: number): number
 
 //Obtenemos el valor de la ruta de la carpeta donde se guardaran los archivos
 const BASE_DIR = getBaseDir();
-let MAX_FILE_SIZE = evaluateEnvVar(process.env.MAX_FILE_SIZE, 100) * 1024 * 1024;
-console.log("Max file size: " + MAX_FILE_SIZE);
+
+const MAX_FILE_SIZE = getSetting("MAX_FILE_SIZE");
 
 // Función para validar que la ruta esté dentro del directorio base
 export function isValidPath(requestedPath: string) {
@@ -48,7 +49,7 @@ export const storage = multer.diskStorage({
       return cb(new ValidationError('Ruta de destino no válida'), null);
     }
 
-    const fullPath = path.join(BASE_DIR, uploadPath);
+    const fullPath = path.join(BASE_DIR, decodePath(uploadPath));
 
     // Crear directorio si no existe (sincrónico para evitar race conditions con busboy)
     try {
@@ -65,8 +66,8 @@ export const storage = multer.diskStorage({
     // Decodificar y sanitizar el nombre del archivo
     let filename = Buffer.from(file.originalname, 'latin1').toString('utf8');
 
-    // Eliminar caracteres que podrían ser usados para path traversal o inyección
-    filename = filename.replace(/[\/\\]/g, '_').trim();
+    // Sanitizar caracteres especiales conflictivos (#, %, &, ?, +, :, *, etc.)
+    filename = sanitizeName(filename);
 
     // RASTREO: Guardar la ruta completa en req para limpieza en caso de aborto
     const uploadPath = req.query.path || '';

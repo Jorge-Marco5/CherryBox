@@ -11,7 +11,7 @@ import { getBaseDir, getSetting, getUsedStorage, setSetting } from "../utils/set
 class ConcurrencyLimiter {
   private active = 0;
   private queue: (() => void)[] = [];
-  constructor(private limit: number) {}
+  constructor(private limit: number) { }
 
   async run<T>(fn: () => Promise<T>): Promise<T> {
     if (this.active >= this.limit) {
@@ -135,6 +135,13 @@ export const setSettings = async (req: AuthRequest, res: Response, next: NextFun
         );
       }
     }
+    if (setting === "MAX_FILE_SIZE" || setting === "MAX_FILES") {
+      const valueNumber = Number(value);
+      if (!valueNumber || valueNumber <= 0) {
+        throw new ValidationError(`El valor de ${setting} debe ser un número mayor a 0`);
+      }
+    }
+
     await setSetting(setting, value);
 
     logger.info(`[AUDIT] Administrador ${req.user?.id} cambió la configuración [${setting}] a: ${value}`);
@@ -155,12 +162,18 @@ export const getSettings = async (req: AuthRequest, res: Response, next: NextFun
     const isSuperAdmin = req.user?.role === "SUPERADMIN";
     const baseDir = getBaseDir();
     const limitStorage = getSetting("LIMIT_STORAGE");
+    const maxFileSize = getSetting("MAX_FILE_SIZE");
+    const maxFiles = getSetting("MAX_FILES");
     // Convertir bytes a GB para la vista
     const limitStorageGB = Math.round(Number(limitStorage) / (1024 * 1024 * 1024));
+    // Convertir bytes a MB para la vista
+    const maxFileSizeMB = Math.round(Number(maxFileSize) / (1024 * 1024));
 
     return res.status(200).json({
       baseDir,
       limitStorage: limitStorageGB,
+      maxFileSize: maxFileSizeMB,
+      maxFiles: maxFiles,
       permission: isSuperAdmin,
     });
   } catch (error) {

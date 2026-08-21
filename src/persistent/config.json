@@ -1,5 +1,7 @@
 {
-  "BASE_DIR": "archivos",
+  "BASE_DIR": "/home/jorgemarcos/Documentos/Node Projects/CherryBox/archivos",
+  "MAX_FILE_SIZE": 524288000,
+  "MAX_FILES": "10",
   "LIMIT_STORAGE": 10737418240,
-  "USED_STORAGE": 1315997162
+  "USED_STORAGE": 1588388028
 }

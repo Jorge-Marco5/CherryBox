@@ -264,7 +264,7 @@ const UILogic = {
     modal.scrollTop = 0;
 
     try {
-      const contentUrl = `${API_URL}/file-content?path=${encodeURIComponent(path)}`;
+      const contentUrl = `${API_URL}/file-content?path=${encodePath(path)}`;
 
       const strategy = PREVIEW_STRATEGIES.find((s) => s.accepts("." + ext));
       if (strategy) {

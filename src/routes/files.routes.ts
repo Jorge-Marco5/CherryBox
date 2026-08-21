@@ -17,15 +17,15 @@ import { upload } from "../utils/multer";
 
 import { uploadCleanupMiddleware } from "../middlewares/cleanup.middleware";
 import { checkStorageLimit, checkUploadPermission } from "../middlewares/storage.middleware";
-
+import { getSetting } from "../utils/settings";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const MAX_FILES = (() => {
-  const val = process.env.MAX_FILES || "10";
+  const val = getSetting("MAX_FILES") || "10";
   try {
-    const sanitized = val.replace(/[^0-9*+\-/\s()]/g, "");
+    const sanitized = val.toString().replace(/[^0-9*+\-/\s()]/g, "");
     // eslint-disable-next-line no-new-func
     return new Function(`return ${sanitized}`)() || 10;
   } catch {

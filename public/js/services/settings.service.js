@@ -2,6 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const formSettings = document.getElementById("form-settings");
     const baseDir = document.getElementById("baseDir");
     const limitStorage = document.getElementById("limitStorage");
+    const maxFileSize = document.getElementById("maxFileSize");
+    const maxFiles = document.getElementById("maxFiles");
     const btnSave = document.getElementById("btn-save");
     const btnSync = document.getElementById("btn-sync");
     const btnAnalyze = document.getElementById("btn-analyze");
@@ -11,11 +13,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await axios.get("/api/getSettings");
             limitStorage.value = response.data.limitStorage;
             baseDir.value = response.data.baseDir;
+            maxFileSize.value = response.data.maxFileSize;
+            maxFiles.value = response.data.maxFiles;
 
             if (!response.data.permission) {
                 // Modo lectura para administradores (no superadmins)
                 baseDir.disabled = true;
                 limitStorage.disabled = true;
+                maxFileSize.disabled = true;
+                maxFiles.disabled = true;
                 if (btnSave) btnSave.style.display = "none";
                 if (btnSync) btnSync.style.display = "none";
                 if (btnAnalyze) btnAnalyze.style.display = "none";
@@ -65,7 +71,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 setting: "BASE_DIR",
                 value: baseDir.value
             }, { silent: true });
-            //mostramos solo una notificaacio
+
+            // Guardar Límite de Tamaño de Archivo
+            await axios.post("/api/setSettings", {
+                setting: "MAX_FILE_SIZE",
+                value: maxFileSize.value
+            }, { silent: true });
+
+            await axios.post("/api/setSettings", {
+                setting: "MAX_FILES",
+                value: maxFiles.value
+            }, { silent: true });
+
+            //mostramos solo una notificacion
             showToast("Configuración guardada exitosamente", 'info');
         } catch (error) {
             showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');

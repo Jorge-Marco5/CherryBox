@@ -142,9 +142,6 @@
                     <div class="form-group">
                         <label for="limitStorage" style="color: #ffffff;">Limite de almacenamiento</label>
                         <p>Limite de almacenamiento en <strong>GB</strong>.
-                            <br>
-                            Si se establece en 0, no habrá límite.
-                            <br>
                             Si se establece un limite menor al actual no se podra subir archivos hasta que se libere
                             espacio
                             o se aumente el limite
@@ -152,6 +149,31 @@
                         <div style="display: flex; align-items: center; gap: 10px;">
                             <input type="number" id="limitStorage" placeholder="10"> <span
                                 style="color: #ffffff;">GB</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxFileSize" style="color: #ffffff;">Limite de tamaño de archivo individual</label>
+                        <p>Limite de tamaño de archivo en <strong>MB</strong>.
+                            <br>
+                            Configuracion que permite establecer un limite maximo para el tamaño de un archivo
+                            individual que se sube al servidor.
+                            <br>
+                            Si el peso del archivo es <strong>mayor</strong> al limite establecido no se podra subir el
+                            archivo.
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="number" id="maxFileSize" placeholder="10"> <span
+                                style="color: #ffffff;">MB</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="maxFiles" style="color: #ffffff;">Numero maximo de archivos</label>
+                        <p>
+                            Configurar el limite maximo de archivos por paquete que se suben al servidor
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="number" id="maxFiles" placeholder="10"> <span
+                                style="color: #ffffff;">Archivos</span>
                         </div>
                     </div>
                     <button type="submit" id="btn-save" class="btn btn-primary">

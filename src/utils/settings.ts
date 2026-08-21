@@ -32,7 +32,9 @@ export async function init_basedir() {
 export const setSetting = async <K extends keyof typeof config>(setting: K, value: (typeof config)[K]) => {
   //si es limit storage convertir GB a bytes
   if (setting === "LIMIT_STORAGE") {
-    (config as any)[setting] = Number(value) * 1024 * 1024 * 1024;
+    (config as any)[setting] = Number(value) * 1024 * 1024 * 1024;//en GB a bytes
+  } else if (setting === "MAX_FILE_SIZE") {
+    (config as any)[setting] = Number(value) * 1024 * 1024;//en MB a bytes
   } else {
     (config as any)[setting] = value;
   }

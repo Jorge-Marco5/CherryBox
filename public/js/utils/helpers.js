@@ -37,6 +37,22 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+/**
+ * Codifica una ruta relativa para ser usada de forma segura en URLs y parámetros de consulta (query params).
+ * Codifica cada segmento de la ruta individualmente para mantener los slashes '/' intactos
+ * y prevenir que '#', '&', '?' o espacios rompan las peticiones HTTP.
+ * @param {string} pathStr - Ruta a codificar.
+ * @returns {string} Ruta codificada segura.
+ */
+function encodePath(pathStr) {
+    if (!pathStr) return '';
+    return pathStr
+        .split('/')
+        .map(segment => encodeURIComponent(segment))
+        .join('/');
+}
+
 window.escapeJS = escapeJS;
 window.escapeHTML = escapeHTML;
 window.escapeHtml = escapeHtml;
+window.encodePath = encodePath;

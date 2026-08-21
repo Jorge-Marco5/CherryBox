@@ -269,7 +269,7 @@ async function getStorage() {
 }
 
 function downloadFile(path) {
-  window.open(`${API_URL}/download?path=${encodeURIComponent(path)}`, "_blank");
+  window.open(`${API_URL}/download?path=${encodePath(path)}`, "_blank");
 }
 
 /**
@@ -456,7 +456,7 @@ async function uploadFilesProcess(files) {
     try {
       const formData = new FormData();
       formData.append("files", upload.file);
-      const response = await axios.post(`${API_URL}/upload?path=${encodeURIComponent(currentPath)}`, formData, {
+      const response = await axios.post(`${API_URL}/upload?path=${encodePath(currentPath)}`, formData, {
         signal: upload.controller.signal,
         onUploadProgress: (event) => {
           upload.loaded = event.loaded;
@@ -475,6 +475,7 @@ async function uploadFilesProcess(files) {
         throw new Error(response.data.error || "Error desconocido");
       }
     } catch (error) {
+      showToast(error.response?.data?.error || "Error desconocido", "error");
       upload.status = axios.isCancel(error) ? "cancelled" : "error";
       progressItem.classList.add(upload.status);
       progressText.textContent = upload.status === "cancelled" ? "Cancelado" : "Error al subir archivo";

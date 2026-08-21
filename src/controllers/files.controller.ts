@@ -19,6 +19,8 @@ import { logger } from "../utils/logger";
 import { isValidPath } from "../utils/multer";
 import { getBaseDir, addUsedStorage } from "../utils/settings";
 import { VideoStreamResult } from "../services/videostream.service";
+import { processUploadedVideosAsync } from "../services/videoOptimizer.service";
+import { decodePath, sanitizeRelativePath } from "../utils/sanitize";
 
 /**
  * Renderiza la vista principal del administrador de archivos.
@@ -54,7 +56,7 @@ export const listFiles = async (req: AuthRequest, res: Response, next: NextFunct
   try {
     const relativePath = (req.query.path as string) || "";
     const { files, currentFolderId, currentFolderName } = await listItemsService(
-      relativePath,
+      decodePath(relativePath),
       req.user!.id,
       req.user!.role,
     );
@@ -119,14 +121,17 @@ export const uploadFiles = async (req: AuthRequest, res: Response, next: NextFun
     const files = req.files as Express.Multer.File[];
     const relativePath = (req.query.path as string) || "";
 
-    //Registro de los datos en la base de datos
-    await registerUploadedFilesService(files, relativePath, user!.id);
+    // Registro de los datos en la base de datos
+    await registerUploadedFilesService(files, decodePath(relativePath), user!.id);
 
     // Actualizar tamaño de almacenamiento usado
     const totalSize = files.reduce((acc, f) => acc + f.size, 0);
     await addUsedStorage(totalSize);
 
-    logger.info(`[AUDIT] Usuario ${user?.id} completó subida de ${files.length} archivo(s) a: ${relativePath}`);
+    // Optimización asíncrona de videos en segundo plano con FFmpeg (+faststart)
+    processUploadedVideosAsync(files, decodePath(relativePath));
+
+    logger.info(`[AUDIT] Usuario ${user?.id} completó subida de ${files.length} archivo(s) a: ${decodePath(relativePath)}`);
     res.json({
       success: true,
       message: `${files.length} archivo(s) subido(s) correctamente`,
@@ -148,7 +153,7 @@ export const renameFile = async (req: AuthRequest, res: Response, next: NextFunc
     if (!oldPath || !newName) {
       throw new ValidationError("Faltan parámetros (oldPath o newName)");
     }
-    const result = await renameItemService(oldPath, newName, newFolderColor, req.user!.id, req.user!.role);
+    const result = await renameItemService(decodePath(oldPath), newName, newFolderColor, req.user!.id, req.user!.role);
     logger.info(`[AUDIT] Usuario ${req.user?.id} renombró: ${oldPath} -> ${newName}`);
     res.json(result);
   } catch (error: any) {
@@ -168,15 +173,15 @@ export const deleteFile = async (req: AuthRequest, res: Response) => {
     if (!relativePath) {
       return res.status(400).json({ error: "No se proporcionó la ruta del archivo" });
     }
-    const result = await deleteItemService(relativePath, req.user!.id, req.user!.role);
+    const result = await deleteItemService(decodePath(relativePath), req.user!.id, req.user!.role);
     const action = result.isDirectory ? "ELIMINÓ CARPETA" : "ELIMINÓ ARCHIVO";
-    logger.warn(`[AUDIT] Usuario ${req.user?.id} ${action}: ${relativePath}`);
+    logger.warn(`[AUDIT] Usuario ${req.user?.id} ${action}: ${decodePath(relativePath)}`);
     res.json({ success: true, message: result.message });
   } catch (error: any) {
     logger.error(`Error al eliminar (Usuario: ${req.user?.id}): ` + error.message);
     const status = error.message.includes("Permiso denegado")
       ? 403
-      : error.message === "El archivo o carpeta no existe"
+      : error.message === `El archivo o carpeta no existe`
         ? 404
         : 500;
     res.status(status).json({ error: error.message });
@@ -195,7 +200,6 @@ export const getFormatsAvailablesController = async (req: Request, res: Response
 
 /**
  * Obtiene el contenido de un archivo para vista previa.
- * Registra el acceso a contenidos específicos para auditoría de privacidad.
  *
  * @param req Petición con la ruta del archivo en query.path
  * @param res JSON con el contenido (texto) o el archivo directamente (media)
@@ -204,9 +208,11 @@ export const getFileContent = async (req: AuthRequest, res: Response) => {
   try {
     const relativePath = (req.query.path as string) || "";
     const rangeHeader = req.headers.range;
-    const result = await getItemContentService(relativePath, rangeHeader, req.user!.id, req.user!.role);
+    const isThumbnail = req.query.thumbnail === "true";
+    const result = await getItemContentService(decodePath(relativePath), rangeHeader, req.user!.id, req.user!.role, isThumbnail);
 
     if (result.type === "text") {
+      logger.info(`[AUDIT] Usuario ${req.user?.id} obtuvo contenido del archivo: ${relativePath}`);
       return res.json(result);
     } else if (result.type === "media") {
       return res.sendFile(result.fullPath!, { acceptRanges: true });

@@ -102,7 +102,7 @@ class MusicPlayerService {
     if (index < 0 || index >= this.playlist.length) return;
     this.currentIndex = index;
     const track = this.playlist[index];
-    const contentUrl = `${API_URL}/file-content?path=${encodeURIComponent(track.path)}`;
+    const contentUrl = `${API_URL}/file-content?path=${encodePath(track.path)}`;
     this.audio.src = contentUrl;
     this.audio.load();
     this.play();

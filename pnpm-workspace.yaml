@@ -1,4 +1,5 @@
 allowBuilds:
   "@prisma/engines": true
   bcrypt: true
+  ffmpeg-static: true
   prisma: true

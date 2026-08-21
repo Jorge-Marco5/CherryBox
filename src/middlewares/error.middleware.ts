@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/errors";
 import { logger } from "../utils/logger";
+import { getSetting } from "../utils/settings";
 
 export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
   // Manejo de errores controlados (AppError)
@@ -31,7 +32,7 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
   // Manejo de errores de Multer (Límites de archivos)
   if (err.code === "LIMIT_FILE_SIZE") {
     return res.status(400).json({
-      error: "El archivo excede el límite de tamaño (100MB)",
+      error: `El archivo excede el límite de tamaño (${Number(getSetting("MAX_FILE_SIZE")) / 1024 / 1024}MB)`,
       code: "FileTooLarge",
     });
   }

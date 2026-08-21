@@ -320,6 +320,31 @@ body {
     image-rendering: optimizeQuality;
 }
 
+.image-file.video-file-item {
+    position: relative;
+}
+
+.video-play-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 2;
+    transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+}
+
+.image-file:hover .video-play-badge {
+    transform: translate(-50%, -50%) scale(1.15);
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
 .file-item:hover {
     background: #2A2A2A;
 }
@@ -328,7 +353,7 @@ body {
     background: #333;
 }
 
-.image-actions {
+.image-file .image-actions {
     width: 100%;
     position: absolute;
     bottom: 0;
@@ -338,6 +363,12 @@ body {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    opacity: 0.3;
+    transition: opacity 0.25s ease;
+}
+
+.image-file:hover .image-actions {
+    opacity: 1;
 }
 
 .image-buttons {

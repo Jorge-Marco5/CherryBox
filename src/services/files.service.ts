@@ -6,7 +6,9 @@ import { audioExts, codeExts, imageExts, pdfExts, textExts, videoExts } from "..
 import { ForbiddenError, ValidationError } from "../utils/errors";
 import { isValidPath } from "../utils/multer";
 import { getBaseDir } from "../utils/settings";
+import { sanitizeName, decodePath } from "../utils/sanitize";
 import videoHandler from "./videostream.service";
+import { getVideoThumbnail } from "./videoOptimizer.service";
 
 /**
  * Evalúa si un nivel de acceso concedido satisface la acción solicitada.
@@ -307,7 +309,10 @@ export const createFolderService = async (
   // Necesita WRITE en la carpeta padre
   await checkPermission(userId, userRole, relativePath, "WRITE");
 
-  const newRelPath = path.join(relativePath, name);
+  const cleanName = sanitizeName(name);
+  if (!cleanName) throw new ValidationError("Nombre de carpeta no válido");
+
+  const newRelPath = path.join(relativePath, cleanName);
   const fullPath = path.join(BASE_DIR, newRelPath);
   await fs.mkdir(fullPath, { recursive: true });
 
@@ -326,7 +331,7 @@ export const renameItemService = async (
   const BASE_DIR = getBaseDir();
 
   const oldFile = await prisma.file.findUnique({ where: { path: oldPath } });
-  if (!oldFile) throw new ValidationError("El archivo o carpeta no existe");
+  if (!oldFile) throw new ValidationError(`El archivo o carpeta no existe: ${oldPath}`);
 
   if (oldFile.ownerId) {
     const owner = await prisma.user.findUnique({ where: { id: oldFile.ownerId } });
@@ -340,8 +345,11 @@ export const renameItemService = async (
   }
   await checkPermission(userId, userRole, oldPath, "WRITE");
 
+  const cleanNewName = sanitizeName(newName);
+  if (!cleanNewName) throw new ValidationError("Nuevo nombre no válido");
+
   const oldFullPath = path.join(BASE_DIR, oldPath);
-  const newRelPath = path.join(path.dirname(oldPath), newName);
+  const newRelPath = path.join(path.dirname(oldPath), cleanNewName);
   const newFullPath = path.join(BASE_DIR, newRelPath);
 
   await fs.rename(oldFullPath, newFullPath);
@@ -362,7 +370,7 @@ export const deleteItemService = async (relativePath: string, userId: string, us
   const BASE_DIR = getBaseDir();
 
   const file = await prisma.file.findUnique({ where: { path: relativePath } });
-  if (!file) throw new ValidationError("El archivo o carpeta no existe");
+  if (!file) throw new ValidationError("El archivo o carpeta no existe: " + relativePath);
 
   if (file.ownerId) {
     const owner = await prisma.user.findUnique({ where: { id: file.ownerId } });
@@ -402,7 +410,22 @@ export const getFormatsAvailables = async () => {
   return { audioExts, codeExts, imageExts, pdfExts, textExts, videoExts };
 };
 
-export const getItemContentService = async (relativePath: string, range: string | undefined, userId: string, userRole: string) => {
+/**
+ * Obtiene el contenido de un archivo o carpeta
+ * @param relativePath Ruta relativa del archivo o carpeta
+ * @param range Range header de la petición
+ * @param userId ID del usuario
+ * @param userRole Rol del usuario
+ * @param isThumbnail ¿Es miniatura?
+ * @returns Objeto con el contenido del archivo o carpeta
+ */
+export const getItemContentService = async (
+  relativePath: string,
+  range: string | undefined,
+  userId: string,
+  userRole: string,
+  isThumbnail?: boolean,
+) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
   const BASE_DIR = getBaseDir();
   // Necesita READ
@@ -410,6 +433,21 @@ export const getItemContentService = async (relativePath: string, range: string 
 
   const fullPath = path.join(BASE_DIR, relativePath);
   const ext = path.extname(fullPath).toLowerCase();
+
+  // Si se solicita específicamente la miniatura de un video
+  if (isThumbnail && videoExts.includes(ext)) {
+    const thumbPath = await getVideoThumbnail(fullPath);
+    if (thumbPath) {
+      try {
+        const stats = await fs.stat(thumbPath);
+        if (stats.isFile()) {
+          return { type: "media", fullPath: thumbPath };
+        }
+      } catch (e) {
+        // Fallback si falla stat
+      }
+    }
+  }
 
   const textExtensions = [...codeExts, ...textExts];
   if (textExtensions.includes(ext)) {
@@ -425,7 +463,7 @@ export const getItemContentService = async (relativePath: string, range: string 
   const videoExtensions = [...videoExts];
   if (videoExtensions.includes(ext)) {
     const content = await videoHandler(fullPath, range);
-    return { type: "video", content }
+    return { type: "video", content };
   }
 
   throw new ValidationError("Tipo de archivo no soportado para vista previa");
@@ -433,6 +471,7 @@ export const getItemContentService = async (relativePath: string, range: string 
 
 export const registerUploadedFilesService = async (files: any[], relativePath: string, userId: string) => {
   for (const file of files) {
+    console.log("relativePath: ", relativePath)
     const relPath = path.join(relativePath, file.filename);
     await syncFileInDb(relPath, "CREATE", { type: "FILE", ownerId: userId });
   }

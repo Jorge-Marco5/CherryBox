@@ -25,11 +25,17 @@ function getVideoMimeType(filePath: string): string {
     }
 }
 
+/**
+ * Procesa la petición de streaming de video. Soporta Range Headers.
+ * @param fullPath Ruta completa del archivo de video.
+ * @param rangeHeader Range header de la petición.
+ * @returns Objeto con status, headers y stream.
+ */
 async function videoHandler(fullPath: string, rangeHeader?: string): Promise<VideoStreamResult> {
     try {
         const resolvedPath = path.resolve(fullPath.toString());
         if (!fs.existsSync(resolvedPath)) {
-            throw new NotFoundError("Video no encontrado");
+            throw new NotFoundError(`Video no encontrado: ${resolvedPath}`);
         }
 
         const stat = fs.statSync(resolvedPath);

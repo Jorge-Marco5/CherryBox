@@ -7,7 +7,7 @@ const FileService = {
    * @param {string} path - Ruta de la carpeta.
    */
   async getFiles(path = "") {
-    return await axios.get(`${API_URL}/files?path=${encodeURIComponent(path)}`);
+    return await axios.get(`${API_URL}/files?path=${encodePath(path)}`);
   },
 
   /**
@@ -15,7 +15,7 @@ const FileService = {
    * @param {string} query - Término de búsqueda.
    */
   async searchFiles(query) {
-    return await axios.get(`${API_URL}/search?q=${encodeURIComponent(query)}`);
+    return await axios.get(`${API_URL}/search?q=${encodePath(query)}`);
   },
 
   /**
@@ -63,7 +63,7 @@ const FileService = {
    * @param {string} path - Ruta del archivo.
    */
   async getFileContent(path) {
-    return await fetch(`${API_URL}/file-content?path=${encodeURIComponent(path)}`);
+    return await fetch(`${API_URL}/file-content?path=${encodePath(path)}`);
   },
 
   /**
@@ -71,7 +71,7 @@ const FileService = {
    * @param {string} path - Ruta del archivo.
    */
   async download(path) {
-    return await fetch(`${API_URL}/download?path=${encodeURIComponent(path)}`);
+    return await fetch(`${API_URL}/download?path=${encodePath(path)}`);
   },
 
   /**
