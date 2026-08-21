@@ -251,7 +251,8 @@ export const analyzeFiles = async (req: AuthRequest, res: Response, next: NextFu
  */
 export const getLogs = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const logPath = path.join(__dirname, "../logs/combined.log");
+    const today = new Date().toISOString().split('T')[0];
+    const logPath = path.join(__dirname, "../logs/" + today + "-combined.log");
     const logs = await fs.readFile(logPath, "utf-8");
     //enviar los ultimos 100 logs
     const lines = logs.split("\n");
@@ -265,7 +266,8 @@ export const getLogs = async (req: Request, res: Response, next: NextFunction) =
 
 export const getErrorLogs = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const logPath = path.join(__dirname, "../logs/error.log");
+    const today = new Date().toISOString().split('T')[0];
+    const logPath = path.join(__dirname, "../logs/" + today + "-error.log");
     const logs = await fs.readFile(logPath, "utf-8");
     const lines = logs.split("\n");
     const last100Lines = lines.slice(-500);

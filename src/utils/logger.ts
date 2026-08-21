@@ -11,6 +11,8 @@ const logFormat = printf(({ level, message, timestamp, stack }: any) => {
   return `${timestamp} ${level} - ${stack || message}`;
 });
 
+const today = new Date().toISOString().split('T')[0];
+
 // Configuración del logger
 export const logger = createLogger({
   level: 'info', // Nivel mínimo de log
@@ -26,11 +28,11 @@ export const logger = createLogger({
         logFormat
       )
     }),
-    new transports.File({ filename: path.join(LOGS_DIR, 'error.log'), level: 'error' }),
-    new transports.File({ filename: path.join(LOGS_DIR, 'combined.log') }),
+    new transports.File({ filename: path.join(LOGS_DIR, `${today}-error.log`), level: 'error' }),
+    new transports.File({ filename: path.join(LOGS_DIR, `${today}-combined.log`) }),
   ],
   exceptionHandlers: [
-    new transports.File({ filename: path.join(LOGS_DIR, 'exceptions.log') })
+    new transports.File({ filename: path.join(LOGS_DIR, `${today}-exceptions.log`) })
   ],
   rejectionHandlers: [
     new transports.File({ filename: path.join(LOGS_DIR, 'rejections.log') })

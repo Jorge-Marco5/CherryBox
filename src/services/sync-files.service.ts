@@ -6,6 +6,8 @@ import { logger } from "../utils/logger";
 
 const BASE_DIR = getBaseDir();
 
+const IGNORE_PATHS = new Set(['thumbnails', 'private']);
+
 export async function syncFiles() {
     const superadmin = await prisma.user.findFirst({ where: { role: "SUPERADMIN" } });
     if (!superadmin) {
@@ -18,6 +20,8 @@ export async function syncFiles() {
         const items = await fs.readdir(fullPath, { withFileTypes: true });
 
         for (const item of items) {
+            if (IGNORE_PATHS.has(item.name)) continue;
+
             const relativePath = path.join(currentDir, item.name);
             const isDirectory = item.isDirectory();
 

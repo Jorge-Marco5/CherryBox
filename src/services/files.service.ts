@@ -24,6 +24,8 @@ function satisfiesAccess(granted: AccessType, requested: AccessType): boolean {
   return false;
 }
 
+const IGNORE_PATHS = new Set(['thumbnails', 'private'])
+
 /**
  * Versión interna de checkPermission que devuelve booleano.
  */
@@ -194,6 +196,11 @@ export const listItemsService = async (relativePath: string, userId: string, use
 
   const results = await Promise.allSettled(
     items.map(async (item) => {
+      // Ocultar e ignorar carpetas reservadas del sistema (ej: thumbnails, private)
+      if (IGNORE_PATHS.has(item.name)) {
+        return null;
+      }
+
       const relItemPath = path.join(relativePath, item.name);
 
       // FILTRADO: Si el usuario NO tiene acceso total al padre, solo mostrar lo que sea accesible
@@ -268,6 +275,7 @@ export const searchItemsService = async (query: string, userId: string, userRole
     }
 
     for (const item of items) {
+      if (IGNORE_PATHS.has(item.name)) continue;
       const relPath = path.join(currentDir, item.name);
 
       // Verificación de acceso rápida

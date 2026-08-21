@@ -33,7 +33,7 @@ async function loadFiles(path = "") {
     Renderers.renderImages();
     updateFolderPermissionButton();
   } catch (error) {
-    showToast("Ha ocurrido un error al iniciar", "danger");
+    showToast("Ha ocurrido un error al iniciar: " + error.message, "danger");
     if (error.response && error.response.status === 401) {
       location.href = "/login";
     }

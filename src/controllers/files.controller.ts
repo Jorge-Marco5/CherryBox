@@ -61,8 +61,8 @@ export const listFiles = async (req: AuthRequest, res: Response, next: NextFunct
       req.user!.role,
     );
     res.json({ files, currentPath: relativePath, currentFolderId, currentFolderName });
-  } catch (error) {
-    console.error("Excepcion: " + error);
+  } catch (error: any) {
+    logger.error(`[AUDIT] Usuario ${req.user?.id} obtuvo un error al listar carpetas. ${error.message}`);
     next(error);
   }
 };
@@ -212,7 +212,7 @@ export const getFileContent = async (req: AuthRequest, res: Response) => {
     const result = await getItemContentService(decodePath(relativePath), rangeHeader, req.user!.id, req.user!.role, isThumbnail);
 
     if (result.type === "text") {
-      logger.info(`[AUDIT] Usuario ${req.user?.id} obtuvo contenido del archivo: ${relativePath}`);
+      logger.info(`[AUDIT] Usuario ${req.user?.id} visualizó el archivo: '${decodePath(relativePath)}'`);
       return res.json(result);
     } else if (result.type === "media") {
       return res.sendFile(result.fullPath!, { acceptRanges: true });
