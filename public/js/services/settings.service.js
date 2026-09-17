@@ -55,71 +55,99 @@ document.addEventListener("DOMContentLoaded", () => {
 
     getSettings();
 
-    const generalSettings = document.getElementById("general-settings");
-    generalSettings.addEventListener("submit", async (e) => {
+    const formBaseDir = document.getElementById("form-base-dir");
+    const formLimitStorage = document.getElementById("form-limit-storage")
+    const formMaxFileSize = document.getElementById("form-max-file-size")
+    const formMaxFiles = document.getElementById("form-max-files")
+    formBaseDir.addEventListener("submit", async (e) => {
         e.preventDefault();
         try {
-
             // Guardar Límite de Almacenamiento
-            await axios.post("/api/setSettings", {
-                setting: "LIMIT_STORAGE",
-                value: limitStorage.value
-            }, { silent: true });
-
-            // Guardar Directorio Base
             await axios.post("/api/setSettings", {
                 setting: "BASE_DIR",
                 value: baseDir.value
             }, { silent: true });
-
-            // Guardar Límite de Tamaño de Archivo
-            await axios.post("/api/setSettings", {
-                setting: "MAX_FILE_SIZE",
-                value: maxFileSize.value
-            }, { silent: true });
-
-            await axios.post("/api/setSettings", {
-                setting: "MAX_FILES",
-                value: maxFiles.value
-            }, { silent: true });
-
-            //mostramos solo una notificacion
             showToast("Configuración guardada exitosamente", 'info');
         } catch (error) {
             showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
         }
     });
+
+    formLimitStorage.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+            // Guardar Límite de Almacenamiento
+            await axios.post("/api/setSettings", {
+                setting: "LIMIT_STORAGE",
+                value: limitStorage.value
+            }, { silent: true });
+            showToast("Configuración guardada exitosamente", 'info');
+        } catch (error) {
+            showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
+        }
+    });
+
+    formMaxFileSize.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+            // Guardar Límite de Tamaño de Archivo
+            await axios.post("/api/setSettings", {
+                setting: "MAX_FILE_SIZE",
+                value: maxFileSize.value
+            }, { silent: true });
+            showToast("Configuración guardada exitosamente", 'info');
+        } catch (error) {
+            showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
+        }
+    });
+
+    formMaxFiles.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        try {
+            // Guardar Límite de Archivos
+            await axios.post("/api/setSettings", {
+                setting: "MAX_FILES",
+                value: maxFiles.value
+            }, { silent: true });
+            showToast("Configuración guardada exitosamente", 'info');
+        } catch (error) {
+            showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
+        }
+    });
+
+    async function syncFiles() {
+        const btn = document.getElementById("btn-sync");
+        const originalContent = btn.innerHTML;
+        if (!confirm("Se sincronizaran todos los archivos en la BD, reseteo de permisos y etiquetas, no puedes deshacer esta accion!, ¿Continuar?")) return;
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span> Sincronizando...';
+            const response = await axios.post("/api/sync", {}, { silent: true });
+            showToast(response.data.message, 'success');
+        } catch (error) {
+            showToast(error.response?.data?.error || "Error en la sincronización", 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+        }
+    }
+
+    async function analyzeFiles() {
+        const btn = document.getElementById("btn-analyze");
+        const originalContent = btn.innerHTML;
+        try {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span> Analizando...';
+            const response = await axios.post("/api/analyzeFiles", {}, { silent: true });
+            showToast(response.data.message, 'info');
+        } catch (error) {
+            showToast(error.response?.data?.error || "Error en el análisis", 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+        }
+    }
+
+    window.syncFiles = syncFiles;
+    window.analyzeFiles = analyzeFiles;
 });
-
-async function syncFiles() {
-    const btn = document.getElementById("btn-sync");
-    const originalContent = btn.innerHTML;
-    if (!confirm("Se sincronizaran todos los archivos en la BD, reseteo de permisos y etiquetas, no puedes deshacer esta accion!, ¿Continuar?")) return;
-    try {
-        btn.disabled = true;
-        btn.innerHTML = '<span class="loader"></span> Sincronizando...';
-        const response = await axios.post("/api/sync", {}, { silent: true });
-        showToast(response.data.message, 'success');
-    } catch (error) {
-        showToast(error.response?.data?.error || "Error en la sincronización", 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalContent;
-    }
-}
-
-async function analyzeFiles() {
-    const btn = document.getElementById("btn-analyze");
-    const originalContent = btn.innerHTML;
-    try {
-        btn.disabled = true;
-        btn.innerHTML = '<span class="loader"></span> Analizando...';
-        const response = await axios.post("/api/analyzeFiles", {}, { silent: true });
-        showToast(response.data.message, 'info');
-    } catch (error) {
-        showToast(error.response?.data?.error || "Error en el análisis", 'error');
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalContent;
-    }
-}

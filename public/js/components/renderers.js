@@ -213,11 +213,17 @@ const Renderers = {
     const escPath = `/api/file-content?path=${encodePath(file.path)}&name=${encodePath(file.name)}`;
 
     item.className = "image-file";
+    item.draggable = false;
+    item.setAttribute("draggable", "false");
+    item.ondragstart = (e) => { e.preventDefault(); return false; };
     item.onclick = () => previewFile(attrPath, escName);
 
     img.src = escPath;
     img.alt = escName;
     img.loading = "lazy";
+    img.draggable = false;
+    img.setAttribute("draggable", "false");
+    img.ondragstart = (e) => { e.preventDefault(); return false; };
 
     // Actualizar el layout cuando se complete la carga de cada imagen
     img.onload = () => {
@@ -256,11 +262,18 @@ const Renderers = {
     const escPath = `/api/file-content?path=${encodePath(attrPath)}&name=${encodePath(escName)}&thumbnail=true`;
 
     item.className = "image-file video-file-item";
+    item.draggable = false;
+    item.setAttribute("draggable", "false");
+    item.ondragstart = (e) => { e.preventDefault(); return false; };
     item.onclick = () => previewFile(attrPath, escName);
 
     img.src = escPath;
     img.alt = escName;
     img.loading = "lazy";
+    img.draggable = false;
+    img.setAttribute("draggable", "false");
+    img.ondragstart = (e) => { e.preventDefault(); return false; };
+
 
     // Actualizar el layout cuando se complete la carga de cada imagen de miniatura
     img.onload = () => {

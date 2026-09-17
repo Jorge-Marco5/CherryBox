@@ -40,9 +40,7 @@ app.use(
   }),
 );
 app.use(express.json());
-// Inicialización del servidor y carpetas
 Promise.all([system_setting.init_basedir()]).then(async () => {
-  // Inicializar/recalcular tamaño de almacenamiento usado al iniciar
   try {
     const baseDir = system_setting.getBaseDir();
     const currentSize = await calculateDirSize(baseDir);
@@ -53,7 +51,6 @@ Promise.all([system_setting.init_basedir()]).then(async () => {
     console.error("Error al calcular almacenamiento inicial:", err);
   }
 
-  // Rutas
   NODE_ENV === "development" ? app.use("/", indexRouter) : null;
   app.use("/api", filesRouter);
   app.use("/api", settingsRouter);
@@ -61,7 +58,6 @@ Promise.all([system_setting.init_basedir()]).then(async () => {
   app.use("/api/auth", authRouter);
   app.use("/api/permissions", permissionsRouter);
 
-  // Middleware de manejo de errores global (Debe ir después de las rutas)
   app.use(errorHandler);
 
   app.listen(PORT, () => {

@@ -303,6 +303,8 @@ body {
     cursor: pointer;
     transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s cubic-bezier(0.25, 1, 0.5, 1);
     border: 1px solid rgba(255, 255, 255, 0.08);
+    -webkit-user-drag: none;
+    user-select: none;
 }
 
 .image-file:hover {
@@ -318,6 +320,9 @@ body {
     border-radius: 10px;
     object-fit: cover;
     image-rendering: optimizeQuality;
+    -webkit-user-drag: none;
+    user-select: none;
+    pointer-events: auto;
 }
 
 .image-file.video-file-item {

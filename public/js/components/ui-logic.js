@@ -301,6 +301,10 @@ const UILogic = {
     window.addEventListener("dragenter", (e) => {
       e.preventDefault();
       e.stopPropagation();
+      // Solo reaccionar a archivos reales arrastrados desde fuera del navegador
+      if (e.dataTransfer && e.dataTransfer.types && !Array.from(e.dataTransfer.types).includes("Files")) {
+        return;
+      }
       dragCounter++;
       if (dragCounter === 1) {
         dropOverlay.classList.add("active");
@@ -310,7 +314,9 @@ const UILogic = {
     window.addEventListener("dragleave", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      dragCounter--;
+      if (dragCounter > 0) {
+        dragCounter--;
+      }
       if (dragCounter === 0) {
         dropOverlay.classList.remove("active");
       }
@@ -323,6 +329,7 @@ const UILogic = {
       dropOverlay.classList.remove("active");
 
       const dt = e.dataTransfer;
+      if (!dt || !dt.files || dt.files.length === 0) return;
       const files = Array.from(dt.files);
 
       if (files.length > 0) {

@@ -97,96 +97,138 @@
                 </div>
             </div>
             <div class="form-wrapper" id="form-settings">
-                <form id="general-settings">
-                    <div class="caption">
-                        <svg xmlns=" http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="icon icon-tabler icons-tabler-outline icon-tabler-file-settings">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                            <path d="M12 10.5v1.5" />
-                            <path d="M12 16v1.5" />
-                            <path d="M15.031 12.25l-1.299 .75" />
-                            <path d="M10.268 15l-1.3 .75" />
-                            <path d="M15 15.803l-1.285 -.773" />
-                            <path d="M10.285 12.97l-1.285 -.773" />
-                            <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                            <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
-                        </svg>Configuración general
-                    </div>
-                    <p class="message-alert" style="display: flex; align-items: center; gap: 5px;"> <svg
-                            xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-                            <path d="M12 9h.01" />
-                            <path d="M11 12h1v4h1" />
-                        </svg> Cambiar las configuraciones del sistema puede interrumpir algunas
-                        operaciones y el servicio momentaneamente, proceda con precaucion
+                <div class="caption">
+                    <svg xmlns=" http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-file-settings">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                        <path d="M12 10.5v1.5" />
+                        <path d="M12 16v1.5" />
+                        <path d="M15.031 12.25l-1.299 .75" />
+                        <path d="M10.268 15l-1.3 .75" />
+                        <path d="M15 15.803l-1.285 -.773" />
+                        <path d="M10.285 12.97l-1.285 -.773" />
+                        <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                        <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
+                    </svg>Configuración general
+                </div>
+                <p class="message-alert" style="display: flex; align-items: center; gap: 5px;"> <svg
+                        xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-info-circle">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+                        <path d="M12 9h.01" />
+                        <path d="M11 12h1v4h1" />
+                    </svg> Cambiar las configuraciones del sistema puede interrumpir algunas
+                    operaciones y el servicio momentaneamente, proceda con precaucion
+                </p>
+                <div class="form-group">
+                    <label for="baseDir" style="color: #ffffff;">Directorio base</label>
+                    <p>Directorio donde se almacenan los archivos.
+                        <br>
+                        Si se cambia podria haber conflictos con los archivos y permisos, se recomienda usar el
+                        boton de
+                        <strong>sincronizar</strong>.
+                        <br>
+                        Despues de cambiar el directorio base y sicronizar, se reiniciaran los permisos de los
+                        usuarios sobre los
+                        archivos
                     </p>
-                    <div class="form-group">
-                        <label for="baseDir" style="color: #ffffff;">Directorio base</label>
-                        <p>Directorio donde se almacenan los archivos.
-                            <br>
-                            Si se cambia podria haber conflictos con los archivos y permisos, se recomienda usar el
-                            boton de
-                            <strong>sincronizar</strong>.
-                            <br>
-                            Despues de cambiar el directorio base y sicronizar, se reiniciaran los permisos de los
-                            usuarios sobre los
-                            archivos
-                        </p>
-                        <input type="text" id="baseDir" placeholder="Directorio base">
-                    </div>
-                    <div class="form-group">
-                        <label for="limitStorage" style="color: #ffffff;">Limite de almacenamiento</label>
-                        <p>Limite de almacenamiento en <strong>GB</strong>.
-                            Si se establece un limite menor al actual no se podra subir archivos hasta que se libere
-                            espacio
-                            o se aumente el limite
-                        </p>
+                    <form id="form-base-dir">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="number" id="limitStorage" placeholder="10"> <span
-                                style="color: #ffffff;">GB</span>
+                            <input type="text" id="baseDir" placeholder="Directorio base">
+                            <button type="submit" class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                                    <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                                    <path d="M14 4l0 4l-6 0l0 -4" />
+                                </svg>
+                            </button>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="maxFileSize" style="color: #ffffff;">Limite de tamaño de archivo individual</label>
-                        <p>Limite de tamaño de archivo en <strong>MB</strong>.
-                            <br>
-                            Configuracion que permite establecer un limite maximo para el tamaño de un archivo
-                            individual que se sube al servidor.
-                            <br>
-                            Si el peso del archivo es <strong>mayor</strong> al limite establecido no se podra subir el
-                            archivo.
-                        </p>
+                    </form>
+                </div>
+                <div class="form-group">
+                    <label for="limitStorage" style="color: #ffffff;">Limite de almacenamiento</label>
+                    <p>Limite de almacenamiento en <strong>GB</strong>.
+                        Si se establece un limite menor al actual no se podra subir archivos hasta que se libere
+                        espacio
+                        o se aumente el limite
+                    </p>
+                    <form id="form-limit-storage">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="number" id="maxFileSize" placeholder="10"> <span
-                                style="color: #ffffff;">MB</span>
+                            <input type="number" id="limitStorage" placeholder="10">
+                            <span style="color: #ffffff; height: 100%;">GB</span>
+                            <button type="submit" class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                                    <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                                    <path d="M14 4l0 4l-6 0l0 -4" />
+                                </svg>
+                            </button>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="maxFiles" style="color: #ffffff;">Numero maximo de archivos</label>
-                        <p>
-                            Configurar el limite maximo de archivos por paquete que se suben al servidor
-                        </p>
+                    </form>
+                </div>
+                <div class="form-group">
+                    <label for="maxFileSize" style="color: #ffffff;">Limite de tamaño de archivo individual</label>
+                    <p>Limite de tamaño de archivo en <strong>MB</strong>.
+                        <br>
+                        Configuracion que permite establecer un limite maximo para el tamaño de un archivo
+                        individual que se sube al servidor.
+                        <br>
+                        Si el peso del archivo es <strong>mayor</strong> al limite establecido no se podra subir el
+                        archivo.
+                    </p>
+                    <form id="form-max-file-size">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="number" id="maxFiles" placeholder="10"> <span
-                                style="color: #ffffff;">Archivos</span>
+                            <input type="number" id="maxFileSize" placeholder="10">
+                            <span style="color: #ffffff;">MB</span>
+                            <button type="submit" class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                                    <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                                    <path d="M14 4l0 4l-6 0l0 -4" />
+                                </svg>
+                            </button>
                         </div>
-                    </div>
-                    <button type="submit" id="btn-save" class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
-                            <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                            <path d="M14 4l0 4l-6 0l0 -4" />
-                        </svg>
-                        Guardar</button>
-                </form>
+                    </form>
+                </div>
+                <div class="form-group">
+                    <label for="maxFiles" style="color: #ffffff;">Numero maximo de archivos</label>
+                    <p>
+                        Configurar el limite maximo de archivos por paquete que se suben al servidor
+                    </p>
+                    <form id="form-max-files">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="number" id="maxFiles" placeholder="10">
+                            <span style="color: #ffffff;">Archivos</span>
+                            <button type="submit" class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                                    <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                                    <path d="M14 4l0 4l-6 0l0 -4" />
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
+                </div>
                 <hr>
                 <div class="form-group">
                     <label for="syncFiles" style="color: #ffffff;">Sincronizar archivos</label>
