@@ -5,7 +5,8 @@ import { prisma } from "../lib/prisma";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError, ValidationError } from "../utils/errors";
 import { logger } from "../utils/logger";
-import { system_setting } from '../config/config'
+import { system_setting } from '../config/config';
+import { settingService } from "../services/setting.service";
 
 
 // Limitador de concurrencia para evitar el error EMFILE (too many open files) en cálculo de peso
@@ -124,28 +125,10 @@ export const setSettings = async (req: AuthRequest, res: Response, next: NextFun
     if (!setting || value === undefined) {
       throw new ValidationError("Faltan parámetros (setting o value)");
     }
-    if (setting === "LIMIT_STORAGE") {
-      const limitStorage = Number(value);
-      if (!limitStorage || limitStorage <= 0) {
-        throw new ValidationError("El límite de almacenamiento debe ser un número mayor a 0");
-      }
-      const usedSize = await system_setting.getUsedStorage();
-      if (limitStorage * 1024 * 1024 * 1024 < usedSize) {
-        throw new ValidationError(
-          "El límite de almacenamiento debe ser mayor o igual al tamaño actual de los archivos",
-        );
-      }
-    }
-    if (setting === "MAX_FILE_SIZE" || setting === "MAX_FILES") {
-      const valueNumber = Number(value);
-      if (!valueNumber || valueNumber <= 0) {
-        throw new ValidationError(`El valor de ${setting} debe ser un número mayor a 0`);
-      }
-    }
 
-    await system_setting.setSetting(setting, value);
+    const updatedValue = await settingService.updateSetting(setting, value);
 
-    logger.info(`[AUDIT] Administrador ${req.user?.id} cambió la configuración [${setting}] a: ${value}`);
+    logger.info(`[AUDIT] Administrador ${req.user?.id} cambió la configuración [${setting}] a: ${value} (guardado: ${updatedValue})`);
     return res.status(200).json({ message: "Configuración actualizada exitosamente" });
   } catch (error) {
     next(error);

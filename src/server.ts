@@ -47,6 +47,7 @@ Promise.all([system_setting.init_basedir()]).then(async () => {
     const baseDir = system_setting.getBaseDir();
     const currentSize = await calculateDirSize(baseDir);
     await system_setting.updateUsedStorage(currentSize);
+    console.log(`🍒 Ruta base de archivos: ${baseDir}`);
     console.log(`🍒 Almacenamiento inicial calculado: ${formatBytes(currentSize)}`);
   } catch (err) {
     console.error("Error al calcular almacenamiento inicial:", err);
@@ -69,7 +70,5 @@ Promise.all([system_setting.init_basedir()]).then(async () => {
 }).catch((error) => {
   console.error("Error al inicializar el servidor:", error);
   process.exit(1);
-}).finally(() => {
-  console.log("🧹 Cerrando servidor");
 });
 
