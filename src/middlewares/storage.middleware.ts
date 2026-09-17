@@ -1,19 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
-import { getSetting, getUsedStorage } from '../utils/settings';
+import { system_setting } from '../config/config'
 import { AppError } from '../utils/errors';
 import { checkPermission } from '../services/files.service';
 import { AuthRequest } from './auth.middleware';
 
 export const checkStorageLimit = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const limitStorageStr = getSetting("LIMIT_STORAGE");
+        const limitStorageStr = system_setting.getSetting("LIMIT_STORAGE");
         const limitStorage = Number(limitStorageStr);
 
         if (!limitStorage) {
             return next(new AppError('No se ha configurado un límite de almacenamiento válido.', 500));
         }
 
-        const currentSize = await getUsedStorage();
+        const currentSize = await system_setting.getUsedStorage();
 
         const contentLength = Number(req.headers['content-length'] || 0);
 

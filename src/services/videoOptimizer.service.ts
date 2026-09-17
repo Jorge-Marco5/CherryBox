@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { videoExts } from "../persistent/formats";
 import { logger } from "../utils/logger";
+import { system_setting } from '../config/config'
 
 // Configurar el ejecutable estático de FFmpeg
 if (ffmpegInstaller) {
@@ -155,8 +156,7 @@ export async function getVideoThumbnail(fullPath: string): Promise<string | null
  * Procesa de forma asíncrona en segundo plano los videos subidos.
  */
 export function processUploadedVideosAsync(files: Express.Multer.File[], relativePath: string): void {
-  const { getBaseDir } = require("../utils/settings");
-  const baseDir = getBaseDir();
+  const baseDir = system_setting.getBaseDir();
 
   setImmediate(async () => {
     for (const file of files) {

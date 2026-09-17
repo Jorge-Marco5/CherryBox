@@ -17,13 +17,10 @@ import { upload } from "../utils/multer";
 
 import { uploadCleanupMiddleware } from "../middlewares/cleanup.middleware";
 import { checkStorageLimit, checkUploadPermission } from "../middlewares/storage.middleware";
-import { getSetting } from "../utils/settings";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { system_setting } from '../config/config'
 
 const MAX_FILES = (() => {
-  const val = getSetting("MAX_FILES") || "10";
+  const val = system_setting.getSetting("MAX_FILES") || "10";
   try {
     const sanitized = val.toString().replace(/[^0-9*+\-/\s()]/g, "");
     // eslint-disable-next-line no-new-func

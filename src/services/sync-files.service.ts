@@ -1,10 +1,10 @@
 import { prisma } from "../lib/prisma";
 import fs from "fs/promises";
 import path from "path";
-import { getBaseDir } from "../utils/settings";
+import { system_setting } from '../config/config'
 import { logger } from "../utils/logger";
 
-const BASE_DIR = getBaseDir();
+const BASE_DIR = system_setting.getBaseDir();
 
 const IGNORE_PATHS = new Set(['thumbnails', 'private']);
 
@@ -18,7 +18,7 @@ export async function syncFiles() {
     const scan = async (currentDir: string, parentId: string | null = null) => {
         const fullPath = path.join(BASE_DIR, currentDir);
         const items = await fs.readdir(fullPath, { withFileTypes: true });
-
+        console.log(fullPath)
         for (const item of items) {
             if (IGNORE_PATHS.has(item.name)) continue;
 

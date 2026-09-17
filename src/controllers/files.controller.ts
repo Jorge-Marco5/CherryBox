@@ -17,7 +17,7 @@ import { syncFiles } from "../services/sync-files.service";
 import { ValidationError } from "../utils/errors";
 import { logger } from "../utils/logger";
 import { isValidPath } from "../utils/multer";
-import { getBaseDir, addUsedStorage } from "../utils/settings";
+import { system_setting } from '../config/config'
 import { VideoStreamResult } from "../services/videostream.service";
 import { processUploadedVideosAsync } from "../services/videoOptimizer.service";
 import { decodePath, sanitizeRelativePath } from "../utils/sanitize";
@@ -126,7 +126,7 @@ export const uploadFiles = async (req: AuthRequest, res: Response, next: NextFun
 
     // Actualizar tamaño de almacenamiento usado
     const totalSize = files.reduce((acc, f) => acc + f.size, 0);
-    await addUsedStorage(totalSize);
+    await system_setting.addUsedStorage(totalSize);
 
     // Optimización asíncrona de videos en segundo plano con FFmpeg (+faststart)
     processUploadedVideosAsync(files, decodePath(relativePath));
@@ -249,7 +249,7 @@ export const downloadFile = async (req: AuthRequest, res: Response) => {
 
     // Aquí no movemos el res.download porque es una respuesta específica de Express,
     // pero mantenemos la lógica mínima.
-    const fullPath = path.join(getBaseDir(), relativePath);
+    const fullPath = path.join(system_setting.getBaseDir(), relativePath);
     logger.info(`[AUDIT] Usuario ${req.user?.id} DESCARGÓ el archivo: ${relativePath}`);
     res.download(fullPath);
   } catch (error: any) {

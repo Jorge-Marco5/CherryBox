@@ -5,7 +5,8 @@ import { prisma } from "../lib/prisma";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError, ValidationError } from "../utils/errors";
 import { logger } from "../utils/logger";
-import { getBaseDir, getSetting, getUsedStorage, setSetting } from "../utils/settings";
+import { system_setting } from '../config/config'
+
 
 // Limitador de concurrencia para evitar el error EMFILE (too many open files) en cálculo de peso
 class ConcurrencyLimiter {
@@ -80,14 +81,14 @@ export const calculateDirSize = async (dirPath: string): Promise<number> => {
  */
 export const getStorage = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const storage = Number(getSetting("LIMIT_STORAGE"));
-    let baseDir = getBaseDir();
+    const storage = Number(system_setting.getSetting("LIMIT_STORAGE"));
+    let baseDir = system_setting.getBaseDir();
 
     if (!storage || !baseDir) {
       throw new AppError("No se encontró la configuración del almacenamiento");
     }
 
-    const usedSize = await getUsedStorage();
+    const usedSize = await system_setting.getUsedStorage();
     const availableSize = storage - usedSize;
 
     return res.status(200).json({ totalStorage: storage, usedStorage: usedSize, availableStorage: availableSize });
@@ -97,14 +98,14 @@ export const getStorage = async (req: AuthRequest, res: Response, next: NextFunc
 };
 
 export async function getStorageString() {
-  const storage = Number(getSetting("LIMIT_STORAGE"));
-  let baseDir = getBaseDir();
+  const storage = Number(system_setting.getSetting("LIMIT_STORAGE"));
+  let baseDir = system_setting.getBaseDir();
 
   if (!storage || !baseDir) {
     throw new AppError("No se encontró la configuración del almacenamiento");
   }
 
-  const usedSize = await getUsedStorage();
+  const usedSize = await system_setting.getUsedStorage();
   const availableSize = storage - usedSize;
 
   return { totalStorage: storage, usedStorage: usedSize, availableStorage: availableSize };
@@ -128,7 +129,7 @@ export const setSettings = async (req: AuthRequest, res: Response, next: NextFun
       if (!limitStorage || limitStorage <= 0) {
         throw new ValidationError("El límite de almacenamiento debe ser un número mayor a 0");
       }
-      const usedSize = await getUsedStorage();
+      const usedSize = await system_setting.getUsedStorage();
       if (limitStorage * 1024 * 1024 * 1024 < usedSize) {
         throw new ValidationError(
           "El límite de almacenamiento debe ser mayor o igual al tamaño actual de los archivos",
@@ -142,7 +143,7 @@ export const setSettings = async (req: AuthRequest, res: Response, next: NextFun
       }
     }
 
-    await setSetting(setting, value);
+    await system_setting.setSetting(setting, value);
 
     logger.info(`[AUDIT] Administrador ${req.user?.id} cambió la configuración [${setting}] a: ${value}`);
     return res.status(200).json({ message: "Configuración actualizada exitosamente" });
@@ -160,10 +161,10 @@ export const setSettings = async (req: AuthRequest, res: Response, next: NextFun
 export const getSettings = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const isSuperAdmin = req.user?.role === "SUPERADMIN";
-    const baseDir = getBaseDir();
-    const limitStorage = getSetting("LIMIT_STORAGE");
-    const maxFileSize = getSetting("MAX_FILE_SIZE");
-    const maxFiles = getSetting("MAX_FILES");
+    const baseDir = system_setting.getBaseDir();
+    const limitStorage = system_setting.getSetting("LIMIT_STORAGE");
+    const maxFileSize = system_setting.getSetting("MAX_FILE_SIZE");
+    const maxFiles = system_setting.getSetting("MAX_FILES");
     // Convertir bytes a GB para la vista
     const limitStorageGB = Math.round(Number(limitStorage) / (1024 * 1024 * 1024));
     // Convertir bytes a MB para la vista
@@ -176,48 +177,6 @@ export const getSettings = async (req: AuthRequest, res: Response, next: NextFun
       maxFiles: maxFiles,
       permission: isSuperAdmin,
     });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * Sincroniza los archivos físicos con la base de datos.
- */
-export const syncFiles = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const baseDir = getBaseDir();
-    const superadmin = await prisma.user.findFirst({ where: { role: "SUPERADMIN" } });
-
-    if (!superadmin) throw new AppError("No se encontró un SUPERADMIN para asignar la propiedad.");
-
-    const scan = async (currentDir: string, parentId: string | null = null) => {
-      const fullPath = path.join(baseDir, currentDir);
-      const items = await fs.readdir(fullPath, { withFileTypes: true });
-
-      for (const item of items) {
-        const relativePath = path.join(currentDir, item.name);
-        const isDirectory = item.isDirectory();
-
-        const dbFile = await prisma.file.upsert({
-          where: { path: relativePath },
-          update: { name: item.name, type: isDirectory ? "FOLDER" : "FILE", parentId },
-          create: {
-            name: item.name,
-            path: relativePath,
-            type: isDirectory ? "FOLDER" : "FILE",
-            ownerId: superadmin.id,
-            parentId,
-          },
-        });
-
-        if (isDirectory) await scan(relativePath, dbFile.id);
-      }
-    };
-
-    logger.info(`[AUDIT] Sincronización iniciada por ${req.user?.id}`);
-    await scan("");
-    return res.status(200).json({ message: "Sincronización completada exitosamente" });
   } catch (error) {
     next(error);
   }

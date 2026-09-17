@@ -2,12 +2,9 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
-import { getBaseDir, getSetting } from './settings';
+import { system_setting } from '../config/config'
 import { ValidationError } from './errors';
 import { sanitizeName, decodePath } from './sanitize';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 /**
  * Evalúa expresiones matemáticas simples de las variables de entorno (ej: "100 * 1024 * 1024")
@@ -25,9 +22,9 @@ function evaluateEnvVar(value: string | undefined, defaultValue: number): number
 }
 
 //Obtenemos el valor de la ruta de la carpeta donde se guardaran los archivos
-const BASE_DIR = getBaseDir();
+const BASE_DIR = system_setting.getBaseDir();
 
-const MAX_FILE_SIZE = getSetting("MAX_FILE_SIZE");
+const MAX_FILE_SIZE = system_setting.getSetting("MAX_FILE_SIZE");
 
 // Función para validar que la ruta esté dentro del directorio base
 export function isValidPath(requestedPath: string) {
@@ -71,7 +68,7 @@ export const storage = multer.diskStorage({
 
     // RASTREO: Guardar la ruta completa en req para limpieza en caso de aborto
     const uploadPath = req.query.path || '';
-    const fullPath = path.join(getBaseDir(), uploadPath, filename);
+    const fullPath = path.join(system_setting.getBaseDir(), uploadPath, filename);
 
     if (!req._filesInProgress) req._filesInProgress = [];
     req._filesInProgress.push(fullPath);

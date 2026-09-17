@@ -5,8 +5,8 @@ import { prisma } from "../lib/prisma";
 import { audioExts, codeExts, imageExts, pdfExts, textExts, videoExts } from "../persistent/formats";
 import { ForbiddenError, ValidationError } from "../utils/errors";
 import { isValidPath } from "../utils/multer";
-import { getBaseDir } from "../utils/settings";
-import { sanitizeName, decodePath } from "../utils/sanitize";
+import { system_setting } from '../config/config'
+import { sanitizeName } from "../utils/sanitize";
 import videoHandler from "./videostream.service";
 import { getVideoThumbnail } from "./videoOptimizer.service";
 
@@ -139,7 +139,7 @@ async function syncFileInDb(relativePath: string, action: "CREATE" | "DELETE" | 
 
 export const listItemsService = async (relativePath: string, userId: string, userRole: string) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-  const BASE_DIR = getBaseDir();
+  const BASE_DIR = system_setting.getBaseDir();
   // Asegurar que la raíz existe
   if (relativePath === "") {
     const superadmin = await prisma.user.findFirst({ where: { role: "SUPERADMIN" } });
@@ -263,7 +263,7 @@ export const listItemsService = async (relativePath: string, userId: string, use
 };
 
 export const searchItemsService = async (query: string, userId: string, userRole: string) => {
-  const BASE_DIR = getBaseDir();
+  const BASE_DIR = system_setting.getBaseDir();
   const results: any[] = [];
   const searchRecursive = async (currentDir: string) => {
     const fullPath = path.join(BASE_DIR, currentDir);
@@ -313,7 +313,7 @@ export const createFolderService = async (
   userRole: string,
 ) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-  const BASE_DIR = getBaseDir();
+  const BASE_DIR = system_setting.getBaseDir();
   // Necesita WRITE en la carpeta padre
   await checkPermission(userId, userRole, relativePath, "WRITE");
 
@@ -336,7 +336,7 @@ export const renameItemService = async (
   userRole: string,
 ) => {
   if (!isValidPath(oldPath)) throw new ValidationError("Ruta no válida");
-  const BASE_DIR = getBaseDir();
+  const BASE_DIR = system_setting.getBaseDir();
 
   const oldFile = await prisma.file.findUnique({ where: { path: oldPath } });
   if (!oldFile) throw new ValidationError(`El archivo o carpeta no existe: ${oldPath}`);
@@ -375,7 +375,7 @@ export const renameItemService = async (
 
 export const deleteItemService = async (relativePath: string, userId: string, userRole: string) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-  const BASE_DIR = getBaseDir();
+  const BASE_DIR = system_setting.getBaseDir();
 
   const file = await prisma.file.findUnique({ where: { path: relativePath } });
   if (!file) throw new ValidationError("El archivo o carpeta no existe: " + relativePath);
@@ -408,8 +408,7 @@ export const deleteItemService = async (relativePath: string, userId: string, us
 
   await syncFileInDb(relativePath, "DELETE");
 
-  const { subtractUsedStorage } = require("../utils/settings");
-  await subtractUsedStorage(sizeDeleted);
+  await system_setting.subtractUsedStorage(sizeDeleted);
 
   return { success: true, message: "Eliminado exitosamente", isDirectory: stats.isDirectory() };
 };
@@ -435,7 +434,7 @@ export const getItemContentService = async (
   isThumbnail?: boolean,
 ) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
-  const BASE_DIR = getBaseDir();
+  const BASE_DIR = system_setting.getBaseDir();
   // Necesita READ
   await checkPermission(userId, userRole, relativePath, "READ");
 
@@ -488,7 +487,7 @@ export const registerUploadedFilesService = async (files: any[], relativePath: s
 export const verifyDownloadMultipleService = async (paths: string[], userId: string, userRole: string) => {
   const filePaths: string[] = [];
   let totalSize = 0;
-  const BASE_DIR = getBaseDir();
+  const BASE_DIR = system_setting.getBaseDir();
   for (const relPath of paths) {
     if (!isValidPath(relPath)) throw new ValidationError(`Ruta no válida: ${relPath}`);
 
