@@ -194,9 +194,8 @@ export const createShareLink = async (req: AuthRequest, res: Response, next: Nex
     // Codificamos todo el conjunto en base64url para que sea seguro en URLs
     const token = Buffer.from(`${payload}:${hmac}`).toString('base64url');
 
-    const protocol = req.protocol;
-    const host = req.headers.host || "localhost";
-    const full_url = `${protocol}://${host}/api/shared/${token}`;
+    const host = config.REVERSE_PROXY ? config.FRONTEND_URL : `${req.protocol}://${req.headers.host}`;
+    const full_url = `${host}/api/shared/${token}`;
 
     res.json({ url: full_url });
   } catch (error: any) {

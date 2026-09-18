@@ -6,6 +6,7 @@ export const system_setting = new Setting();
 
 interface config_server {
     NODE_ENV: "development" | "production";
+    REVERSE_PROXY: boolean;
     FRONTEND_URL: string;
     PORT: string | number;
     DATABASE_URL: string;
@@ -21,6 +22,7 @@ interface config_server {
 export const config: config_server = {
     DATABASE_URL: process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/cherrybox",
     NODE_ENV: process.env.NODE_ENV as "development" | "production" || "development",
+    REVERSE_PROXY: process.env.REVERSE_PROXY?.toLowerCase() === 'true' || false,
     FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
     PORT: process.env.PORT || 3000,
     JWT_SECRET: process.env.JWT_SECRET || "secret",

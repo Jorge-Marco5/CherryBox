@@ -59,61 +59,77 @@ document.addEventListener("DOMContentLoaded", () => {
     const formLimitStorage = document.getElementById("form-limit-storage")
     const formMaxFileSize = document.getElementById("form-max-file-size")
     const formMaxFiles = document.getElementById("form-max-files")
-    formBaseDir.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        try {
-            // Guardar Límite de Almacenamiento
-            await axios.post("/api/setSettings", {
-                setting: "BASE_DIR",
-                value: baseDir.value
-            }, { silent: true });
-            showToast("Configuración guardada exitosamente", 'info');
-        } catch (error) {
-            showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
-        }
-    });
+    if (formBaseDir) {
+        formBaseDir.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try {
+                // Guardar Límite de Almacenamiento
+                await axios.post("/api/setSettings", {
+                    setting: "BASE_DIR",
+                    value: baseDir.value
+                }, { silent: true });
+                showToast("Configuración guardada exitosamente", 'info');
+            } catch (error) {
+                showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
+            }
+        });
+    } else {
+        showToast("No se pudo cargar el formulario de configuración", 'error');
+    }
 
-    formLimitStorage.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        try {
-            // Guardar Límite de Almacenamiento
-            await axios.post("/api/setSettings", {
-                setting: "LIMIT_STORAGE",
-                value: limitStorage.value
-            }, { silent: true });
-            showToast("Configuración guardada exitosamente", 'info');
-        } catch (error) {
-            showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
-        }
-    });
+    if (formLimitStorage) {
+        formLimitStorage.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try {
+                // Guardar Límite de Almacenamiento
+                await axios.post("/api/setSettings", {
+                    setting: "LIMIT_STORAGE",
+                    value: limitStorage.value
+                }, { silent: true });
+                showToast("Configuración guardada exitosamente", 'info');
+            } catch (error) {
+                showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
+            }
+        });
+    } else {
+        showToast("No se pudo cargar el formulario de configuración", 'error');
+    }
 
-    formMaxFileSize.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        try {
-            // Guardar Límite de Tamaño de Archivo
-            await axios.post("/api/setSettings", {
-                setting: "MAX_FILE_SIZE",
-                value: maxFileSize.value
-            }, { silent: true });
-            showToast("Configuración guardada exitosamente", 'info');
-        } catch (error) {
-            showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
-        }
-    });
+    if (formMaxFileSize) {
+        formMaxFileSize.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try {
+                // Guardar Límite de Tamaño de Archivo
+                await axios.post("/api/setSettings", {
+                    setting: "MAX_FILE_SIZE",
+                    value: maxFileSize.value
+                }, { silent: true });
+                showToast("Configuración guardada exitosamente", 'info');
+            } catch (error) {
+                showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
+            }
+        });
+    } else {
+        showToast("No se pudo cargar el formulario de configuración", 'error');
+    }
 
-    formMaxFiles.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        try {
-            // Guardar Límite de Archivos
-            await axios.post("/api/setSettings", {
-                setting: "MAX_FILES",
-                value: maxFiles.value
-            }, { silent: true });
-            showToast("Configuración guardada exitosamente", 'info');
-        } catch (error) {
-            showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
-        }
-    });
+    if (formMaxFiles) {
+        formMaxFiles.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            try {
+                // Guardar Límite de Archivos
+                await axios.post("/api/setSettings", {
+                    setting: "MAX_FILES",
+                    value: maxFiles.value
+                }, { silent: true });
+                showToast("Configuración guardada exitosamente", 'info');
+            } catch (error) {
+                showToast(error.response?.data?.error || "Error al cambiar la configuración", 'error');
+            }
+        });
+    } else {
+        showToast("No se pudo cargar el formulario de configuración", 'error');
+    }
 
     async function syncFiles() {
         const btn = document.getElementById("btn-sync");
