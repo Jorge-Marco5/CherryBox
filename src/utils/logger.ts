@@ -28,8 +28,23 @@ export const logger = createLogger({
         logFormat
       )
     }),
-    new transports.File({ filename: path.join(LOGS_DIR, `${today}-error.log`), level: 'error' }),
-    new transports.File({ filename: path.join(LOGS_DIR, `${today}-combined.log`) }),
+    new transports.File({
+      filename: path.join(LOGS_DIR, `${today}-error.log`),
+      level: 'error',
+      format: format.combine(
+        format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        format.errors({ stack: true }),
+        logFormat
+      )
+    }),
+    new transports.File({
+      filename: path.join(LOGS_DIR, `${today}-combined.log`),
+      format: format.combine(
+        format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        format.errors({ stack: true }),
+        logFormat
+      )
+    }),
   ],
   exceptionHandlers: [
     new transports.File({ filename: path.join(LOGS_DIR, `${today}-exceptions.log`) })

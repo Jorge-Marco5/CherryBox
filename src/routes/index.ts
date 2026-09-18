@@ -7,6 +7,8 @@ import { requireAdminView, requireAuthView } from "../middlewares/auth.middlewar
 const router = Router();
 router.get("/", requireAuthView, dashboard);
 
+router.get("/uploads", requireAuthView, dashboard);
+
 //vista login
 router.get("/login", (req, res) => {
   res.sendFile(path.join(__dirname, "../views/login.html"));

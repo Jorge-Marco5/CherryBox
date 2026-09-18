@@ -1,12 +1,4 @@
-// Estado global
-let currentPath = "";
-let currentRenameItem = null;
-let currentPreviewPath = null;
-let currentPermissionFileId = null;
-let currentFolderData = { id: null, name: "" };
-let isLoadingFiles = false;
-let activeUploads = [];
-let currentModalActive = '';
+const mainContainer = document.getElementById("main-container");
 
 /**
  * Carga los archivos de una ruta específica.
@@ -43,13 +35,14 @@ async function loadFiles(path = "") {
 }
 
 /**
- * Busca archivos usando el campo de búsqueda.
+ * Manejador del formulario de búsqueda mediante delegación de eventos.
+ * Esto asegura que la búsqueda funcione tras cambiar de plantilla/vista sin perder el listener.
  */
-const searchForm = document.getElementById("search-form");
-
-searchForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  searchFiles();
+document.addEventListener("submit", (e) => {
+  if (e.target && (e.target.id === "search-form" || e.target.closest("#search-form"))) {
+    e.preventDefault();
+    searchFiles();
+  }
 });
 
 async function searchFiles() {
@@ -369,7 +362,7 @@ async function revokePermission(permissionId) {
 }
 
 /**
- * Gestión de Subida de Archivos
+ * Gestión de Subida de Archivos e Historial en Memoria
  */
 
 async function uploadFiles(event) {
@@ -379,137 +372,339 @@ async function uploadFiles(event) {
   event.target.value = "";
 }
 
-async function uploadFilesProcess(files) {
-  const progressEl = document.getElementById("uploadProgress");
-  const progressList = document.getElementById("progressList");
-  const progressDetail = document.createElement("details");
-  progressDetail.className = "progress-detail";
-  const fileCount = document.getElementById("fileCount");
-  const totalProgressFill = document.getElementById("totalProgressFill");
-  const totalProgressText = document.getElementById("totalProgressText");
-  const uploadSpeed = document.getElementById("uploadSpeed");
+/**
+ * Notificación Toast interactiva para el progreso de subidas
+ */
+function updateUploadToast(activeCount, totalPercent, isCompleted = false) {
+  const container = document.getElementById("toast-container");
+  if (!container) return;
 
-  progressEl.classList.add("active");
-  progressList.innerHTML = "";
-  progressDetail.innerHTML = "";
-  activeUploads = [];
+  let toast = document.getElementById("active-upload-toast");
 
-  const totalFiles = files.length;
-  let completedCount = 0;
-  let totalBytes = files.reduce((acc, file) => acc + file.size, 0);
-  let startTime = Date.now();
-
-  fileCount.textContent = `0/${totalFiles}`;
-  totalProgressFill.style.width = "0%";
-  totalProgressText.textContent = "0%";
-  uploadSpeed.textContent = "0 KB/s";
-
-  files.forEach((file, index) => {
-    const controller = new AbortController();
-    activeUploads.push({ file, controller, status: "pending", loaded: 0 });
-
-    const progressItem = document.createElement("div");
-    progressItem.className = "progress-item";
-    progressItem.id = `progress-${index}`;
-    progressItem.innerHTML = `
-            <div class="progress-item-header">
-                <span class="progress-file-name" title="${file.name}">[${formatBytes(file.size)}]-${file.name}</span>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="progress-percent">0%</span>
-                    <button class="btn-cancel-single" onclick="cancelUpload(${index})" id="cancel-btn-${index}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
-                    </button>
-                </div>
-            </div>
-            <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
-        `;
-    progressDetail.appendChild(progressItem);
-  });
-  progressList.appendChild(progressDetail);
-
-  const updateGlobalProgress = () => {
-    let totalLoaded = activeUploads.reduce((acc, u) => acc + u.loaded, 0);
-    const percent = totalBytes > 0 ? Math.round((totalLoaded / totalBytes) * 100) : 100;
-    totalProgressFill.style.width = percent + "%";
-    totalProgressText.textContent = percent + "%";
-
-    const timeElapsed = (Date.now() - startTime) / 1000;
-    if (timeElapsed > 0) {
-      uploadSpeed.textContent = formatBytes(totalLoaded / timeElapsed) + "/s";
+  if (activeCount > 0) {
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "active-upload-toast";
+      toast.className = "toast upload-toast info";
+      toast.title = "Haz clic para ver el gestor de subidas";
+      toast.onclick = () => {
+        if (typeof renderUploadTemplate === "function") {
+          renderUploadTemplate();
+          toast.style.display = "none";
+        }
+      };
+      container.appendChild(toast);
+    } else {
+      toast.classList.remove("fade-out");
     }
-    fileCount.textContent = `${completedCount}/${totalFiles}`;
-  };
 
+    toast.innerHTML = `
+      <div class="upload-toast-header">
+        <div class="upload-toast-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M7 18a4.6 4.4 0 0 1 0 -9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1" />
+            <path d="M9 15l3 -3l3 3" />
+            <path d="M12 12l0 9" />
+          </svg>
+          <span>Subiendo ${activeCount} archivo(s)... (${totalPercent}%)</span>
+        </div>
+        <span class="upload-toast-cta"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-up-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M17 7l-10 10" /><path d="M8 7l9 0l0 9" /></svg></span>
+      </div>
+      <div class="progress-bar" style="width: 100%; height: 5px; margin-top: 6px;">
+        <div class="progress-fill" style="width: ${totalPercent}%;"></div>
+      </div>
+    `;
+  } else if (toast) {
+    if (isCompleted) {
+      toast.className = "toast upload-toast success";
+      toast.innerHTML = `
+        <div class="upload-toast-header">
+          <div class="upload-toast-title" style="color: var(--success, #22c55e);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M5 12l5 5l10 -10" />
+            </svg>
+            <span>Subida finalizada</span>
+          </div>
+          <span class="upload-toast-cta">Ver historial ↗</span>
+        </div>
+      `;
+      setTimeout(() => {
+        if (toast && toast.parentNode) {
+          toast.classList.add("fade-out");
+          setTimeout(() => toast.remove(), 350);
+        }
+      }, 4500);
+    } else {
+      toast.classList.add("fade-out");
+      setTimeout(() => toast.remove(), 350);
+    }
+  }
+}
+
+/**
+ * Actualiza los indicadores globales: menú #indicador, toast y vista activa
+ */
+function updateUploadIndicators(isCompleted = false) {
+  activeUploads = uploadHistory.filter((u) => u.status === "uploading" || u.status === "pending");
+
+  const indicador = document.getElementById("indicador");
+  if (indicador) {
+    if (activeUploads.length > 0) {
+      indicador.textContent = activeUploads.length;
+      indicador.style.display = "flex";
+      indicador.style.alignItems = "center";
+      indicador.style.justifyContent = "center";
+    } else {
+      indicador.style.display = "none";
+    }
+  }
+
+  // Progreso global
+  const activeOnly = uploadHistory.filter((u) => u.status === "uploading" || u.status === "pending");
+  let totalBytes = activeOnly.reduce((acc, u) => acc + (u.size || 0), 0);
+  let totalLoaded = activeOnly.reduce((acc, u) => acc + (u.loaded || 0), 0);
+  let overallPercent = totalBytes > 0 ? Math.min(100, Math.round((totalLoaded / totalBytes) * 100)) : 0;
+
+  updateUploadToast(activeOnly.length, overallPercent, isCompleted);
+
+  // Si estamos en la vista de subida, refrescar la lista
+  if (urlPath === "/uploads") {
+    renderUploadManagerView();
+  }
+}
+
+/**
+ * Renderiza la lista e historial de subidas en el template de subida de archivos
+ */
+function renderUploadManagerView() {
+  const container = document.getElementById("uploadManagerList");
+  if (!container) return;
+
+  const historyBadge = document.getElementById("uploadHistoryBadge");
+  if (historyBadge) historyBadge.textContent = uploadHistory.length;
+
+  const btnCancelAll = document.getElementById("btnCancelAllUploads");
+  const btnClear = document.getElementById("btnClearUploadHistory");
+  const globalProgress = document.getElementById("uploadGlobalProgressContainer");
+  const globalText = document.getElementById("uploadGlobalText");
+  const globalPercent = document.getElementById("uploadGlobalPercent");
+  const globalFill = document.getElementById("uploadGlobalProgressFill");
+  const totalSpeed = document.getElementById("uploadTotalSpeed");
+
+  const active = uploadHistory.filter((u) => u.status === "uploading" || u.status === "pending");
+  const finished = uploadHistory.filter((u) => u.status === "completed" || u.status === "cancelled" || u.status === "error");
+
+  if (btnCancelAll) btnCancelAll.style.display = active.length > 0 ? "inline-flex" : "none";
+  if (btnClear) btnClear.style.display = finished.length > 0 ? "inline-flex" : "none";
+
+  if (active.length > 0) {
+    if (globalProgress) globalProgress.style.display = "block";
+    let activeTotal = active.reduce((acc, u) => acc + (u.size || 0), 0);
+    let activeLoaded = active.reduce((acc, u) => acc + (u.loaded || 0), 0);
+    let pct = activeTotal > 0 ? Math.round((activeLoaded / activeTotal) * 100) : 0;
+    if (globalText) globalText.textContent = `Subiendo ${active.length} archivo(s)...`;
+    if (globalPercent) globalPercent.textContent = `${pct}%`;
+    if (globalFill) globalFill.style.width = `${pct}%`;
+  } else {
+    if (globalProgress) globalProgress.style.display = "none";
+    if (totalSpeed) totalSpeed.textContent = "";
+  }
+
+  if (uploadHistory.length === 0) {
+    container.innerHTML = `
+      <div class="upload-empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M7 18a4.6 4.4 0 0 1 0 -9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1" />
+          <path d="M9 15l3 -3l3 3" />
+          <path d="M12 12l0 9" />
+        </svg>
+        <p>No hay subidas recientes en esta sesión.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Renderizado dinámico de la lista de cargas
+  container.innerHTML = uploadHistory.map((item) => {
+    let statusLabel = "En cola";
+    let badgeClass = "pending";
+    let isProgressActive = item.status === "uploading" || item.status === "pending";
+
+    if (item.status === "uploading") {
+      statusLabel = `${item.percent}%`;
+      badgeClass = "uploading";
+    } else if (item.status === "completed") {
+      statusLabel = "Completado";
+      badgeClass = "completed";
+    } else if (item.status === "cancelled") {
+      statusLabel = "Cancelado";
+      badgeClass = "cancelled";
+    } else if (item.status === "error") {
+      statusLabel = item.error ? `Error: ${item.error}` : "Error";
+      badgeClass = "error";
+    }
+
+    const cancelBtnHtml = isProgressActive
+      ? `<button class="btn-cancel-single" onclick="cancelUpload('${item.id}')" title="Cancelar esta subida">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
+        </button>`
+      : "";
+
+    return `
+      <div class="upload-manager-item ${item.status}" id="upload-item-${item.id}">
+        <div class="upload-item-header">
+          <div class="upload-item-info">
+            ${getFileIcon(item.name)}
+            <div style="display:flex; flex-direction:column;min-width: 0; flex: 1; gap:5px;">
+              <div class="upload-item-name" title="${item.name}">${item.name}</div>
+              <div class="upload-item-meta">
+                <span>${formatBytes(item.size)}</span>
+                <span> • Carpeta: ${item.folder ? '/' + decodeURI(item.folder) : '/ (Raíz)'}</span>
+              </div>
+            </div>
+          </div>
+          <div class="upload-item-actions">
+            <span class="upload-status-badge ${badgeClass}" id="badge-${item.id}">${statusLabel}</span>
+            ${cancelBtnHtml}
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill ${item.status}" id="fill-${item.id}" style="width: ${item.percent}%;"></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function uploadFilesProcess(files) {
+  if (!files || files.length === 0) return;
+
+  const targetFolder = currentPath;
+  const newItems = files.map((file, index) => {
+    const item = {
+      id: "upl-" + Date.now() + "-" + index + "-" + Math.random().toString(36).substring(2, 6),
+      file: file,
+      name: file.name,
+      size: file.size,
+      status: "pending",
+      loaded: 0,
+      percent: 0,
+      controller: new AbortController(),
+      folder: targetFolder,
+      error: null,
+      timestamp: Date.now()
+    };
+    uploadHistory.unshift(item);
+    return item;
+  });
+
+  updateUploadIndicators();
+
+  const startTime = Date.now();
   const CONCURRENCY_LIMIT = 3;
   let currentIndex = 0;
 
-  const startNextUpload = async () => {
-    if (currentIndex >= totalFiles) return;
-    const index = currentIndex++;
-    const upload = activeUploads[index];
-    const progressItem = document.getElementById(`progress-${index}`);
-    const progressFill = progressItem.querySelector(".progress-fill");
-    const progressText = progressItem.querySelector(".progress-percent");
+  const updateProgressState = (item, event) => {
+    item.loaded = event.loaded;
+    item.percent = event.total > 0 ? Math.round((event.loaded / event.total) * 100) : 0;
 
-    upload.status = "uploading";
+    // Actualización directa del DOM si estamos en la vista de subidas para máximo rendimiento
+    const fill = document.getElementById(`fill-${item.id}`);
+    const badge = document.getElementById(`badge-${item.id}`);
+    if (fill) fill.style.width = `${item.percent}%`;
+    if (badge) badge.textContent = `${item.percent}%`;
+
+    const timeElapsed = (Date.now() - startTime) / 1000;
+    if (timeElapsed > 0) {
+      const active = uploadHistory.filter((u) => u.status === "uploading");
+      const totalLoaded = active.reduce((acc, u) => acc + u.loaded, 0);
+      const speedEl = document.getElementById("uploadTotalSpeed");
+      if (speedEl) speedEl.textContent = `${formatBytes(totalLoaded / timeElapsed)}/s`;
+    }
+
+    updateUploadIndicators();
+  };
+
+  const startNextUpload = async () => {
+    if (currentIndex >= newItems.length) return;
+    const item = newItems[currentIndex++];
+    if (item.status === "cancelled") return startNextUpload();
+
+    item.status = "uploading";
+    updateUploadIndicators();
 
     try {
       const formData = new FormData();
-      formData.append("files", upload.file);
-      const response = await axios.post(`${API_URL}/upload?path=${encodePath(currentPath)}`, formData, {
-        signal: upload.controller.signal,
-        onUploadProgress: (event) => {
-          upload.loaded = event.loaded;
-          const percent = Math.round((event.loaded / event.total) * 100);
-          progressFill.style.width = percent + "%";
-          progressText.textContent = percent + "%";
-          updateGlobalProgress();
-        },
+      formData.append("files", item.file);
+      const response = await axios.post(`${API_URL}/upload?path=${encodePath(item.folder)}`, formData, {
+        signal: item.controller.signal,
+        onUploadProgress: (event) => updateProgressState(item, event)
       });
 
-      if (response.data.success) {
-        upload.status = "completed";
-        upload.loaded = upload.file.size;
-        progressItem.classList.add("completed");
+      if (response.data && response.data.success) {
+        item.status = "completed";
+        item.loaded = item.size;
+        item.percent = 100;
       } else {
-        throw new Error(response.data.error || "Error desconocido");
+        throw new Error(response.data?.error || "Error desconocido en el servidor");
       }
     } catch (error) {
-      showToast(error.response?.data?.error || "Error desconocido", "error");
-      upload.status = axios.isCancel(error) ? "cancelled" : "error";
-      progressItem.classList.add(upload.status);
-      progressText.textContent = upload.status === "cancelled" ? "Cancelado" : "Error al subir archivo";
+      item.status = axios.isCancel(error) ? "cancelled" : "error";
+      item.error = error.response?.data?.error || error.message || "Error al subir archivo";
+      if (!axios.isCancel(error)) {
+        showToast(`Error al subir ${item.name}: ${item.error}`, "error");
+      }
     } finally {
-      const cancelBtn = document.getElementById(`cancel-btn-${index}`);
-      if (cancelBtn) cancelBtn.style.display = "none";
-      completedCount++;
-      updateGlobalProgress();
+      updateUploadIndicators();
       await startNextUpload();
     }
   };
 
   const initialPool = [];
-  for (let i = 0; i < Math.min(CONCURRENCY_LIMIT, totalFiles); i++) {
+  for (let i = 0; i < Math.min(CONCURRENCY_LIMIT, newItems.length); i++) {
     initialPool.push(startNextUpload());
   }
   await Promise.all(initialPool);
 
-  setTimeout(() => {
-    if (!activeUploads.some((u) => u.status === "uploading")) {
-      progressEl.classList.remove("active");
+  // Al finalizar todas las subidas de este lote
+  const hasActive = uploadHistory.some((u) => u.status === "uploading" || u.status === "pending");
+  if (!hasActive) {
+    updateUploadIndicators(true);
+    getStorage();
+    if (window.TemplateManager && window.TemplateManager.currentView === "files") {
       loadFiles(currentPath);
     }
-  }, 2000);
+  }
 }
 
-function cancelUpload(index) {
-  if (activeUploads[index] && activeUploads[index].status === "uploading") {
-    activeUploads[index].controller.abort();
+function cancelUpload(id) {
+  const item = uploadHistory.find((u) => u.id === id);
+  if (item && (item.status === "uploading" || item.status === "pending")) {
+    item.controller.abort();
+    item.status = "cancelled";
+    updateUploadIndicators();
   }
 }
 
 function cancelAllUploads() {
-  activeUploads.forEach((u) => (u.status === "uploading" || u.status === "pending") && u.controller.abort());
+  uploadHistory.forEach((u) => {
+    if (u.status === "uploading" || u.status === "pending") {
+      u.controller.abort();
+      u.status = "cancelled";
+    }
+  });
+  updateUploadIndicators();
+}
+
+function clearUploadHistory() {
+  uploadHistory = uploadHistory.filter((u) => u.status === "uploading" || u.status === "pending");
+  updateUploadIndicators();
+  if (window.TemplateManager && window.TemplateManager.currentView === "upload") {
+    renderUploadManagerView();
+  }
 }
 
 /**
@@ -549,15 +744,6 @@ document.addEventListener("click", (e) => {
   if (e.target.classList.contains("modal")) UILogic.closeModal(e.target.id);
 });
 
-
-// Inicialización
-if (document.getElementById("fileList")) {
-  loadFiles();
-  UILogic.setupDragAndDrop();
-  getStorage();
-}
-
-
 // Exponer funciones globales necesarias
 window.loadFiles = loadFiles;
 window.searchFiles = searchFiles;
@@ -573,7 +759,22 @@ window.uploadFiles = uploadFiles;
 window.uploadFilesProcess = uploadFilesProcess;
 window.cancelUpload = cancelUpload;
 window.cancelAllUploads = cancelAllUploads;
+window.clearUploadHistory = clearUploadHistory;
+window.renderUploadManagerView = renderUploadManagerView;
 window.showPermissionsModal = showPermissionsModal;
 window.revokePermission = revokePermission;
 window.grantPermission = grantPermission;
 window.showCurrentFolderPermissions = showCurrentFolderPermissions;
+
+// Inicialización de la vista principal con TemplateManager
+if (window.TemplateManager) {
+  if (urlPath === "/") {
+    TemplateManager.render("files");
+  } else {
+    TemplateManager.render(urlPath.replace("/", ""));
+  }
+} else if (document.getElementById("fileList")) {
+  loadFiles();
+  UILogic.setupDragAndDrop();
+  getStorage();
+}

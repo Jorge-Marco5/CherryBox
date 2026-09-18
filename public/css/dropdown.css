@@ -10,48 +10,87 @@
     background-color: #2a2a2a;
     display: flex;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    text-align: center;
     color: white;
     padding: 7px;
     font-size: 16px;
     border: none;
     cursor: pointer;
     border-radius: 10px;
+    transition: background-color 0.2s ease;
 }
 
 /* Contenido del dropdown (oculto por defecto) */
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: var(--card-bg);
-    min-width: 150px;
-    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-    z-index: 1;
-    border-radius: 4px;
+    top: 90%;
+    left: -70px;
+    margin-top: 4px;
+    background-color: var(--card-bg, #1e1e1e);
+    min-width: 180px;
+    box-shadow: 0px 8px 20px 0px rgba(0, 0, 0, 0.35);
+    z-index: 1000;
+    border-radius: 10px;
+    border: 1px solid #333;
+    overflow: hidden;
+    /* Evita que las opciones o sus fondos en hover desborden las esquinas */
 }
 
 /* Enlaces dentro del dropdown */
 .dropdown-content a {
+    position: relative;
     color: rgb(255, 255, 255);
     padding: 12px 16px;
     text-decoration: none;
     display: flex;
-    /* Para alinear icono y texto */
+    font-size: 0.9rem;
+    border-bottom: 1px solid #333;
     align-items: center;
     gap: 10px;
-    /* Espacio entre icono y texto */
-    transition: all 0.3s ease;
+    cursor: pointer;
+    transition: background-color 0.2s ease, filter 0.2s ease;
 }
 
-/* Cambiar color al pasar el ratón */
+/* Evitar desborde en esquinas redondeadas y eliminar borde del último ítem */
+.dropdown-content a:first-child {
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+}
+
+.dropdown-content a:last-child {
+    border-bottom-left-radius: 9px;
+    border-bottom-right-radius: 9px;
+    border-bottom: none;
+}
+
+#indicador {
+    display: none;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 1px;
+    left: 1px;
+    background-color: var(--primary);
+    padding: 3px;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+    z-index: 2;
+}
+
+/* Efecto hover sin desbordar los bordes redondeados */
 .dropdown-content a:hover {
     background-color: #333;
+    filter: brightness(1.15);
 }
 
 /* Mostrar el menú al pasar el ratón */
 .dropdown:hover .dropdown-content {
     display: block;
-    left: -50px;
 }
 
 .dropdown:hover .dropbtn {

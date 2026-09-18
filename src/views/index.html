@@ -17,20 +17,56 @@
 <body>
   <div class="container">
     <div class="header">
-      <div class="icon" onclick="navigateTo('')" style="cursor: pointer">
+      <div class="icon" onclick="return renderFilesTemplate('')" style="cursor: pointer">
         <h1>CherryBox</h1>
         <img src="public/cherries.svg" alt="CherryBox" width="50" height="50" />
       </div>
-      <button class="btn btn-primary" style="border: solid 1px #bebebe" onclick="logout()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="icon icon-tabler icons-tabler-outline icon-tabler-logout">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
-          <path d="M9 12h12l-3 -3" />
-          <path d="M18 15l3 -3" />
-        </svg>
-      </button>
+      <div class="dropdown">
+        <button class="dropbtn" style="background-color: transparent;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512">
+            <path fill="currentColor" fill-rule="evenodd"
+              d="M256 117.333c17.673 0 32-14.327 32-32s-14.327-32-32-32-32 14.327-32 32 14.327 32 32 32m0 341.333c17.673 0 32-14.327 32-32s-14.327-32-32-32-32 14.327-32 32 14.327 32 32 32M256 288c17.673 0 32-14.327 32-32s-14.327-32-32-32-32 14.327-32 32 14.327 32 32 32" />
+          </svg>
+        </button>
+        <div class="dropdown-content" style="left:-120px;">
+          <a onclick=" return renderFilesTemplate()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-layout-board-split">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M4 6a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2l0 -12" />
+              <path d="M4 12h8" />
+              <path d="M12 15h8" />
+              <path d="M12 9h8" />
+              <path d="M12 4v16" />
+            </svg>
+            <p>Archivos</p>
+          </a>
+          <a onclick=" return renderUploadTemplate()">
+            <span id="indicador">0</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-cloud-upload">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M7 18a4.6 4.4 0 0 1 0 -9a5 4.5 0 0 1 11 2h1a3.5 3.5 0 0 1 0 7h-1" />
+              <path d="M9 15l3 -3l3 3" />
+              <path d="M12 12l0 9" />
+            </svg>
+            <p>Archivos subidos</p>
+          </a>
+          <a onclick=" return logout()" style="color: var(--error);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-logout">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+              <path d="M9 12h12l-3 -3" />
+              <path d="M18 15l3 -3" />
+            </svg>
+            <p>Cerrar Sesión</p>
+          </a>
+        </div>
+      </div>
     </div>
     <div class="card-storage">
       <div class="bar-storage-info">
@@ -43,12 +79,19 @@
       </div>
     </div>
 
+    <!--  Contenedor principal-->
+    <div class="main-container" id="main-container"></div>
+  </div>
+
+  <!-- ==================== PLANTILLAS / VISTAS SPA ==================== -->
+  <!-- 1. Plantilla de Explorador de Archivos -->
+  <template id="tmpl-files">
     <div class="toolbar">
       <div class="search-container">
         <form style="width:100%" id="search-form">
           <div class="search">
             <input type="search" id="searchInput" placeholder="Buscar archivos..." list="searchHistory" />
-            <button class="btn btn-primary" type="submit">
+            <button class="btn btn-primary" type="submit" title="Buscar">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-search">
@@ -73,7 +116,7 @@
         </span>
       </div>
       <button class="btn btn-danger" id="btn-deleteSelectedFiles" title="Eliminar seleccionados"
-        onclick="deleteSelectedFiles()">
+        onclick="deleteSelectedFiles()" style="display: none">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
@@ -138,7 +181,7 @@
           <path d="M9.5 13.5l2.5 -2.5l2.5 2.5" />
         </svg>
       </button>
-      <input type="file" id="fileInput" multiple onchange="uploadFiles(event)" />
+      <input type="file" id="fileInput" multiple onchange="uploadFiles(event)" style="display: none;" />
       <button class="btn btn-music-player" title="CherryJam" id="btn-music-player" onclick="readyPlayerMusic()">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -194,35 +237,104 @@
         </svg>
       </a>
     </div>
-  </div>
-  <!-- Indicador de progreso de subida -->
-  <div class="upload-progress" id="uploadProgress">
-    <div class="progress-header">
-      <span>Subiendo archivos</span>
-      <div style="display: flex; gap: 10px; align-items: center">
-        <span class="file-count" id="fileCount">0/0</span>
-        <button class="btn-cancel-all" id="cancelAllBtn" onclick="cancelAllUploads()"
-          title="Cancelar todas las subidas">
+  </template>
+
+  <!-- 2. Plantilla de Subida de Archivos -->
+  <template id="tmpl-uploads">
+    <div class="upload-container" id="uploadContainer" style="padding: 20px 0;">
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput')?.click()">
+        <div class="upload-icon">📤</div>
+        <div class="upload-text">Arrastra archivos aquí o haz clic para seleccionar</div>
+        <div class="upload-hint">Puedes subir múltiples archivos simultáneamente a la carpeta actual</div>
+      </div>
+      <input type="file" id="fileInput" multiple onchange="uploadFiles(event)" style="display: none;" />
+
+      <div class="upload-actions-bar">
+        <button class="btn btn-secondary" onclick="renderFilesTemplate()">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-back-up">
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M18 6l-12 12" />
-            <path d="M6 6l12 12" />
+            <path d="M9 14l-4 -4l4 -4" />
+            <path d="M5 10h11a4 4 0 1 1 0 8h-1" />
           </svg>
         </button>
+        <div class="dropdown">
+          <a class="dropbtn" style="background-color: transparent;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+              <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+                <circle cx="8" cy="2.5" r=".75" />
+                <circle cx="8" cy="8" r=".75" />
+                <circle cx="8" cy="13.5" r=".75" />
+              </g>
+            </svg>
+          </a>
+          <div class="dropdown-content">
+            <a style="background-color: var(--error); width: 100%; display: none;" id="btnClearUploadHistory"
+              onclick="clearUploadHistory()" title="Limpiar elementos finalizados">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-history-off">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path
+                  d="M3.05 11a8.975 8.975 0 0 1 2.54 -5.403m2.314 -1.697a9 9 0 0 1 12.113 12.112m-1.695 2.312a9 9 0 0 1 -14.772 -3.324m-.5 5v-5h5" />
+                <path d="M3 3l18 18" />
+              </svg>
+              limpiar
+            </a>
+            <a style="background-color: var(--error); width: 100%; display: none;" id="btnCancelAllUploads"
+              onclick="cancelAllUploads()" title="Cancelar todas las subidas">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-cancel">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                <path d="M18.364 5.636l-12.728 12.728" />
+              </svg>
+              cancelar
+            </a>
+            <a style="background-color: var(--card-bg); width: 100%;"
+              onclick="document.getElementById('fileInput')?.click()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-upload">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                <path d="M7 9l5 -5l5 5" />
+                <path d="M12 4l0 12" />
+              </svg>
+              subir
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de Historial y Progreso de Subidas en Memoria -->
+      <div class="upload-history-section">
+        <div class="upload-history-header">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">Historial y Estado de Subidas</h3>
+            <span class="file-count" id="uploadHistoryBadge">0</span>
+          </div>
+          <span id="uploadTotalSpeed" style="font-size: 0.85rem; color: #a0a0a0;"></span>
+        </div>
+
+        <!-- Progreso global cuando hay subidas activas -->
+        <div id="uploadGlobalProgressContainer" class="total-progress-container" style="display: none;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem;">
+            <span id="uploadGlobalText">Subiendo archivos...</span>
+            <span id="uploadGlobalPercent" style="font-weight: 600; color: var(--primary, #FF146C);">0%</span>
+          </div>
+          <div class="progress-bar total-bar" style="width: 100%;">
+            <div class="progress-fill" id="uploadGlobalProgressFill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Lista dinámica de archivos -->
+        <div id="uploadManagerList" class="upload-manager-list"></div>
       </div>
     </div>
-    <div class="total-progress-container">
-      <div class="progress-bar total-bar">
-        <div class="progress-fill" id="totalProgressFill" style="width: 0%"></div>
-      </div>
-      <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px">
-        <span id="totalProgressText">0%</span>
-        <span id="uploadSpeed">0 KB/s</span>
-      </div>
-    </div>
-    <div id="progressList"></div>
-  </div>
+  </template>
 
   <!-- Modal para crear carpeta -->
   <div class="modal" id="createFolderModal">
@@ -596,6 +708,7 @@
   <script src="public/js/utils/formats.js"></script>
   <script src="public/js/services/permission.service.js"></script>
   <script src="public/js/services/musicPlayer.service.js"></script>
+  <script src="public/js/components/templates.js"></script>
   <script src="public/js/components/renderers.js"></script>
   <script src="public/js/components/ui-logic.js"></script>
   <script src="public/js/components/info-user.js"></script>

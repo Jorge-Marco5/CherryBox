@@ -340,6 +340,11 @@ const Renderers = {
   }
 };
 
+function renderTemplate(template, mainContainer) {
+  const container = document.getElementById(mainContainer);
+  container.innerHTML = template;
+}
+
 window.onload = () => {
   const elem = document.querySelector('.image-list');
   const msnry = new Masonry(elem, {
