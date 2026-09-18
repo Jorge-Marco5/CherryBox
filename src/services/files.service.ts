@@ -9,6 +9,7 @@ import { system_setting } from '../config/config'
 import { sanitizeName } from "../utils/sanitize";
 import videoHandler from "./videostream.service";
 import { getVideoThumbnail } from "./videoOptimizer.service";
+import { createShareLink } from "../controllers/files.controller";
 
 /**
  * Evalúa si un nivel de acceso concedido satisface la acción solicitada.
@@ -373,6 +374,28 @@ export const renameItemService = async (
   return { success: true, message: "Actualizado exitosamente" };
 };
 
+export const createShareLinkService = async (relativePath: string, userId: string, userRole: string) => {
+  if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
+  const file = await prisma.file.findUnique({ where: { path: relativePath } });
+  if (!file) throw new ValidationError("El archivo o carpeta no existe: " + relativePath);
+
+  if (file.ownerId) {
+    const owner = await prisma.user.findUnique({ where: { id: file.ownerId } });
+    if (owner?.role === "SUPERADMIN" && userRole !== "SUPERADMIN") {
+      throw new ForbiddenError("No tienes permiso para compartir este archivo.");
+    }
+  }
+
+  if (userRole === "USER" && file.ownerId !== userId) {
+    throw new ForbiddenError("Solo puedes compartir archivos y carpetas creados por ti.");
+  }
+
+  await checkPermission(userId, userRole, relativePath, "READ");
+
+  return true;
+
+}
+
 export const deleteItemService = async (relativePath: string, userId: string, userRole: string) => {
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
   const BASE_DIR = system_setting.getBaseDir();
@@ -436,7 +459,9 @@ export const getItemContentService = async (
   if (!isValidPath(relativePath)) throw new ValidationError("Ruta no válida");
   const BASE_DIR = system_setting.getBaseDir();
   // Necesita READ
-  await checkPermission(userId, userRole, relativePath, "READ");
+  if (userRole != "secure") {
+    await checkPermission(userId, userRole, relativePath, "READ");
+  }
 
   const fullPath = path.join(BASE_DIR, relativePath);
   const ext = path.extname(fullPath).toLowerCase();
@@ -459,7 +484,7 @@ export const getItemContentService = async (
   const textExtensions = [...codeExts, ...textExts];
   if (textExtensions.includes(ext)) {
     const content = await fs.readFile(fullPath, "utf-8");
-    return { type: "text", content };
+    return { type: "text", content, fullPath };
   }
 
   const mediaExtensions = [...imageExts, ...pdfExts, ...audioExts];
@@ -470,7 +495,7 @@ export const getItemContentService = async (
   const videoExtensions = [...videoExts];
   if (videoExtensions.includes(ext)) {
     const content = await videoHandler(fullPath, range);
-    return { type: "video", content };
+    return { type: "video", content, fullPath };
   }
 
   throw new ValidationError("Tipo de archivo no soportado para vista previa");

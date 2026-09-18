@@ -37,6 +37,16 @@ const FileService = {
   },
 
   /**
+   * Crea un enlace temporal para compartir
+   * @param {*} path 
+   * @param {*} timeShare 
+   * @returns 
+   */
+  async createShareLink(file_path, time) {
+    return await axios.post(`${API_URL}/share`, { file_path, time });
+  },
+
+  /**
    * Elimina un archivo o carpeta.
    * @param {string} path - Ruta a eliminar.
    */

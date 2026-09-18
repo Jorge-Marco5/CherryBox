@@ -9,6 +9,8 @@ import {
   listFiles,
   manualSync,
   renameFile,
+  createShareLink,
+  getSharedFile,
   searchFiles,
   uploadFiles,
 } from "../controllers/files.controller";
@@ -19,16 +21,7 @@ import { uploadCleanupMiddleware } from "../middlewares/cleanup.middleware";
 import { checkStorageLimit, checkUploadPermission } from "../middlewares/storage.middleware";
 import { system_setting } from '../config/config'
 
-const MAX_FILES = (() => {
-  const val = system_setting.getSetting("MAX_FILES") || "10";
-  try {
-    const sanitized = val.toString().replace(/[^0-9*+\-/\s()]/g, "");
-    // eslint-disable-next-line no-new-func
-    return new Function(`return ${sanitized}`)() || 10;
-  } catch {
-    return 10;
-  }
-})();
+
 
 const router = Router();
 
@@ -48,11 +41,15 @@ router.post(
   checkUploadPermission,
   checkStorageLimit,
   uploadCleanupMiddleware,
-  upload.array("files", Number(MAX_FILES)),
+  upload.array("files"),
   uploadFiles,
 );
 
 router.put("/rename", requireAuth, renameFile);
+
+router.post("/share", requireAuth, createShareLink);
+
+router.get("/shared/:token_shared", getSharedFile);
 
 router.delete("/delete", requireAuth, deleteFile);
 

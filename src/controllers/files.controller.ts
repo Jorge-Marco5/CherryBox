@@ -2,8 +2,11 @@ import archiver from "archiver";
 import { NextFunction, Request, Response } from "express";
 import path from "path";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import {
   createFolderService,
+  createShareLinkService,
   deleteItemService,
   getFormatsAvailables,
   getItemContentService,
@@ -17,10 +20,12 @@ import { syncFiles } from "../services/sync-files.service";
 import { ValidationError } from "../utils/errors";
 import { logger } from "../utils/logger";
 import { isValidPath } from "../utils/multer";
-import { system_setting } from '../config/config'
+import { system_setting, config } from '../config/config'
 import { VideoStreamResult } from "../services/videostream.service";
 import { processUploadedVideosAsync } from "../services/videoOptimizer.service";
 import { decodePath, sanitizeRelativePath } from "../utils/sanitize";
+import { formatBytes } from "../utils/formatBytes";
+import { contentHtml } from "../persistent/contentHTML";
 
 /**
  * Renderiza la vista principal del administrador de archivos.
@@ -156,6 +161,149 @@ export const renameFile = async (req: AuthRequest, res: Response, next: NextFunc
     const result = await renameItemService(decodePath(oldPath), newName, newFolderColor, req.user!.id, req.user!.role);
     logger.info(`[AUDIT] Usuario ${req.user?.id} renombró: ${oldPath} -> ${newName}`);
     res.json(result);
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+/**
+ * Crea un enlace compartido con expiración y firmado para un archivo o carpeta.
+ * @param req Petición con el path del archivo y tiempo de expiración en milisegundos
+ * @param res Objeto con la URL completa del enlace compartido
+ * @param next Middleware de manejo de errores
+ */
+export const createShareLink = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { file_path, time } = req.body;
+    const user = req.user;
+    if (!file_path || !time) {
+      throw new ValidationError("Faltan parámetros (file_path o time)");
+    }
+
+    await createShareLinkService(decodePath(file_path), user!.id, user!.role);
+
+    const exp = Math.floor((Date.now() + Number(time)) / 1000); // Expiración en segundos Unix (más corto)
+    const payload = `${file_path}:${exp}`;
+
+    // Creamos una firma web segura ultra compacta (primeros 12 bytes del HMAC-SHA256 en base64url)
+    const hmac = crypto.createHmac('sha256', config.JWT_SECRET)
+      .update(payload)
+      .digest('base64url')
+      .substring(0, 12);
+
+    // Codificamos todo el conjunto en base64url para que sea seguro en URLs
+    const token = Buffer.from(`${payload}:${hmac}`).toString('base64url');
+
+    const protocol = req.protocol;
+    const host = req.headers.host || "localhost";
+    const full_url = `${protocol}://${host}/api/shared/${token}`;
+
+    res.json({ url: full_url });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
+export const getSharedFile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { token_shared } = req.params;
+    const rangeHeader = req.headers.range;
+
+    const decoded = Buffer.from(token_shared, 'base64url').toString('utf8');
+    const lastColon = decoded.lastIndexOf(':');
+    const secondLastColon = decoded.lastIndexOf(':', lastColon - 1);
+
+    if (lastColon === -1 || secondLastColon === -1) {
+      throw new ValidationError("El token compartido no es válido.");
+    }
+
+    const file_path = decoded.substring(0, secondLastColon);
+    const exp = decoded.substring(secondLastColon + 1, lastColon);
+    const hmacOriginal = decoded.substring(lastColon + 1);
+
+    // 1. Validar que corresponda al archivo solicitado
+    if (!file_path) {
+      throw new ValidationError("Este enlace no pertenece a un archivo válido.");
+    }
+
+    // 2. Validar si ya expiró, exp en segundos
+    const tiempoActual = Math.floor(Date.now() / 1000);
+    if (tiempoActual > parseInt(exp)) {
+      throw new ValidationError("El enlace temporal ha expirado.");
+    }
+
+    // 3. Validar integridad (Recalcular firma)
+    const payload = `${file_path}:${exp}`;
+    const hmacEsperado = crypto.createHmac('sha256', config.JWT_SECRET)
+      .update(payload)
+      .digest('base64url')
+      .substring(0, 12);
+
+    if (hmacOriginal !== hmacEsperado) {
+      throw new ValidationError("El enlace ha sido manipulado o es inválido.");
+    }
+
+    const result = await getItemContentService(decodePath(file_path), rangeHeader, "", "secure", false);
+
+    logger.info(`[AUDIT] Se obtuvo el archivo: '${file_path}' a través del enlace compartido.`);
+
+    let fileName = path.basename(decodePath(file_path));
+
+    if (fileName.length > 25) {
+      fileName = fileName.substring(0, 25) + "..." + fileName.substring(fileName.length - 5);
+    }
+
+    const isDownload = req.query.download === "true";
+    const isRaw = req.query.raw === "true";
+    const acceptsHtml = Boolean(req.headers.accept && req.headers.accept.includes("text/html"));
+
+    if (result.type === "text") {
+      if (isDownload && result.fullPath) {
+        return res.download(result.fullPath, fileName);
+      }
+
+      // Si se solicita texto plano o es una petición que no espera HTML (ej. curl, fetch)
+      if (isRaw || !acceptsHtml) {
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        res.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(fileName)}"`);
+        return res.send(result.content);
+      }
+
+      // Renderizar visor web limpio y oscuro integrado para el navegador
+      const escapedContent = (result.content as string)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+      const fileSize = formatBytes(Buffer.byteLength(result.content as string, 'utf8'));
+
+
+      const html = contentHtml(fileName, fileSize, escapedContent);
+
+      return res.send(html);
+    } else if (result.type === "media") {
+      if (isDownload && result.fullPath) {
+        return res.download(result.fullPath, fileName);
+      }
+      res.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(fileName)}"`);
+      return res.sendFile(result.fullPath!, { acceptRanges: true });
+    } else if (result.type === "video") {
+      if (isDownload && result.fullPath) {
+        return res.download(result.fullPath, fileName);
+      }
+      const videoResult = result.content as VideoStreamResult;
+      res.writeHead(videoResult.status, videoResult.headers);
+      if (videoResult.stream) {
+        videoResult.stream.pipe(res);
+        res.on("close", () => {
+          videoResult.stream?.destroy();
+        });
+      } else {
+        res.end();
+      }
+    }
   } catch (error: any) {
     next(error);
   }

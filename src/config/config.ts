@@ -15,6 +15,7 @@ interface config_server {
     MAX_FILES: number;
     LIMIT_STORAGE: number;
     USED_STORAGE: number;
+    JWT_SECRET: string;
 }
 
 export const config: config_server = {
@@ -22,6 +23,7 @@ export const config: config_server = {
     NODE_ENV: process.env.NODE_ENV as "development" | "production" || "development",
     FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:3000",
     PORT: process.env.PORT || 3000,
+    JWT_SECRET: process.env.JWT_SECRET || "secret",
     API_BASE_PATH: process.env.API_BASE_PATH || "/api",
     BASE_DIR: process.env.BASE_DIR || "files",
     MAX_FILE_SIZE: Number(process.env.MAX_FILE_SIZE) || 524288000,

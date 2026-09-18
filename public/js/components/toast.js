@@ -26,7 +26,4 @@ function showToast(message, type = 'info') {
         toast.classList.add('fade-out');
         setTimeout(() => toast.remove(), 10);
     });
-
-
-
 }

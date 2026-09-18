@@ -131,6 +131,28 @@ async function confirmRename() {
   }
 }
 
+
+const formShareTime = document.getElementById("form-share-time");
+if (formShareTime) {
+  formShareTime.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const timeShare = document.getElementById("selectTimeShare").value;
+    const inputPathShare = document.getElementById("inputPathShare");
+    inputPathShare.value = "";
+    if (!timeShare) {
+      showToast("Por favor selecciona un tiempo límite", "warning");
+      return;
+    }
+    try {
+      const res = await FileService.createShareLink(currentRenameItem, timeShare);
+      inputPathShare.value = res.data.url;
+    } catch (error) {
+      console.error(error);
+      showToast("Error al crear enlace", "error");
+    }
+  });
+}
+
 /**
  * Elimina un archivo o carpeta.
  */
@@ -582,6 +604,22 @@ function renderUploadManagerView() {
 async function uploadFilesProcess(files) {
   if (!files || files.length === 0) return;
 
+  const settings = await axios.get("/api/getSettings");
+  const maxFileSizeMB = settings.data.maxFileSize;
+  const maxFiles = settings.data.maxFiles;
+
+  if (files.length > maxFiles) {
+    showToast(`Se permiten subir hasta ${maxFiles} archivos por subida`, "error");
+    return;
+  }
+
+  for (let file of files) {
+    if (file.size / (1024 * 1024) > maxFileSizeMB) {
+      showToast(`El archivo "${file.name}" excede el límite de tamaño (${formatBytes(file.size)}). Tamaño maximo por archivo ${maxFileSizeMB} MB`, "error");
+      return;
+    }
+  }
+
   const targetFolder = currentPath;
   const newItems = files.map((file, index) => {
     const item = {
@@ -655,7 +693,7 @@ async function uploadFilesProcess(files) {
       item.status = axios.isCancel(error) ? "cancelled" : "error";
       item.error = error.response?.data?.error || error.message || "Error al subir archivo";
       if (!axios.isCancel(error)) {
-        showToast(`Error al subir ${item.name}: ${item.error}`, "error");
+        showToast(`Error al subir ${item.name.length > 15 ? item.name.substring(0, 15) + "..." : item.name}: ${item.error}`, "error");
       }
     } finally {
       updateUploadIndicators();
@@ -743,6 +781,13 @@ document.addEventListener("keydown", (e) => {
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("modal")) UILogic.closeModal(e.target.id);
 });
+
+async function copyToClipboard(input) {
+  const copy = document.getElementById(input);
+  copy.select();
+  await navigator.clipboard.writeText(copy.value);
+  showToast("Copiado", "success");
+}
 
 // Exponer funciones globales necesarias
 window.loadFiles = loadFiles;

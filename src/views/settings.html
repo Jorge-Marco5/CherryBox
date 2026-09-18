@@ -163,7 +163,7 @@
                     </p>
                     <form id="form-limit-storage">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="number" id="limitStorage" placeholder="10">
+                            <input type="number" id="limitStorage" placeholder="10" min="1" maxlength="6">
                             <span style="color: #ffffff; height: 100%;">GB</span>
                             <button type="submit" class="btn btn-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
@@ -191,7 +191,7 @@
                     </p>
                     <form id="form-max-file-size">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="number" id="maxFileSize" placeholder="10">
+                            <input type="number" id="maxFileSize" placeholder="10" min="1" max="9765625" step="128">
                             <span style="color: #ffffff;">MB</span>
                             <button type="submit" class="btn btn-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
@@ -214,7 +214,7 @@
                     </p>
                     <form id="form-max-files">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <input type="number" id="maxFiles" placeholder="10">
+                            <input type="number" id="maxFiles" placeholder="10" min="1" maxlength="6">
                             <span style="color: #ffffff;">Archivos</span>
                             <button type="submit" class="btn btn-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"

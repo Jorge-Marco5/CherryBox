@@ -682,6 +682,20 @@ body {
     appearance: none;
 }
 
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #444;
+    background: #2A2A2A;
+    color: #ededed;
+    border-radius: 6px;
+    font-size: 14px;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+
+
 .form-group input[type="color"] {
     border: none;
     width: 40px;

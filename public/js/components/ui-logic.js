@@ -198,6 +198,19 @@ const UILogic = {
   },
 
   /**
+   * Muestra el modal para generar enlace temporal para compartir
+   * @param {string} path - Ruta del archivo.
+   * @param {string} name - Nombre del archivo.
+   */
+  showShareModal(path) {
+    currentRenameItem = path;
+    this.closeModal(currentModalActive);
+
+    currentModalActive = "shareModal";
+    document.getElementById(currentModalActive)?.classList.add("active");
+  },
+
+  /**
    * Cierra un modal específico.
    * @param {string} modalId - ID del modal.
    */
@@ -245,6 +258,7 @@ const UILogic = {
     const ext = name.split(".").pop().toLowerCase();
     const previewContent = document.getElementById("previewContent");
     const previewTitle = document.getElementById("previewTitle");
+    previewTitle.onclick = () => { this.showShareModal(path) }
     const modal = document.getElementById(currentModalActive);
 
     if (!modal || !previewContent || !previewTitle) return;
@@ -382,6 +396,7 @@ function pauseMedia() {
 window.UILogic = UILogic;
 window.showRenameModal = UILogic.showRenameModal;
 window.showCreateFolderModal = UILogic.showCreateFolderModal;
+window.showShareModal = UILogic.showShareModal;
 window.closeModal = UILogic.closeModal;
 window.previewFile = UILogic.previewFile;
 window.setupDragAndDrop = UILogic.setupDragAndDrop;

@@ -21,14 +21,10 @@ function evaluateEnvVar(value: string | undefined, defaultValue: number): number
   }
 }
 
-//Obtenemos el valor de la ruta de la carpeta donde se guardaran los archivos
-const BASE_DIR = system_setting.getBaseDir();
-
-const MAX_FILE_SIZE = system_setting.getSetting("MAX_FILE_SIZE");
-
 // Función para validar que la ruta esté dentro del directorio base
 export function isValidPath(requestedPath: string) {
-  const normalizedBase = path.resolve(BASE_DIR);
+  const baseDir = system_setting.getBaseDir();
+  const normalizedBase = path.resolve(baseDir);
   const fullPath = path.resolve(normalizedBase, requestedPath);
 
   // Usar path.relative para verificar que no escapa del directorio base
@@ -46,7 +42,8 @@ export const storage = multer.diskStorage({
       return cb(new ValidationError('Ruta de destino no válida'), null);
     }
 
-    const fullPath = path.join(BASE_DIR, decodePath(uploadPath));
+    const baseDir = system_setting.getBaseDir();
+    const fullPath = path.join(baseDir, decodePath(uploadPath));
 
     // Crear directorio si no existe (sincrónico para evitar race conditions con busboy)
     try {
@@ -77,9 +74,42 @@ export const storage = multer.diskStorage({
   }
 });
 
-export const upload = multer({
-  storage,
-  limits: {
-    fileSize: Number(MAX_FILE_SIZE) // Límite de 100MB por archivo
+/**
+ * Objeto upload con funciones middleware dinámicas.
+ * En cada petición consulta system_setting para aplicar los límites
+ * de MAX_FILE_SIZE y MAX_FILES en tiempo real, evitando que cambios
+ * de configuración en caliente sean ignorados por instancias estáticas de Multer.
+ */
+export const upload = {
+  array: (fieldName: string = "files", maxCount?: number) => {
+    return (req: any, res: any, next: any) => {
+      const maxFileSize = Number(system_setting.getSetting("MAX_FILE_SIZE")) || 524288000;
+      const configuredMaxFiles = Number(system_setting.getSetting("MAX_FILES")) || 10;
+      const limitFiles = maxCount ?? configuredMaxFiles;
+
+      const dynamicMulter = multer({
+        storage,
+        limits: {
+          fileSize: maxFileSize,
+          files: limitFiles
+        }
+      });
+
+      return dynamicMulter.array(fieldName, limitFiles)(req, res, next);
+    };
+  },
+  single: (fieldName: string = "file") => {
+    return (req: any, res: any, next: any) => {
+      const maxFileSize = Number(system_setting.getSetting("MAX_FILE_SIZE")) || 524288000;
+      const dynamicMulter = multer({
+        storage,
+        limits: {
+          fileSize: maxFileSize,
+          files: 1
+        }
+      });
+
+      return dynamicMulter.single(fieldName)(req, res, next);
+    };
   }
-});
+};
