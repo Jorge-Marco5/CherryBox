@@ -238,11 +238,17 @@ const UILogic = {
 
     if (modalId === "musicPlayerModal") {
       MusicPlayer.cherryJamActive = false;
-      if (MusicPlayer.isPlaying) {
-        MusicPlayer.player.classList.remove("hide");
-        MusicPlayer.player.classList.add("show");
-      } else {
-        MusicPlayer.player.classList.remove("hide", "show");
+      const playerEl = MusicPlayer.player || document.getElementById("miniplayer");
+      if (playerEl) {
+        if (MusicPlayer.isPlaying) {
+          playerEl.classList.remove("hide");
+          playerEl.classList.add("show");
+        } else if (MusicPlayer.currentIndex !== -1) {
+          playerEl.classList.remove("show");
+          playerEl.classList.add("hide");
+        } else {
+          playerEl.classList.remove("hide", "show");
+        }
       }
     }
   },
@@ -377,8 +383,9 @@ const UILogic = {
       playlistContainer.appendChild(p);
     });
 
-    if (MusicPlayer.player) {
-      MusicPlayer.player.classList.remove("show", "hide");
+    const playerEl = MusicPlayer.player || document.getElementById("miniplayer");
+    if (playerEl) {
+      playerEl.classList.remove("show", "hide");
     }
     document.getElementById("musicPlayerModal").classList.add("active");
     MusicPlayer.highlightTrack(MusicPlayer.currentIndex);

@@ -34,6 +34,11 @@ class MusicPlayerService {
   }
 
   init() {
+    this.miniTitle = document.querySelector(".miniplayer-title");
+    this.miniArtist = document.querySelector(".miniplayer-artist");
+    this.miniImg = document.querySelector(".miniplayer-artwork img");
+    this.player = document.getElementById("miniplayer");
+
     this.playBtn = document.getElementById("playMusic");
     this.pauseBtn = document.getElementById("pauseMusic");
     this.progressBar = document.getElementById("progressBar");
@@ -68,7 +73,7 @@ class MusicPlayerService {
 
     miniPlayBtn?.addEventListener("click", () => this.play());
     miniPauseBtn?.addEventListener("click", () => this.pause());
-    miniplayerShow?.addEventListener("click", () => this.miniplayerHandler());
+    miniplayerShow?.addEventListener("click", (e) => this.miniplayerHandler(e));
 
     this.progressBar?.addEventListener("input", (e) => {
       this.seek(e.target.value);
@@ -375,13 +380,23 @@ class MusicPlayerService {
     });
   }
 
-  miniplayerHandler() {
-    if (!this.isPlaying) {
+  miniplayerHandler(e) {
+    if (e && typeof e.stopPropagation === "function") {
+      e.stopPropagation();
+    }
+
+    if (!this.player) {
+      this.player = document.getElementById("miniplayer");
+    }
+    if (!this.player) return;
+
+    // Si no hay lista ni pista seleccionada, ocultar por completo
+    if (this.currentIndex === -1 && (!this.playlist || this.playlist.length === 0)) {
       this.player.classList.remove("show", "hide");
-      this.destroyMusicPlayer();
       return;
     }
 
+    // Alternar visibilidad del miniplayer
     if (this.player.classList.contains("show")) {
       this.player.classList.remove("show");
       this.player.classList.add("hide");
@@ -392,6 +407,10 @@ class MusicPlayerService {
   }
 
   async updateMiniplayerUI(metadata) {
+    if (!this.miniTitle) this.miniTitle = document.querySelector(".miniplayer-title");
+    if (!this.miniArtist) this.miniArtist = document.querySelector(".miniplayer-artist");
+    if (!this.miniImg) this.miniImg = document.querySelector(".miniplayer-artwork img");
+
     if (this.miniTitle) {
       this.miniTitle.textContent = metadata.title || "Título Desconocido";
     }
