@@ -14,7 +14,7 @@ if [ -n "$DATABASE_URL" ]; then
   # Ejecutar seed de usuario inicial de forma segura e idempotente (upsert)
   if [ -f "dist/lib/seed.js" ]; then
     echo "🌱 Asegurando usuario inicial en la base de datos..."
-    node dist/seed.js || echo "⚠️ Advertencia: No se pudo ejecutar el seed inicial."
+    node dist/lib/seed.js || echo "⚠️ Advertencia: No se pudo ejecutar el seed inicial."
   fi
 fi
 

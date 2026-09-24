@@ -1,5 +1,8 @@
 import bcrypt from "bcrypt";
 import { prisma } from "./prisma";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const user = {
   email: process.env.ADMIN_EMAIL || "superadmin@example.com",

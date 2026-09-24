@@ -68,7 +68,13 @@ docker compose up --build -d
 docker compose logs -f app
 ```
 
-### 4. Detener Contenedores
+### 4. Conexion con la shell de la aplicacion
+
+```bash
+docker exec -it cherrybox_app sh
+```
+
+### 5. Detener Contenedores
 ```bash
 # Detener sin borrar datos
 docker compose down

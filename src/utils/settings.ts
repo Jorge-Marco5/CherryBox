@@ -17,7 +17,7 @@ export interface AppConfig {
  * Configuración por defecto utilizada en caso de que config.json no exista.
  */
 export const config_default: AppConfig = {
-  BASE_DIR: "archivos",
+  BASE_DIR: "files", //carpeta por defecto para almacenar archivos dentro del proyecto
   MAX_FILE_SIZE: 524288000,    // 500 MB
   MAX_FILES: "10",
   LIMIT_STORAGE: 10737418240,   // 10 GB
