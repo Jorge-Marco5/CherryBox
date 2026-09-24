@@ -30,7 +30,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      BASE_DIR: ${BASE_DIR:-/app/files}
+      BASE_DIR: /app/files
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres_password}@db:5432/${POSTGRES_DB:-cherrybox_db}?schema=public
       ADMIN_EMAIL: ${ADMIN_EMAIL:-systemadmin@example.com}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-123456789}
@@ -38,7 +38,7 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       FRONTEND_URL: ${FRONTEND_URL:-*}
     volumes:
-      - ${BASE_DIR}:/app/files
+      - ${BASE_DIR:-./files}:/app/files
       - cherrybox_persistent:/app/dist/persistent
     depends_on:
       db:

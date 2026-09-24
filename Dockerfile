@@ -30,7 +30,7 @@ RUN apk add --no-cache openssl ca-certificates ffmpeg && corepack enable && core
 
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV BASE_DIR=/app/archivos
+ENV BASE_DIR=/app/files
 
 # Copiar package.json y prisma
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -47,7 +47,7 @@ COPY --from=builder /app/src/generated ./src/generated
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
 
 # Crear carpetas de almacenamiento y logs, y asignar permisos de ejecución
-RUN mkdir -p /app/archivos /app/logs /app/dist/logs && chmod +x ./docker-entrypoint.sh
+RUN mkdir -p /app/files /app/logs /app/dist/logs && chmod +x ./docker-entrypoint.sh
 
 EXPOSE 3000
 
