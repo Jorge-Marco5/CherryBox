@@ -41,7 +41,8 @@ body {
 
 .container {
     width: 100%;
-    max-width: 100dvh;
+    max-width: 800px;
+    min-height: 50dvh;
     background: var(--glass);
     backdrop-filter: blur(12px);
     border: 1px solid var(--border);
