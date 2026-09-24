@@ -1,7 +1,6 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { prisma } from "../lib/prisma";
-import { AccessType } from "../generated/prisma/enums";
 import { logger } from "../utils/logger";
 import { ForbiddenError, NotFoundError } from "../utils/errors";
 
@@ -74,7 +73,7 @@ export const revokePermissionHandler = async (req: AuthRequest, res: Response, n
         const requesterId = req.user!.id;
 
         const permission = await prisma.filePermission.findUnique({
-            where: { id: permissionId },
+            where: { id: permissionId.toString() },
             include: { file: true }
         });
 
@@ -94,7 +93,7 @@ export const revokePermissionHandler = async (req: AuthRequest, res: Response, n
             throw new ForbiddenError("Permiso denegado");
         }
 
-        await prisma.filePermission.delete({ where: { id: permissionId } });
+        await prisma.filePermission.delete({ where: { id: permissionId.toString() } });
         res.json({ success: true, message: "Permiso revocado" });
     } catch (error: any) {
         next(error);
@@ -108,7 +107,7 @@ export const getFilePermissionsHandler = async (req: AuthRequest, res: Response,
     try {
         const { fileId } = req.params;
 
-        const file = await prisma.file.findUnique({ where: { id: fileId } });
+        const file = await prisma.file.findUnique({ where: { id: fileId.toString() } });
         if (!file) throw new NotFoundError("Archivo no encontrado");
 
         const { hasAccess } = require("../services/files.service");
@@ -118,7 +117,7 @@ export const getFilePermissionsHandler = async (req: AuthRequest, res: Response,
         }
 
         const permissions = await prisma.filePermission.findMany({
-            where: { fileId },
+            where: { fileId:fileId.toString() },
             include: { user: { select: { email: true, id: true } } }
         });
         res.json(permissions);

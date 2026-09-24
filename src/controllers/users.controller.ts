@@ -28,7 +28,7 @@ export const getUsersHandler = async (req: AuthRequest, res: Response, next: Nex
  */
 export const deleteUserHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const user = await deleteUserService(req.params.id, req.user!);
+        const user = await deleteUserService(req.params.id.toString(), req.user!);
         logger.info(`ADMIN ${req.user?.id} eliminó al usuario ${req.params.id} (${user?.email})`);
         res.json(user);
     } catch (error: any) {
@@ -44,7 +44,7 @@ export const deleteUserHandler = async (req: AuthRequest, res: Response, next: N
  */
 export const updateUserHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const user = await updateUserService(req.params.id, req.body, req.user!);
+        const user = await updateUserService(req.params.id.toString(), req.body, req.user!);
         logger.info(`ADMIN ${req.user?.id} actualizó datos del usuario ${req.params.id}`);
         res.json(user);
     } catch (error: any) {
@@ -61,7 +61,7 @@ export const updateUserHandler = async (req: AuthRequest, res: Response, next: N
  */
 export const blockUserHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const user = await blockUserService(req.params.id, req.user!);
+        const user = await blockUserService(req.params.id.toString(), req.user!);
         const action = user?.is_blocked ? "BLOQUEÓ" : "DESBLOQUEÓ";
         logger.info(`ADMIN ${req.user?.id} ${action} al usuario ${req.params.id}`);
         res.json(user);
@@ -79,7 +79,7 @@ export const blockUserHandler = async (req: AuthRequest, res: Response, next: Ne
  */
 export const changeRoleHandler = async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-        const user = await updateUserService(req.params.id, { role: req.body.role }, req.user!);
+        const user = await updateUserService(req.params.id.toString(), { role: req.body.role }, req.user!);
         logger.info(`ADMIN ${req.user?.id} cambió el rol de ${req.params.id} (${user?.email}) a ${req.body.role}`);
         res.json(user);
     } catch (error: any) {

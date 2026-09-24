@@ -7,98 +7,194 @@
 ## 🌟 Características Principales
 
 ### 📁 Gestión de Archivos Completa
--   **Operaciones Inteligentes**: Navega, crea, renombra, elimina y descarga archivos o carpetas.
--   **Descarga Masiva**: Selecciona múltiples archivos y descárgalos instantáneamente en un archivo `.zip` generado al vuelo (límite de 100MB).
--   **Drag & Drop**: Sube archivos múltiples simplemente arrastrándolos a la interfaz.
--   **Búsqueda Recursiva**: Encuentra cualquier archivo en segundos mediante el motor de búsqueda integrado.
+- **Operaciones Inteligentes**: Navega, crea, renombra, elimina y descarga archivos o carpetas.
+- **Descarga Masiva**: Selecciona múltiples archivos y descárgalos instantáneamente en un archivo `.zip` generado al vuelo.
+- **Drag & Drop**: Sube múltiples archivos simplemente arrastrándolos a la interfaz.
+- **Búsqueda Recursiva**: Encuentra cualquier archivo en segundos mediante el motor de búsqueda integrado.
 
 ### 🛡️ Seguridad y Control de Acceso (ACL)
--   **Roles de Usuario**:
-    -   🥇 **SUPERADMIN**: Control total del sistema, gestión de configuraciones globales y jerarquía suprema (intocable por otros administradores).
-    -   🥈 **ADMIN**: Gestión de usuarios y archivos. Acceso de solo lectura a configuraciones globales.
-    -   🥉 **USER**: Acceso restringido a archivos propios y compartidos.
--   **Permisos Granulares**: Define permisos de `LECTURA`, `ESCRITURA`, `ELIMINACIÓN` o `GESTIÓN` para cualquier usuario en cualquier archivo o carpeta.
--   **Bloqueo Visual Preventivo**: Sistema de "Guarda de Vistas" que bloquea el acceso a nivel de interfaz basado en el rol de `localStorage`, optimizado para despliegues con Nginx.
+- **Roles de Usuario**:
+  - 🥇 **SUPERADMIN**: Control total del sistema, gestión de configuraciones globales y jerarquía suprema.
+  - 🥈 **ADMIN**: Gestión de usuarios y archivos. Acceso de solo lectura a configuraciones globales.
+  - 🥉 **USER**: Acceso restringido a archivos propios y compartidos.
+- **Permisos Granulares**: Define permisos de `LECTURA`, `ESCRITURA`, `ELIMINACIÓN` o `GESTIÓN` para cualquier usuario en cualquier archivo o carpeta.
+- **Enlaces Compartidos Temporales**: Generación de links públicos firmados y protegidos con expiración temporal.
 
 ### 📋 Auditoría y Monitoreo
--   **Logs de Acciones**: Registro detallado de cada operación (Creación, Eliminación, Renombrado, Descarga).
--   **Logs de Seguridad**: Seguimiento de intentos de inicio de sesión, accesos fallidos y bloqueos de cuenta.
--   **Inspector de Logs**: Visualizador de logs integrado en la interfaz administrativa con resaltado de sintaxis.
+- **Logs de Acciones**: Registro detallado de cada operación (Creación, Eliminación, Renombrado, Descarga).
+- **Logs de Seguridad**: Seguimiento de intentos de inicio de sesión, accesos fallidos y bloqueos de cuenta.
+- **Inspector de Logs**: Visualizador de logs integrado en la interfaz administrativa con resaltado de sintaxis.
 
 ### 🖼️ Previsualización Nativa
--   **Media**: Imágenes (jpg, png, gif, svg, webp), Video (mp4, webm) y Audio (mp3, wav, flac, aac).
--   **Documentos**: PDF y archivos de texto plano (txt, md, js, css, etc.) con resaltado de código.
+- **Media**: Imágenes (`jpg`, `png`, `gif`, `svg`, `webp`), Video (`mp4`, `webm`) y Audio (`mp3`, `wav`, `flac`, `aac`).
+- **Documentos**: PDF y archivos de texto plano (`txt`, `md`, `js`, `ts`, `css`, `html`, `json`, etc.) con resaltado de código.
+- **Transcodificación / Faststart**: Optimización asíncrona de videos en segundo plano con FFmpeg.
 
 ---
 
-## 🚀 Instalación y Despliegue
+## 🐳 Despliegue con Docker (Recomendado)
+
+Docker Compose gestiona la base de datos PostgreSQL y la aplicación NodeJS de forma aislada y persistente.
+
+### 1. Variables de Entorno y Configuración
+Copia el archivo de ejemplo y ajusta las variables según tus necesidades:
+
+```bash
+cp .env.example .env
+```
+
+Revisa las credenciales en `.env` o en [docker-compose.yml](docker-compose.yml):
+- `POSTGRES_USER`: Usuario de PostgreSQL (por defecto `postgres`).
+- `POSTGRES_PASSWORD`: Contraseña de PostgreSQL.
+- `POSTGRES_DB`: Nombre de la base de datos (`cherrybox_db`).
+- `JWT_SECRET`: Clave secreta para la firma de tokens JWT.
+- `PORT`: Puerto expuesto en el host (por defecto `3000`).
+
+### 2. Levantamiento Inicial (Primer despliegue)
+Ejecuta:
+
+```bash
+docker compose up --build -d
+```
+
+> **¿Qué ocurre automáticamente en el inicio?**
+> 1. Se construye la imagen con Node.js, compilando TypeScript y generando el cliente de Prisma (`src/generated/prisma`).
+> 2. Se inicia el contenedor de base de datos (`cherrybox_db`) y se verifica su estado de salud (`healthcheck`).
+> 3. El script [docker-entrypoint.sh](docker-entrypoint.sh) sincroniza el esquema de tablas en PostgreSQL y crea el usuario inicial (`SUPERADMIN`).
+> 4. El servidor queda disponible en **`http://localhost:3000`**.
+
+### 3. Monitoreo de Logs
+```bash
+docker compose logs -f app
+```
+
+### 4. Detener Contenedores
+```bash
+# Detener sin borrar datos
+docker compose down
+
+# Detener y reiniciar limpiando datos de la base de datos (¡CUIDADO!)
+docker compose down -v
+```
+
+---
+
+## 💻 Instalación Local (Desarrollo sin Docker)
 
 ### 1. Requisitos Previos
--   Node.js (v18+)
--   PostgreSQL
--   pnpm (Recomendado)
+- Node.js (v20 o superior)
+- pnpm (`corepack enable && corepack prepare pnpm@12.6.0 --activate`)
+- PostgreSQL instalado y en ejecución
 
-### 2. Configuración Inicial
-Clona el repositorio y configura tu entorno:
-
+### 2. Pasos de Instalación
 ```bash
+# 1. Clonar el repositorio
 git clone https://github.com/Jorge-Marco5/CherryBox.git
 cd CherryBox
+
+# 2. Configurar variables de entorno
 cp .env.example .env
+
+# 3. Instalar dependencias
 pnpm install
-```
 
-### 3. Configuración del Sistema
-Edita el archivo `.env` con tus credenciales de base de datos y secretos:
--   `DATABASE_URL`: Conexión de Prisma a PostgreSQL.
--   `JWT_SECRET`: Llave para el cifrado de sesiones.
--   `MAX_FILE_SIZE`: Límite por archivo (default: 100MB).
+# 4. Generar cliente de Prisma
+pnpm prisma:generate
 
-Para configurar la ruta física de los archivos, edita `src/persistent/config.json`:
-```json
-{
-  "BASE_DIR": "/ruta/a/tus/archivos",
-  "LIMIT_STORAGE": 10737418240
-}
-```
+# 5. Cargar las tablas a la base de datos local
+pnpm prisma:push
 
-### 4. Construcción y Ejecución
-**Modo Desarrollo:**
-```bash
+# 6. Crear el usuario Administrador inicial
+pnpm seed
+
+# 7. Iniciar en modo desarrollo
 pnpm dev
 ```
 
-**Producción:**
+---
+
+## 🔄 Flujo para Aplicar Cambios en Producción
+
+### Caso A: Cambios solo en Código (Frontend, Backend, Estilos, Rutas)
+Cuando **no** se realizan cambios en la base de datos:
+
 ```bash
-pnpm build
-pnpm start
+# 1. Descargar los últimos cambios del repositorio
+git pull origin main
+
+# 2. Reconstruir e iniciar solo el contenedor de la app (la BD sigue corriendo sin interrupción)
+docker compose up -d --build app
+
+# 3. Verificar que la aplicación levantó sin errores
+docker compose logs -f app
 ```
 
-### 5. Usuario SuperAdmin
+---
 
-El usuario superadmin lo puedes definir en [prisma/seed.ts](prisma/seed.ts). Una vez creado el usuario puedes iniciar sesion en CherryBox y crear nuevos usuarios desde la interfaz. La cuenta superadmin tiene el control total del sistema, por lo que se recomienda tener solo una de ellas y usar el resto de cuentas para administracion o acceso a los archivos.
+### Caso B: Cambios en la Base de Datos (Modelos en `prisma/schema.prisma`)
 
-### 6. Escaneo de archivos
-Si defines una carpeta fija con archivos y la usas como BASE_DIR
-puedes escanear la carpeta para cargar los archivos a la base de datos automaticamnente en la seccion *configuración > sincronizar archivos*.
+#### Paso 1: En tu entorno local de desarrollo
+1. Modifica [prisma/schema.prisma](prisma/schema.prisma).
+2. Genera el archivo SQL de migración versionado:
+   ```bash
+   npx prisma migrate dev --name descripcion_del_cambio
+   ```
+3. Realiza commit y sube la nueva migración:
+   ```bash
+   git add prisma/
+   git commit -m "feat: migración descripcion_del_cambio"
+   git push origin main
+   ```
+
+#### Paso 2: En el servidor de Producción con Docker
+1. Descarga el código y reconstruye la app:
+   ```bash
+   git pull origin main
+   docker compose up -d --build app
+   ```
+2. **Aplicación automática:**
+   [docker-entrypoint.sh](docker-entrypoint.sh) detectará automáticamente las nuevas migraciones y ejecutará `npx prisma migrate deploy` antes de iniciar el servidor web, garantizando la consistencia de los datos.
+
+---
+
+## 🛠️ Comandos de Mantenimiento y Operaciones
+
+| Acción | Comando Docker | Comando Local |
+| :--- | :--- | :--- |
+| **Ver estado de migraciones** | `docker compose exec app npx prisma migrate status` | `npx prisma migrate status` |
+| **Ejecutar Seed manualmente** | `docker compose exec app node dist/lib/seed.js` | `pnpm seed` |
+| **Respaldo de Base de Datos (Backup)** | `docker compose exec -T db pg_dump -U postgres cherrybox_db > backup.sql` | `pg_dump -U postgres cherrybox_db > backup.sql` |
+| **Restaurar Respaldo** | `cat backup.sql \| docker compose exec -T db psql -U postgres cherrybox_db` | `psql -U postgres cherrybox_db < backup.sql` |
+| **Acceder a la consola de PostgreSQL** | `docker compose exec db psql -U postgres -d cherrybox_db` | `psql -U postgres -d cherrybox_db` |
+
+---
+
+## 👤 Usuario Inicial por Defecto (Seed)
+
+Al realizar la primera instalación o despliegue, se genera automáticamente el usuario:
+
+* **Email:** `system_admin@example.com`
+* **Contraseña:** `123456789`
+* **Rol:** `SUPERADMIN`
+
+*(**Recomendado:*** Puedes personalizar estas credenciales en [src/lib/seed.ts](src/lib/seed.ts) o mediante las variables de entorno `ADMIN_EMAIL` y `ADMIN_PASSWORD`).*
 
 ---
 
 ## 🛠️ Stack Tecnológico
--   **Backend**: Node.js, Express.js (v5), TypeScript.
--   **ORM**: Prisma con PostgreSQL.
--   **Frontend**: Vanilla JavaScript (ES6+), CSS3 (Modern UI/UX).
--   **Seguridad**: JWT (JSON Web Tokens), Bcrypt para hash de contraseñas.
--   **Utilidades**: Archiver (Compresión ZIP), Winston (Logging avanzado), Zod (Validación de esquemas).
+- **Backend**: Node.js, Express.js (v5), TypeScript.
+- **ORM & Base de Datos**: Prisma con driver `@prisma/adapter-pg` y PostgreSQL 16.
+- **Frontend**: Vanilla JavaScript (ES6+), CSS3 (Modern Dark Glassmorphism UI).
+- **Seguridad**: JWT, Cookies HTTP-Only, Bcrypt, Control de acceso ACL.
+- **Multimedia & Archivos**: FFmpeg, Multer, Archiver (ZIP).
+- **Logging & Auditoría**: Winston.
 
 ---
 
-## 🛡️ Seguridad y Buenas Prácticas
--   **Protección de Rutas**: Middlewares de autenticación robustos a nivel de API y de Vistas.
--   **Auditoría de Navegación**: Cada acceso a una carpeta es registrado para control de fuga de información.
--   **Integridad**: El sistema Admin/Superadmin garantiza que la infraestructura crítica no sea modificada por usuarios no autorizados.
-
-> ⚠️ **IMPORTANTE**: Para despliegues en producción, se recomienda encarecidamente el uso de HTTPS y un servidor proxy inverso como Nginx.
+## 🛡️ Recomendaciones de Seguridad en Producción
+1. **HTTPS / Proxy Inverso**: Utiliza un proxy inverso como Nginx, Traefik o Caddy para servir CherryBox mediante SSL/TLS.
+2. **Cambio de Secretos**: Modifica `JWT_SECRET`, cambia a usuarios y las contraseñas mas robustas de la base de datos y aplicación antes de exponer el servidor a redes públicas.
+3. **Copia de Seguridad**: Configura tareas programadas (cron jobs) para respaldar el directorio de archivos y la base de datos periódicamente.
 
 ---
-**CherryBox** - *Tu caja de herramientas para la gestión segura de archivos.* 🍒
+**CherryBox** - *Tu nube personal segura, rápida y auto-alojada.* 🍒

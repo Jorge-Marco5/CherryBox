@@ -208,7 +208,7 @@ export const getSharedFile = async (req: Request, res: Response, next: NextFunct
     const { token_shared } = req.params;
     const rangeHeader = req.headers.range;
 
-    const decoded = Buffer.from(token_shared, 'base64url').toString('utf8');
+    const decoded = Buffer.from(token_shared.toString(), 'base64url').toString('utf8');
     const lastColon = decoded.lastIndexOf(':');
     const secondLastColon = decoded.lastIndexOf(':', lastColon - 1);
 

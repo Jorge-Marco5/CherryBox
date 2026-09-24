@@ -12,9 +12,11 @@ import permissionsRouter from "./routes/permissions.routes";
 import settingsRouter from "./routes/settings.routes";
 import usersRouter from "./routes/users.routes";
 import { formatBytes } from "./utils/formatBytes";
+import { reverse } from "dns";
 console.clear();
 
 const app = express();
+
 const PORT = config.PORT;
 const FRONTEND_URL = config.FRONTEND_URL;
 const NODE_ENV = config.NODE_ENV;
@@ -50,8 +52,7 @@ Promise.all([system_setting.init_basedir()]).then(async () => {
   } catch (err) {
     console.error("Error al calcular almacenamiento inicial:", err);
   }
-
-  NODE_ENV === "development" ? app.use("/", indexRouter) : null;
+  if(!config.REVERSE_PROXY) app.use("/", indexRouter);
   app.use("/api", filesRouter);
   app.use("/api", settingsRouter);
   app.use("/api", usersRouter);
@@ -61,6 +62,7 @@ Promise.all([system_setting.init_basedir()]).then(async () => {
   app.use(errorHandler);
 
   app.listen(PORT, () => {
+    config.REVERSE_PROXY ? console.log("🍒 ReverseProxy Habilidato"): '';  
     console.log(`🍒 CherryBox page en: http://localhost:${PORT}/`);
   });
 }).catch((error) => {
