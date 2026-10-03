@@ -1,20 +1,3 @@
-/**
- * Gestor y Plantillas de Vistas para CherryBox (SPA)
- * 
- * ¿Por qué esta arquitectura es más segura y robusta que el uso de innerHTML con strings?
- * 1. Uso de HTML5 <template> y cloneNode(true):
- *    - Los elementos <template> son analizados una sola vez por el navegador y permanecen inertes 
- *      (scripts no se ejecutan accidentalmente, imágenes no se descargan hasta ser instanciadas).
- *    - cloneNode(true) es una operación nativa de duplicación de nodos DOM del motor del navegador, 
- *      mucho más rápida y segura frente a inyecciones XSS que concatenar o parsear cadenas HTML repetidamente.
- * 2. Ciclo de vida (mount / unmount):
- *    - Permite limpiar instancias activas (como Masonry) y desvincular recursos antes de destruir el DOM,
- *      evitando memory leaks (fugas de memoria) y listeners huérfanos.
- * 3. Escalable para futuras funciones:
- *    - Basta con registrar nuevas vistas con TemplateManager.register(name, config) y llamarlas con 
- *      TemplateManager.render(name, params).
- */
-
 const TemplateManager = {
     currentView: null,
     viewRoot: ["files"],
@@ -134,21 +117,17 @@ const TemplateManager = {
     }
 };
 
-// ==========================================
-// REGISTRO DE VISTAS ESTÁNDAR
-// ==========================================
-
-// 1. Vista de Archivos y Carpetas
+/**
+ * Vista de archivos y carpetas
+ */
 TemplateManager.register("files", {
     templateId: "tmpl-files",
     mount(params = {}) {
         const targetPath = params.path !== undefined ? params.path : (window.currentPath || "");
-        if (typeof window.loadFiles === "function") {
-            window.loadFiles(targetPath);
+        if (typeof window.filesManager.loadFiles === "function") {
+            window.filesManager.loadFiles(targetPath);
         }
-        if (typeof window.getStorage === "function") {
-            window.getStorage();
-        }
+
         if (window.UILogic && typeof window.UILogic.setupDragAndDrop === "function") {
             window.UILogic.setupDragAndDrop();
         }
@@ -166,7 +145,9 @@ TemplateManager.register("files", {
     }
 });
 
-// 2. Vista de Subida de Archivos
+/**
+ * Vista de subida de archivos
+ */
 TemplateManager.register("uploads", {
     templateId: "tmpl-uploads",
     mount() {

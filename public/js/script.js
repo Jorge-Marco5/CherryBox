@@ -1,36 +1,3 @@
-/**
- * Carga los archivos de una ruta específica.
- */
-async function loadFiles(path = "") {
-  if (isLoadingFiles) return;
-  isLoadingFiles = true;
-  try {
-    const response = await FileService.getFiles(path);
-    const data = response.data;
-
-    currentPath = data.currentPath;
-    currentFolderData = { id: data.currentFolderId, name: data.currentFolderName };
-
-    Renderers.updateBreadcrumb(currentPath);
-    if (containsOnlyOneMusicFile(data.files)) {
-      document.getElementById("btn-music-player").style.display = "inline-flex";
-    } else {
-      document.getElementById("btn-music-player").style.display = "none";
-    }
-    getStorage();
-
-    Renderers.renderFiles(data.files);
-    Renderers.renderImages();
-    updateFolderPermissionButton();
-  } catch (error) {
-    showToast("Ha ocurrido un error al iniciar: " + error.message, "danger");
-    if (error.response && error.response.status === 401) {
-      location.href = "/login";
-    }
-  } finally {
-    isLoadingFiles = false;
-  }
-}
 
 /**
  * Manejador del formulario de búsqueda mediante delegación de eventos.
@@ -39,115 +6,64 @@ async function loadFiles(path = "") {
 document.addEventListener("submit", (e) => {
   if (e.target && (e.target.id === "search-form" || e.target.closest("#search-form"))) {
     e.preventDefault();
-    searchFiles();
+    
+    filesManager.searchFiles();
   }
 });
 
-async function searchFiles() {
-  const searchInput = document.getElementById("searchInput");
-  const query = searchInput?.value.trim();
-
-  if (query == "") {
-    loadFiles("");
-  }
-
-  try {
-    const response = await FileService.searchFiles(query);
-    Renderers.renderFiles(response.data);
-    isLoadingFiles = false;
-  } catch (error) {
-    alert("Error al buscar archivos: " + error.message);
-    location.href = "/error?code=" + error.response.status + "&message=" + error.response.data.error;
-  }
-}
-
 function navigateTo(path) {
-  loadFiles(path);
+  
+  filesManager.loadFiles(path);
 }
 
 function refreshpath() {
   showToast("Carpeta actualizada", "info");
-  loadFiles(currentPath);
+  
+  filesManager.loadFiles(currentPath);
 }
 
 /**
  * Crea una nueva carpeta.
  */
 const createFolderForm = document.getElementById("create-folder-form");
-createFolderForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  createFolder();
-});
+if (createFolderForm) {
+  createFolderForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    createFolder();
+  });
+}
 
-async function createFolder() {
-  const name = document.getElementById("folderNameInput").value.trim();
-  const color = document.getElementById("folderColorInput").value;
-
-  if (!name) {
-    showToast("Por favor ingresa un nombre", "warning");
-    return;
-  }
-
-  try {
-    const response = await FileService.createFolder(currentPath, name, color);
-    if (response.data.success) {
-      UILogic.closeModal(currentModalActive);
-      document.getElementById("folderNameInput").value = "";
-      loadFiles(currentPath);
-    } else {
-      showToast(response.data.error, "error");
-    }
-  } catch (error) {
-    showToast("Error al crear carpeta", "error");
-  }
+async function createFolder(name, color) {
+  await filesManager.createFolder(name, color);
 }
 
 /**
  * Confirma el renombrado de un archivo.
  */
 const renameForm = document.getElementById("rename-file-form");
-renameForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  confirmRename();
-});
-
-async function confirmRename() {
-  const newName = document.getElementById("renameInput").value.trim();
-  const newColor = document.getElementById("renameColorInput").value;
-
-  if (!newName) {
-    showToast("Por favor ingresa un nombre", "warning");
-    return;
-  }
-
-  try {
-    await FileService.rename(currentRenameItem, newName, newColor);
-    UILogic.closeModal(currentModalActive);
-    loadFiles(currentPath);
-  } catch (error) {
-    console.error(error);
-  }
+if (renameForm) {
+  renameForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    confirmRename();
+  });
 }
 
+async function confirmRename(newName, newColor) {
+  await filesManager.confirmRename(newName, newColor);
+}
+
+/**
+ * Genera un enlace temporal de descarga/compartir.
+ */
+async function createShareLink(filePath, time) {
+  return await filesManager.createShareLink(filePath, time);
+}
 
 const formShareTime = document.getElementById("form-share-time");
 if (formShareTime) {
   formShareTime.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const timeShare = document.getElementById("selectTimeShare").value;
-    const inputPathShare = document.getElementById("inputPathShare");
-    inputPathShare.value = "";
-    if (!timeShare) {
-      showToast("Por favor selecciona un tiempo límite", "warning");
-      return;
-    }
-    try {
-      const res = await FileService.createShareLink(currentRenameItem, timeShare);
-      inputPathShare.value = res.data.url;
-    } catch (error) {
-      console.error(error);
-      showToast("Error al crear enlace", "error");
-    }
+    await createShareLink();
   });
 }
 
@@ -155,134 +71,32 @@ if (formShareTime) {
  * Elimina un archivo o carpeta.
  */
 async function deleteFile(path, name) {
-  if (!confirm(`¿Estás seguro de eliminar "${name}"?`)) return;
-
-  try {
-    await FileService.delete(path);
-    loadFiles(currentPath);
-  } catch (error) {
-    console.error("Error al eliminar:", error);
-  }
+  await filesManager.deleteFile(path, name);
 }
 
 /**
  * Elimina los archivos seleccionados mediante checkbox.
  */
 async function deleteSelectedFiles() {
-  const checkboxes = document.querySelectorAll(".file-checkbox:checked");
-  const paths = Array.from(checkboxes).map((checkbox) => checkbox.dataset.path);
-
-  if (paths.length === 0) {
-    showToast("No se han seleccionado archivos", "error");
-    return;
-  } else if (paths.length >= 10) {
-    showToast("No se pueden eliminar más de 10 archivos a la vez", "error");
-    return;
-  }
-
-  if (confirm(`¿Estás seguro de que quieres eliminar ${paths.length} archivos?`)) {
-    try {
-      await Promise.all(paths.map((path) => FileService.delete(path)));
-      document.getElementById("btn-deleteSelectedFiles").style.display = "none";
-      await loadFiles(currentPath);
-    } catch (error) {
-      console.error("Error al eliminar archivos:", error);
-      await loadFiles(currentPath);
-    }
-  }
+  await filesManager.deleteSelectedFiles();
 }
 
 /**
  * Descarga los archivos seleccionados mediante checkbox.
  */
 async function downloadSelectedFiles() {
-  const checkboxes = document.querySelectorAll(".file-checkbox:checked");
-  const paths = Array.from(checkboxes)
-    .filter((cb) => cb.id !== "checkbox-all")
-    .map((cb) => cb.dataset.path);
-
-  if (paths.length === 0) {
-    showToast("No se han seleccionado archivos", "error");
-    return;
-  } else if (paths.length === 1) {
-    downloadFile(paths[0]);
-    return;
-  }
-
-  try {
-    showToast("Preparando descarga...", "info");
-    const response = await FileService.downloadMultiple(paths);
-
-    // Crear un objeto URL para el blob
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-
-    // Nombre del archivo con timestamp
-    const timestamp = new Date().getTime();
-    link.setAttribute("download", `cherrybox_download_${timestamp}.zip`);
-
-    document.body.appendChild(link);
-    link.click();
-
-    // Limpieza
-    link.remove();
-    window.URL.revokeObjectURL(url);
-
-    document.getElementById("btn-downloadSelectedFiles").style.display = "none";
-    showToast("Descarga iniciada", "success");
-
-    // Deseleccionar todo
-    const checkboxAll = document.getElementById("checkbox-all");
-    if (checkboxAll) checkboxAll.checked = false;
-    document.querySelectorAll(".file-checkbox").forEach((cb) => (cb.checked = false));
-    Renderers.updateSelectionButtons();
-  } catch (error) {
-    console.error("Error al descargar:", error);
-
-    // Si el error viene de un blob, hay que leerlo como texto
-    if (error.response && error.response.data instanceof Blob) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const errData = JSON.parse(reader.result);
-          showToast(errData.error || "Error al descargar archivos", "error");
-        } catch {
-          showToast("Error al descargar archivos", "error");
-        }
-      };
-      reader.readAsText(error.response.data);
-    } else {
-      showToast(error.response?.data?.error || "Error en el servidor al procesar la descarga", "error");
-    }
-  }
+  await filesManager.downloadSelectedFiles();
 }
 
 /**
  * Obtiene y actualiza la información de almacenamiento.
  */
 async function getStorage() {
-  try {
-    const response = await FileService.getStorage();
-    const data = response.data;
-
-    document.getElementById("storageLimit").textContent = formatBytes(data.totalStorage);
-    document.getElementById("storageUsed").textContent = formatBytes(data.usedStorage);
-    document.getElementById("storageAvailable").textContent = formatBytes(data.availableStorage);
-
-    const barFill = document.querySelector(".bar-storage-fill");
-    const percentage = (data.usedStorage / data.totalStorage) * 100;
-    if (barFill && data.totalStorage > 0) {
-      barFill.style.width = `${Math.min(percentage, 100)}%`;
-      barFill.style.backgroundColor = percentage < 50 ? "#22c55e" : percentage < 80 ? "#f59e0b" : "#ef4444";
-    }
-  } catch (error) {
-    console.error("Error al obtener el límite de almacenamiento:", error);
-  }
+  await filesManager.getStorage();
 }
 
 function downloadFile(path) {
-  window.open(`${API_URL}/download?path=${encodePath(path)}`, "_blank");
+  filesManager.downloadFile(path);
 }
 
 /**
@@ -711,7 +525,8 @@ async function uploadFilesProcess(files) {
     updateUploadIndicators(true);
     getStorage();
     if (window.TemplateManager && window.TemplateManager.currentView === "files") {
-      loadFiles(currentPath);
+      
+      filesManager.loadFiles(currentPath);
     }
   }
 }
@@ -761,7 +576,8 @@ document.addEventListener("change", (e) => {
 
 document.addEventListener("keypress", (e) => {
   if (e.target.id === "searchInput" && e.key === "Enter") {
-    searchFiles();
+    
+    filesManager.searchFiles();
   }
 });
 
@@ -788,8 +604,6 @@ async function copyToClipboard(input) {
 }
 
 // Exponer funciones globales necesarias
-window.loadFiles = loadFiles;
-window.searchFiles = searchFiles;
 window.navigateTo = navigateTo;
 window.refreshpath = refreshpath;
 window.createFolder = createFolder;
@@ -807,19 +621,25 @@ window.renderUploadManagerView = renderUploadManagerView;
 window.showPermissionsModal = showPermissionsModal;
 window.revokePermission = revokePermission;
 window.grantPermission = grantPermission;
+window.createShareLink = createShareLink;
+window.getStorage = getStorage;
 window.showCurrentFolderPermissions = showCurrentFolderPermissions;
 
 // Inicialización de la vista principal con TemplateManager
 document.addEventListener('DOMContentLoaded', () => {
+  try{
     if (window.TemplateManager) {
-    if (urlPath === "/") {
-      TemplateManager.render("files");
-    } else {
-      TemplateManager.render(urlPath.replace("/", ""));
+      if (urlPath === "/") {
+        TemplateManager.render("files");
+      } else {
+        TemplateManager.render(urlPath.replace("/", ""));
+      }
+    } else if (document.getElementById("fileList")) {
+      filesManager.loadFiles();
+      UILogic.setupDragAndDrop();
     }
-  } else if (document.getElementById("fileList")) {
-    loadFiles();
-    UILogic.setupDragAndDrop();
-    getStorage();
+  }catch(error){
+    showToast("Error al iniciar...", "warning");
+    console.error(error);
   }
 })
