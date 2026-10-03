@@ -1,5 +1,3 @@
-const mainContainer = document.getElementById("main-container");
-
 /**
  * Carga los archivos de una ruta específica.
  */
@@ -812,14 +810,16 @@ window.grantPermission = grantPermission;
 window.showCurrentFolderPermissions = showCurrentFolderPermissions;
 
 // Inicialización de la vista principal con TemplateManager
-if (window.TemplateManager) {
-  if (urlPath === "/") {
-    TemplateManager.render("files");
-  } else {
-    TemplateManager.render(urlPath.replace("/", ""));
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.TemplateManager) {
+    if (urlPath === "/") {
+      TemplateManager.render("files");
+    } else {
+      TemplateManager.render(urlPath.replace("/", ""));
+    }
+  } else if (document.getElementById("fileList")) {
+    loadFiles();
+    UILogic.setupDragAndDrop();
+    getStorage();
   }
-} else if (document.getElementById("fileList")) {
-  loadFiles();
-  UILogic.setupDragAndDrop();
-  getStorage();
-}
+})

@@ -7,8 +7,8 @@ import { ForbiddenError, ValidationError } from "../utils/errors";
 import { isValidPath } from "../utils/multer";
 import { system_setting } from '../config/config'
 import { sanitizeName } from "../utils/sanitize";
-import videoHandler from "./videostream.service";
-import { getVideoThumbnail } from "./videoOptimizer.service";
+import videoHandler from "../helpers/video/videostream.helper";
+import { getVideoThumbnail } from "../helpers/video/videoOptimizer.helper";
 import { createShareLink } from "../controllers/files.controller";
 
 /**

@@ -35,15 +35,7 @@ router.get("/search", requireAuth, searchFiles);
 
 router.post("/folder", requireAuth, createFolder);
 
-router.post(
-  "/upload",
-  requireAuth,
-  checkUploadPermission,
-  checkStorageLimit,
-  uploadCleanupMiddleware,
-  upload.array("files"),
-  uploadFiles,
-);
+router.post("/upload", requireAuth, checkUploadPermission, checkStorageLimit, uploadCleanupMiddleware, upload.array("files"), uploadFiles,);
 
 router.put("/rename", requireAuth, renameFile);
 

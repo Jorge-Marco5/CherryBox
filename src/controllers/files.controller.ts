@@ -21,8 +21,8 @@ import { ValidationError } from "../utils/errors";
 import { logger } from "../utils/logger";
 import { isValidPath } from "../utils/multer";
 import { system_setting, config } from '../config/config'
-import { VideoStreamResult } from "../services/videostream.service";
-import { processUploadedVideosAsync } from "../services/videoOptimizer.service";
+import { VideoStreamResult } from "../helpers/video/videostream.helper";
+import { processUploadedVideosAsync } from "../helpers/video/videoOptimizer.helper";
 import { decodePath, sanitizeRelativePath } from "../utils/sanitize";
 import { formatBytes } from "../utils/formatBytes";
 import { contentHtml } from "../persistent/contentHTML";

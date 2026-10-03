@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs";
-import { NotFoundError } from "../utils/errors";
+import { NotFoundError } from "../../utils/errors";
 
 export interface VideoStreamResult {
     status: number;

@@ -89,27 +89,8 @@ const PREVIEW_STRATEGIES = [
     },
     async render(path, name, ext, contentUrl, container) {
       MusicPlayer.pause();
-      if (navigator.onLine) {
-        const device = getTypeDevice();
-        const isMobile = device === "movil";
-        if (!isMobile) {
-          container.innerHTML = `
-        <div class="video-preview-container">
-          <video-player>
-            <video-skin>
-              <video slot="media" preload="metadata" playsinline>
-                <source src="${contentUrl}" type="video/${ext}">
-              </video>
-            </video-skin>
-          </video-player>
-        </div>
-      `;
-        } else {
-          container.innerHTML = `<video controls preload="metadata" controlsList="nodownload"><source src="${contentUrl}" type="video/${ext}"></video>`;
-        }
-      } else {
         container.innerHTML = `<video controls preload="metadata" controlsList="nodownload"><source src="${contentUrl}" type="video/${ext}"></video>`;
-      }
+      
     },
   },
   {

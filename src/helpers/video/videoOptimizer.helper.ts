@@ -2,9 +2,9 @@ import ffmpeg from "fluent-ffmpeg";
 import ffmpegInstaller from "ffmpeg-static";
 import fs from "fs";
 import path from "path";
-import { videoExts } from "../persistent/formats";
-import { logger } from "../utils/logger";
-import { system_setting } from '../config/config'
+import { videoExts } from "../../persistent/formats";
+import { logger } from "../../utils/logger";
+import { system_setting } from '../../config/config'
 
 // Configurar el ejecutable estático de FFmpeg
 if (ffmpegInstaller) {
