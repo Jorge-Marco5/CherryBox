@@ -131,6 +131,16 @@ TemplateManager.register("files", {
         if (window.UILogic && typeof window.UILogic.setupDragAndDrop === "function") {
             window.UILogic.setupDragAndDrop();
         }
+
+        const btnRefreshFiles = document.getElementById("btnRefreshFiles");
+        console.log(btnRefreshFiles);
+            if(btnRefreshFiles){
+            btnRefreshFiles.addEventListener('click', (e) => {
+                e.preventDefault();
+                showToast("Carpeta actualizada", "info");
+                filesManager.loadFiles(currentPath);
+            })
+        }
     },
     unmount() {
         // Destruir instancia de Masonry para evitar fugas de memoria

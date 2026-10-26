@@ -3,7 +3,7 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Habilitar pnpm
-RUN corepack enable && corepack prepare pnpm@12.6.0 --activate
+RUN corepack enable && corepack prepare pnpm@12.15.0 --activate
 
 # Copiar archivos de dependencias y esquema Prisma
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./

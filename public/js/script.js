@@ -6,20 +6,17 @@
 document.addEventListener("submit", (e) => {
   if (e.target && (e.target.id === "search-form" || e.target.closest("#search-form"))) {
     e.preventDefault();
-    
+
     filesManager.searchFiles();
   }
 });
 
+/**
+ * Redirigir a alguna ruta dentro del explorador de archivos
+ * @param {*} path 
+ */
 function navigateTo(path) {
-  
   filesManager.loadFiles(path);
-}
-
-function refreshpath() {
-  showToast("Carpeta actualizada", "info");
-  
-  filesManager.loadFiles(currentPath);
 }
 
 /**
@@ -32,6 +29,7 @@ if (createFolderForm) {
     createFolder();
   });
 }
+
 
 async function createFolder(name, color) {
   await filesManager.createFolder(name, color);
@@ -103,6 +101,9 @@ function downloadFile(path) {
  * Gestión de Permisos
  */
 
+/**
+ * Ver los permisos de usuarios de una carpeta
+ */
 function showCurrentFolderPermissions() {
   if (currentFolderData.id) {
     showPermissionsModal(currentFolderData.id, currentFolderData.name || "Carpeta Actual");
@@ -111,6 +112,9 @@ function showCurrentFolderPermissions() {
   }
 }
 
+/**
+ * mostrar|ocultar boton para permisos del folder
+ */
 function updateFolderPermissionButton() {
   const btn = document.getElementById("btn-folderPermissions");
   if (btn) {
@@ -120,6 +124,11 @@ function updateFolderPermissionButton() {
   }
 }
 
+/**
+ * Mostrar el modal con usuarios y permisos
+ * @param {*} fileId 
+ * @param {*} fileName 
+ */
 async function showPermissionsModal(fileId, fileName) {
   currentPermissionFileId = fileId;
   currentModalActive = "permissionsModal";
@@ -170,6 +179,10 @@ permissionsForm.addEventListener("submit", async (e) => {
   await grantPermission();
 });
 
+/**
+ * Aplicar un permiso a un usuario sobre un archivo
+ * @returns 
+ */
 async function grantPermission() {
   const targetUserId = document.getElementById("targetUserId").value.trim();
   const access = document.getElementById("accessLevel").value;
@@ -493,7 +506,6 @@ async function uploadFilesProcess(files) {
         signal: item.controller.signal,
         onUploadProgress: (event) => updateProgressState(item, event)
       });
-
       if (response.data && response.data.success) {
         item.status = "completed";
         item.loaded = item.size;
@@ -525,7 +537,7 @@ async function uploadFilesProcess(files) {
     updateUploadIndicators(true);
     getStorage();
     if (window.TemplateManager && window.TemplateManager.currentView === "files") {
-      
+
       filesManager.loadFiles(currentPath);
     }
   }
@@ -562,40 +574,64 @@ function clearUploadHistory() {
  * Listeners y Configuración Inicial
  */
 
+/**
+ * Funcion para marcar como seleccionado todos los archivos de la carpeta
+ * @param {*} element 
+ */
 function toggleSelectAll(element) {
   const isChecked = element.checked;
   document.querySelectorAll(".file-checkbox").forEach((cb) => (cb.checked = isChecked));
   Renderers.updateSelectionButtons();
 }
 
+/**
+ * Marcar como seleeccionado un archivo de la carpeta
+ */
 document.addEventListener("change", (e) => {
   if (e.target?.classList.contains("file-checkbox")) {
     Renderers.updateSelectionButtons();
   }
 });
 
+/**
+ * enter para lanzar busqueda
+ */
 document.addEventListener("keypress", (e) => {
   if (e.target.id === "searchInput" && e.key === "Enter") {
-    
+
     filesManager.searchFiles();
   }
 });
 
 document.addEventListener("keydown", (e) => {
+  /**
+   * presiona F5 para actualizar la carpeta actual
+   */
   if (e.key === "F5") {
     e.preventDefault();
-    refreshpath();
+    showToast("Carpeta actualizada", "info");
+    filesManager.loadFiles(currentPath);
   }
 
+  /**
+   * Escape para el cierre del modal actual
+   */
   if (e.key === "Escape") {
     UILogic.closeModal(currentModalActive);
   }
 });
 
+/**
+ * Click afuera del modal para cerrar
+ */
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("modal")) UILogic.closeModal(e.target.id);
 });
 
+/**
+ * Funcion para copiar un texto de un componente
+ * @param {*} input 
+ */
 async function copyToClipboard(input) {
   const copy = document.getElementById(input);
   copy.select();
@@ -605,7 +641,6 @@ async function copyToClipboard(input) {
 
 // Exponer funciones globales necesarias
 window.navigateTo = navigateTo;
-window.refreshpath = refreshpath;
 window.createFolder = createFolder;
 window.confirmRename = confirmRename;
 window.deleteFile = deleteFile;
@@ -627,7 +662,7 @@ window.showCurrentFolderPermissions = showCurrentFolderPermissions;
 
 // Inicialización de la vista principal con TemplateManager
 document.addEventListener('DOMContentLoaded', () => {
-  try{
+  try {
     if (window.TemplateManager) {
       if (urlPath === "/") {
         TemplateManager.render("files");
@@ -638,7 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
       filesManager.loadFiles();
       UILogic.setupDragAndDrop();
     }
-  }catch(error){
+  } catch (error) {
     showToast("Error al iniciar...", "warning");
     console.error(error);
   }
