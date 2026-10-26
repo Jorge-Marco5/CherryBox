@@ -19,6 +19,7 @@ import { upload } from "../utils/multer";
 
 import { uploadCleanupMiddleware } from "../middlewares/cleanup.middleware";
 import { checkStorageLimit, checkUploadPermission } from "../middlewares/storage.middleware";
+import { validateUploadedFiles } from "../middlewares/fileValidator.middleware";
 import { system_setting } from '../config/config'
 
 
@@ -35,7 +36,16 @@ router.get("/search", requireAuth, searchFiles);
 
 router.post("/folder", requireAuth, createFolder);
 
-router.post("/upload", requireAuth, checkUploadPermission, checkStorageLimit, uploadCleanupMiddleware, upload.array("files"), uploadFiles,);
+router.post(
+  "/upload",
+  requireAuth,
+  checkUploadPermission,
+  checkStorageLimit,
+  uploadCleanupMiddleware,
+  upload.array("files"),
+  validateUploadedFiles,
+  uploadFiles
+);
 
 router.put("/rename", requireAuth, renameFile);
 

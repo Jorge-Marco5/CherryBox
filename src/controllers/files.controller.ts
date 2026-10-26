@@ -102,7 +102,7 @@ export const createFolder = async (req: AuthRequest, res: Response, next: NextFu
     const { path: relativePath, name, folderColor } = req.body;
     if (!name) throw new ValidationError("El nombre de la carpeta es requerido");
 
-    const result = await createFolderService(relativePath, name, folderColor, req.user!.id, req.user!.role);
+    const result = await createFolderService(decodePath(relativePath), decodePath(name), folderColor, req.user!.id, req.user!.role);
     logger.info(`[AUDIT] Usuario ${req.user?.id} creó la carpeta: ${path.join(relativePath, name)}`);
     res.json(result);
   } catch (error: any) {
