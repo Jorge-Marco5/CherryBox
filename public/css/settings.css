@@ -27,10 +27,10 @@
 }
 
 .form-wrapper {
-    padding: 20px 30px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    max-height: 80%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px 30px;
 }
 
 .caption {
