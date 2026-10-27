@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { videoExts } from "../../persistent/formats";
 import { logger } from "../../utils/logger";
+import sharp from "sharp";
 import { system_setting } from '../../config/config'
 
 // Configurar el ejecutable estático de FFmpeg
@@ -99,7 +100,7 @@ export function optimizeVideo(fullPath: string): Promise<VideoOptimizationResult
 }
 
 /**
- * Genera una miniatura (thumbnail) del video en formato PNG a partir del 5% del tiempo del video.
+ * Genera una miniatura (thumbnail) del video en formato WebP optimizado a partir del 5% del tiempo del video.
  */
 export function generateVideoThumbnail(fullPath: string): Promise<string | null> {
   return new Promise((resolve) => {
@@ -109,15 +110,28 @@ export function generateVideoThumbnail(fullPath: string): Promise<string | null>
 
     const dir = path.dirname(fullPath);
     const baseName = path.basename(fullPath, path.extname(fullPath));
-    const thumbName = `${baseName}_thumb.png`;
+    const tempPngName = `${baseName}_thumb_tmp.png`;
+    const webpThumbName = `${baseName}_thumb.webp`;
     const thumbPath = path.join(dir, "thumbnails");
     fs.mkdirSync(thumbPath, { recursive: true });
 
     ffmpeg(fullPath)
-      .on("end", () => {
-        const fullThumbFile = path.join(thumbPath, thumbName);
-        logger.info(`[FLUENT-FFMPEG] Miniatura generada: ${thumbName}`);
-        resolve(fullThumbFile);
+      .on("end", async () => {
+        const tempPngFile = path.join(thumbPath, tempPngName);
+        const fullThumbFile = path.join(thumbPath, webpThumbName);
+        try {
+          if (fs.existsSync(tempPngFile)) {
+            await sharp(tempPngFile)
+              .webp({ quality: 80, effort: 4 })
+              .toFile(fullThumbFile);
+            try { fs.unlinkSync(tempPngFile); } catch { }
+          }
+          logger.info(`[FLUENT-FFMPEG] Miniatura WebP generada: ${webpThumbName}`);
+          resolve(fullThumbFile);
+        } catch (err: any) {
+          logger.warn(`[FLUENT-FFMPEG] Error convirtiendo miniatura a WebP para ${baseName}: ${err.message}`);
+          resolve(fs.existsSync(tempPngFile) ? tempPngFile : null);
+        }
       })
       .on("error", (err: Error) => {
         logger.warn(`[FLUENT-FFMPEG] No se pudo generar la miniatura para ${baseName}: ${err.message}`);
@@ -126,7 +140,7 @@ export function generateVideoThumbnail(fullPath: string): Promise<string | null>
       .screenshots({
         count: 1,
         timestamps: ["5%"],
-        filename: thumbName,
+        filename: tempPngName,
         folder: thumbPath,
         size: "320x?"
       });
@@ -141,12 +155,15 @@ export async function getVideoThumbnail(fullPath: string): Promise<string | null
 
   const dir = path.dirname(fullPath);
   const baseName = path.basename(fullPath, path.extname(fullPath));
-  const thumbName = `${baseName}_thumb.png`;
   const thumbFolder = path.join(dir, "thumbnails");
-  const thumbFile = path.join(thumbFolder, thumbName);
+  const webpThumbFile = path.join(thumbFolder, `${baseName}_thumb.webp`);
+  const pngThumbFile = path.join(thumbFolder, `${baseName}_thumb.png`);
 
-  if (fs.existsSync(thumbFile)) {
-    return thumbFile;
+  if (fs.existsSync(webpThumbFile)) {
+    return webpThumbFile;
+  }
+  if (fs.existsSync(pngThumbFile)) {
+    return pngThumbFile;
   }
 
   return await generateVideoThumbnail(fullPath);
