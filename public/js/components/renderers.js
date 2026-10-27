@@ -210,7 +210,7 @@ const Renderers = {
     const img = document.createElement("img");
     const attrPath = escapeHTML(file.path);
     const escName = escapeHTML(file.name);
-    const escPath = `/api/file-content?path=${encodePath(file.path)}&name=${encodePath(file.name)}`;
+    const escPath = `/api/file-content?path=${encodePath(file.path)}&name=${encodePath(file.name)}&thumbnail=true`;
 
     item.className = "image-file";
     item.draggable = false;

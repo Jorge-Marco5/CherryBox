@@ -23,6 +23,7 @@ import { isValidPath } from "../utils/multer";
 import { system_setting, config } from '../config/config'
 import { VideoStreamResult } from "../helpers/video/videostream.helper";
 import { processUploadedVideosAsync } from "../helpers/video/videoOptimizer.helper";
+import { processUploadedImagesAsync } from "../helpers/images/imageOptimizer.helper";
 import { decodePath, sanitizeRelativePath } from "../utils/sanitize";
 import { formatBytes } from "../utils/formatBytes";
 import { contentHtml } from "../persistent/contentHTML";
@@ -135,6 +136,9 @@ export const uploadFiles = async (req: AuthRequest, res: Response, next: NextFun
 
     // Optimización asíncrona de videos en segundo plano con FFmpeg (+faststart)
     processUploadedVideosAsync(files, decodePath(relativePath));
+
+    // Optimización asíncrona de imágenes en segundo plano con Sharp (miniaturas WebP)
+    processUploadedImagesAsync(files, decodePath(relativePath));
 
     logger.info(`[AUDIT] Usuario ${user?.id} completó subida de ${files.length} archivo(s) a: ${decodePath(relativePath)}`);
     res.json({

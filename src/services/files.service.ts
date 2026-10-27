@@ -9,6 +9,7 @@ import { system_setting } from '../config/config'
 import { sanitizeName } from "../utils/sanitize";
 import videoHandler from "../helpers/video/videostream.helper";
 import { getVideoThumbnail } from "../helpers/video/videoOptimizer.helper";
+import { getImageThumbnail } from "../helpers/images/imageOptimizer.helper";
 import { createShareLink } from "../controllers/files.controller";
 
 /**
@@ -427,6 +428,18 @@ export const deleteItemService = async (relativePath: string, userId: string, us
   } else {
     sizeDeleted = stats.size;
     await fs.unlink(fullPath);
+
+    // Limpieza de miniatura asociada (imagen o video) en thumbnails/
+    try {
+      const dir = path.dirname(fullPath);
+      const fileExt = path.extname(fullPath);
+      const baseName = path.basename(fullPath, fileExt);
+      const imageThumb = path.join(dir, "thumbnails", `${baseName}_thumb.webp`);
+      const videoThumb = path.join(dir, "thumbnails", `${baseName}_thumb.png`);
+      const fsSync = require("fs");
+      if (fsSync.existsSync(imageThumb)) fsSync.unlinkSync(imageThumb);
+      if (fsSync.existsSync(videoThumb)) fsSync.unlinkSync(videoThumb);
+    } catch { }
   }
 
   await syncFileInDb(relativePath, "DELETE");
@@ -466,17 +479,31 @@ export const getItemContentService = async (
   const fullPath = path.join(BASE_DIR, relativePath);
   const ext = path.extname(fullPath).toLowerCase();
 
-  // Si se solicita específicamente la miniatura de un video
-  if (isThumbnail && videoExts.includes(ext)) {
-    const thumbPath = await getVideoThumbnail(fullPath);
-    if (thumbPath) {
-      try {
-        const stats = await fs.stat(thumbPath);
-        if (stats.isFile()) {
-          return { type: "media", fullPath: thumbPath };
+  // Si se solicita específicamente la miniatura de un video o imagen
+  if (isThumbnail) {
+    if (videoExts.includes(ext)) {
+      const thumbPath = await getVideoThumbnail(fullPath);
+      if (thumbPath) {
+        try {
+          const stats = await fs.stat(thumbPath);
+          if (stats.isFile()) {
+            return { type: "media", fullPath: thumbPath };
+          }
+        } catch (e) {
+          // Fallback si falla stat
         }
-      } catch (e) {
-        // Fallback si falla stat
+      }
+    } else if (imageExts.includes(ext)) {
+      const thumbPath = await getImageThumbnail(fullPath);
+      if (thumbPath) {
+        try {
+          const stats = await fs.stat(thumbPath);
+          if (stats.isFile()) {
+            return { type: "media", fullPath: thumbPath };
+          }
+        } catch (e) {
+          // Fallback si falla stat
+        }
       }
     }
   }
