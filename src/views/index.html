@@ -4,31 +4,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aplicacion web para gestion de archivos">
   <title>CherryBox - Administrador de Archivos</title>
   <link rel="icon" type="image/svg+xml" href="public/cherries.svg" />
+  <link rel="preload" href="public/fonts/Geist-Regular.ttf" as="font" type="font/ttf" crossorigin />
+  <link rel="stylesheet" href="public/css/header.css" />
   <link rel="stylesheet" href="public/css/styles.css" />
-  <script src="public/js/lib/axios.min.js"></script>
-  <script src="public/js/lib/masonry.pkgd.min.js"></script>
-  <script src="public/js/lib/imagesloaded.pkgd.min.js"></script>
-  <script src="public/js/lib/jsmediatags.min.js"></script>
+  <link rel="stylesheet" href="public/css/dropdown.css" />
+  <link rel="stylesheet" href="public/css/toast.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="public/css/musicPlayer.css" media="print" onload="this.media='all'" />
+  <noscript>
+    <link rel="stylesheet" href="public/css/toast.css" />
+    <link rel="stylesheet" href="public/css/musicPlayer.css" />
+  </noscript>
+  <script defer src="public/js/lib/axios.min.js"></script>
+  <script defer src="public/js/lib/masonry.pkgd.min.js"></script>
+  <script defer src="public/js/lib/imagesloaded.pkgd.min.js"></script>
+  <script defer src="public/js/lib/jsmediatags.min.js"></script>
 </head>
 
 <body>
-  <div class="container">
+  <main class="container">
     <div class="header">
       <div class="icon" onclick="return renderFilesTemplate('')" style="cursor: pointer">
         <h1>CherryBox</h1>
         <img src="public/cherries.svg" alt="CherryBox" width="50" height="50" />
       </div>
       <div class="dropdown">
-        <button class="dropbtn" style="background-color: transparent;">
+        <button class="btn-dropdown" aria-label="button-dropdown" style="background-color: transparent;">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 512 512">
             <path fill="currentColor" fill-rule="evenodd"
               d="M256 117.333c17.673 0 32-14.327 32-32s-14.327-32-32-32-32 14.327-32 32 14.327 32 32 32m0 341.333c17.673 0 32-14.327 32-32s-14.327-32-32-32-32 14.327-32 32 14.327 32 32 32M256 288c17.673 0 32-14.327 32-32s-14.327-32-32-32-32 14.327-32 32 14.327 32 32 32" />
           </svg>
         </button>
         <div class="dropdown-content" style="left:-120px;">
-          <a onclick=" return renderFilesTemplate()">
+          <a href="#" onclick=" return renderFilesTemplate()">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-layout-board-split">
@@ -41,7 +51,7 @@
             </svg>
             <p>Archivos</p>
           </a>
-          <a onclick=" return renderUploadTemplate()">
+          <a href="#" onclick=" return renderUploadTemplate()">
             <span id="indicador">0</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -53,7 +63,7 @@
             </svg>
             <p>Archivos subidos</p>
           </a>
-          <a onclick=" return logout()" style="color: var(--error);">
+          <a href="#" onclick=" return logout()" style="color: var(--error);">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
               class="icon icon-tabler icons-tabler-outline icon-tabler-logout">
@@ -80,17 +90,16 @@
 
     <!--  Contenedor principal-->
     <div class="main-container" id="main-container"></div>
-  </div>
+  </main>
 
-  <!-- ==================== PLANTILLAS / VISTAS SPA ==================== -->
-  <!-- 1. Plantilla de Explorador de Archivos -->
   <template id="tmpl-files">
     <div class="toolbar">
       <div class="search-container">
         <form style="width:100%" id="search-form">
           <div class="search">
-            <input type="search" id="searchInput" placeholder="Buscar archivos..." list="searchHistory" />
-            <button class="btn btn-primary" type="submit" title="Buscar">
+            <input type="search" id="searchInput" aria-label="Buscar archivos" placeholder="Buscar archivos..."
+              list="searchHistory" />
+            <button class="btn btn-primary" aria-label="search" type="submit" title="Buscar">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-search">
@@ -114,8 +123,8 @@
           </svg>
         </span>
       </div>
-      <button class="btn btn-danger" id="btn-deleteSelectedFiles" title="Eliminar seleccionados"
-        onclick="deleteSelectedFiles()" style="display: none">
+      <button class="btn btn-danger" aria-label="delete-files" id="btn-deleteSelectedFiles"
+        title="Eliminar seleccionados" onclick="deleteSelectedFiles()" style="display: none">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="icon icon-tabler icons-tabler-outline icon-tabler-trash">
@@ -127,8 +136,8 @@
           <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
         </svg>
       </button>
-      <button class="btn btn-secondary" id="btn-downloadSelectedFiles" title="Descargar seleccionados"
-        onclick="downloadSelectedFiles()" style="display: none">
+      <button class="btn btn-secondary" aria-label="download-files" id="btn-downloadSelectedFiles"
+        title="Descargar seleccionados" onclick="downloadSelectedFiles()" style="display: none">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="icon icon-tabler icons-tabler-outline icon-tabler-download">
@@ -138,7 +147,7 @@
           <path d="M12 4l0 12" />
         </svg>
       </button>
-      <button class="btn btn-secondary" id="btnRefreshFiles" title="Actualizar">
+      <button class="btn btn-secondary" aria-label="refresh-files" id="btnRefreshFiles" title="Actualizar">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="icon icon-tabler icons-tabler-outline icon-tabler-refresh">
@@ -147,7 +156,8 @@
           <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
         </svg>
       </button>
-      <button class="btn btn-secondary" title="Crear Carpeta" onclick="showCreateFolderModal()">
+      <button class="btn btn-secondary" aria-label="create-folder" title="Crear Carpeta"
+        onclick="showCreateFolderModal()">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="icon icon-tabler icons-tabler-outline icon-tabler-folder-plus">
@@ -157,8 +167,8 @@
           <path d="M19 16v6" />
         </svg>
       </button>
-      <button class="btn btn-secondary" id="btn-folderPermissions" onclick="showCurrentFolderPermissions()"
-        title="Permisos de esta carpeta">
+      <button class="btn btn-secondary" aria-label="permissions-file" id="btn-folderPermissions"
+        onclick="showCurrentFolderPermissions()" title="Permisos de esta carpeta">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff"
           stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="icon icon-tabler icons-tabler-outline icon-tabler-lock">
@@ -168,7 +178,7 @@
           <path d="M8 11v-4a4 4 0 1 1 8 0v4" />
         </svg>
       </button>
-      <button class="btn btn-secondary" id="btn-upload" title="Subir Archivo"
+      <button class="btn btn-secondary" aria-label="upload-files" id="btn-upload" title="Subir Archivo"
         onclick="document.getElementById('fileInput').click()">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -181,7 +191,8 @@
         </svg>
       </button>
       <input type="file" id="fileInput" multiple onchange="uploadFiles(event)" style="display: none;" />
-      <button class="btn btn-music-player" title="CherryJam" id="btn-music-player" onclick="readyPlayerMusic()">
+      <button class="btn btn-music-player" aria-label="music-player" title="CherryJam" id="btn-music-player"
+        onclick="readyPlayerMusic()">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="icon icon-tabler icons-tabler-outline icon-tabler-vinyl">
@@ -249,7 +260,7 @@
       <input type="file" id="fileInput" multiple onchange="uploadFiles(event)" style="display: none;" />
 
       <div class="upload-actions-bar">
-        <button class="btn btn-secondary" onclick="renderFilesTemplate()">
+        <button class="btn btn-secondary" aria-label="return-to-files" onclick="renderFilesTemplate()">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-back-up">
@@ -259,7 +270,7 @@
           </svg>
         </button>
         <div class="dropdown">
-          <a class="dropbtn" style="background-color: transparent;">
+          <a class="btn-dropdown" style="background-color: transparent;">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
               <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
                 <circle cx="8" cy="2.5" r=".75" />
@@ -339,39 +350,41 @@
   <div class="modal" id="createFolderModal">
     <div class="modal-content">
       <div class="modal-header">Nueva Carpeta</div>
-      <form action="" id="create-folder-form">
-        <div class="form-group">
-          <label for="folderNameInput">Nombre de la carpeta:</label>
-          <input type="text" id="folderNameInput" placeholder="Mi carpeta" />
-        </div>
-        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center; gap: 10px">
-          <label for="folderColorInput">Color de la carpeta:</label>
-          <input type="color" id="folderColorInput" placeholder="Mi carpeta" value="#FFE36C" />
-        </div>
-        <div class="modal-actions">
-          <button class="btn" onclick="closeModal(currentModalActive)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-x">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M18 6l-12 12" />
-              <path d="M6 6l12 12" />
-            </svg>
-            <p class="acction-text">Cancelar</p>
-          </button>
-          <button class="btn btn-primary" type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-folder-plus">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M12 19h-7a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v3.5" />
-              <path d="M16 19h6" />
-              <path d="M19 16v6" />
-            </svg>
-            <p class="acction-text">Crear</p>
-          </button>
-        </div>
-      </form>
+      <div class="modal-body">
+        <form action="" id="create-folder-form">
+          <div class="form-group">
+            <label for="folderNameInput">Nombre de la carpeta:</label>
+            <input type="text" id="folderNameInput" placeholder="Mi carpeta" />
+          </div>
+          <div class="form-group" style="display: flex; justify-content: space-between; align-items: center; gap: 10px">
+            <label for="folderColorInput">Color de la carpeta:</label>
+            <input type="color" id="folderColorInput" placeholder="Mi carpeta" value="#FFE36C" />
+          </div>
+          <div class="modal-actions">
+            <button class="btn" aria-label="close-modal" onclick="closeModal(currentModalActive)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M18 6l-12 12" />
+                <path d="M6 6l12 12" />
+              </svg>
+              <p class="acction-text">Cancelar</p>
+            </button>
+            <button class="btn btn-primary" aria-label="confirm-create-folder" type="submit">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-folder-plus">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M12 19h-7a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2h4l3 3h7a2 2 0 0 1 2 2v3.5" />
+                <path d="M16 19h6" />
+                <path d="M19 16v6" />
+              </svg>
+              <p class="acction-text">Crear</p>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -379,40 +392,42 @@
   <div class="modal" id="renameModal">
     <div class="modal-content">
       <div class="modal-header">Renombrar</div>
-      <form action="" id="rename-file-form">
-        <div class="form-group">
-          <label for="renameInput">Nuevo nombre:</label>
-          <input type="text" id="renameInput" />
-        </div>
-        <div id="colorFolderCustom" class="form-group"
-          style="display: flex; justify-content: space-between; align-items: center; gap: 10px">
-          <label for="renameColorInput">Color de la carpeta:</label>
-          <input type="color" id="renameColorInput" placeholder="Mi carpeta" value="#FFE36C" />
-        </div>
-        <div class="modal-actions">
-          <button class="btn" type="button" onclick="closeModal(currentModalActive)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-x">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M18 6l-12 12" />
-              <path d="M6 6l12 12" />
-            </svg>
-            <p class="acction-text">Cancelar</p>
-          </button>
-          <button class="btn btn-primary" type="submit">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
-              <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-              <path d="M14 4l0 4l-6 0l0 -4" />
-            </svg>
-            <p class="acction-text">Guardar</p>
-          </button>
-        </div>
-      </form>
+      <div class="modal-body">
+        <form action="" id="rename-file-form">
+          <div class="form-group">
+            <label for="renameInput">Nuevo nombre:</label>
+            <input type="text" id="renameInput" />
+          </div>
+          <div id="colorFolderCustom" class="form-group"
+            style="display: flex; justify-content: space-between; align-items: center; gap: 10px">
+            <label for="renameColorInput">Color de la carpeta:</label>
+            <input type="color" id="renameColorInput" placeholder="Mi carpeta" value="#FFE36C" />
+          </div>
+          <div class="modal-actions">
+            <button class="btn" aria-label="close-modal" type="button" onclick="closeModal(currentModalActive)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M18 6l-12 12" />
+                <path d="M6 6l12 12" />
+              </svg>
+              <p class="acction-text">Cancelar</p>
+            </button>
+            <button class="btn btn-primary" aria-label="save-rename-file" type="submit">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
+                <path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                <path d="M14 4l0 4l-6 0l0 -4" />
+              </svg>
+              <p class="acction-text">Guardar</p>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -421,39 +436,44 @@
     <div class="modal-content">
       <div class="modal-header">Compartir</div>
       <br>
-      <form id="form-share-time">
+      <div class="modal-body">
+        <form id="form-share-time">
+          <div style="display: flex; align-items: center; gap: 10px;" class="form-group">
+            <select name="selectTimeShare" id="selectTimeShare" aria-label="Selecciona un tiempo límite" required>
+              <option value="">Selecciona un tiempo límite</option>
+              <option value="60000">1 minuto</option>
+              <option value="3600000">1 hora</option>
+              <option value="18000000">5 horas</option>
+              <option value="86400000">1 dia</option>
+              <option value="604800000">1 semana</option>
+              <option value="2592000000">1 mes</option>
+            </select>
+            <button type="submit" aria-label="generate-temporal-url" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
+                <path fill="currentColor"
+                  d="M440.88 129.37 288.16 40.62a64.14 64.14 0 0 0-64.33 0L71.12 129.37a4 4 0 0 0 0 6.9L254 243.85a4 4 0 0 0 4.06 0L440.9 136.27a4 4 0 0 0-.02-6.9M256 152c-13.25 0-24-7.16-24-16s10.75-16 24-16 24 7.16 24 16-10.75 16-24 16m-18 118.81L54 163.48a4 4 0 0 0-6 3.46v173.92a48 48 0 0 0 23.84 41.39L234 479.48a4 4 0 0 0 6-3.46V274.27a4 4 0 0 0-2-3.46M96 368c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24m96-32c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24m266-172.49L274 271.56a4 4 0 0 0-2 3.45V476a4 4 0 0 0 6 3.46l162.15-97.23A48 48 0 0 0 464 340.86V167a4 4 0 0 0-6-3.49M320 424c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24m0-88c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24m96 32c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24m0-88c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24" />
+              </svg>
+            </button>
+          </div>
+        </form>
+        <hr>
+        <br>
         <div style="display: flex; align-items: center; gap: 10px;" class="form-group">
-          <select name="selectTimeShare" id="selectTimeShare" required>
-            <option value="">Selecciona un tiempo límite</option>
-            <option value="60000">1 minuto</option>
-            <option value="3600000">1 hora</option>
-            <option value="18000000">5 horas</option>
-            <option value="86400000">1 dia</option>
-            <option value="604800000">1 semana</option>
-            <option value="2592000000">1 mes</option>
-          </select>
-          <button type="submit" class="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512">
+          <input type="text" id="inputPathShare" aria-label="Enlace para compartir" placeholder="Enlace para compartir"
+            value="" readonly>
+          <button type="button" aria-label="copy-temporal-url" class="btn btn-primary"
+            onclick="copyToClipboard('inputPathShare')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
               <path fill="currentColor"
-                d="M440.88 129.37 288.16 40.62a64.14 64.14 0 0 0-64.33 0L71.12 129.37a4 4 0 0 0 0 6.9L254 243.85a4 4 0 0 0 4.06 0L440.9 136.27a4 4 0 0 0-.02-6.9M256 152c-13.25 0-24-7.16-24-16s10.75-16 24-16 24 7.16 24 16-10.75 16-24 16m-18 118.81L54 163.48a4 4 0 0 0-6 3.46v173.92a48 48 0 0 0 23.84 41.39L234 479.48a4 4 0 0 0 6-3.46V274.27a4 4 0 0 0-2-3.46M96 368c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24m96-32c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24m266-172.49L274 271.56a4 4 0 0 0-2 3.45V476a4 4 0 0 0 6 3.46l162.15-97.23A48 48 0 0 0 464 340.86V167a4 4 0 0 0-6-3.49M320 424c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24m0-88c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24m96 32c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24m0-88c-8.84 0-16-10.75-16-24s7.16-24 16-24 16 10.75 16 24-7.16 24-16 24" />
+                d="M20 2H10c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2m0 12H10V4h10z" />
+              <path fill="currentColor"
+                d="M14 20H4V10h2V8H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-2h-2z" />
             </svg>
           </button>
         </div>
-      </form>
-      <hr>
-      <br>
-      <div style="display: flex; align-items: center; gap: 10px;" class="form-group">
-        <input type="text" id="inputPathShare" placeholder="Enlace para compartir" value="" readonly>
-        <button type="button" class="btn btn-primary" onclick="copyToClipboard('inputPathShare')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
-            <path fill="currentColor"
-              d="M20 2H10c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2m0 12H10V4h10z" />
-            <path fill="currentColor" d="M14 20H4V10h2V8H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-2h-2z" />
-          </svg>
-        </button>
       </div>
       <div class="modal-actions">
-        <button class="btn" type="button" onclick="closeModal(currentModalActive)">
+        <button class="btn" type="button" aria-label="close-modal" onclick="closeModal(currentModalActive)">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="icon icon-tabler icons-tabler-outline icon-tabler-x">
@@ -477,7 +497,7 @@
         <div class="preview-loading"></div>
       </div>
       <div class="modal-actions">
-        <button class="btn" onclick="closeModal(currentModalActive)">
+        <button class="btn" aria-label="closen-modal" onclick="closeModal(currentModalActive)">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="icon icon-tabler icons-tabler-outline icon-tabler-x">
@@ -487,14 +507,14 @@
           </svg>
           <p class="acction-text">Cerrar</p>
         </button>
-        <button class="btn btn-primary" onclick="showShareModal(currentPreviewPath)">
+        <button class="btn btn-primary" aria-label="share-file" onclick="showShareModal(currentPreviewPath)">
           <svg xmlns="http://www.w3.org/2000/svg" width="16.8" height="20" viewBox="0 0 680 810">
             <path fill="currentColor"
               d="M341 537q3 1 4 4t-1 6l-83 83q-20 20-46 32t-53 14t-54-4t-49-25q-27-21-42-51T1 536t9-61t34-54l129-129q31-31 72-46t84-8q38 6 60 22t35 37q2 5-.5 7.5T418 309t-7 6l-7 7q-10 11-24 11t-25.5-11.5T329 304t-31-5t-30 5t-27 18L93 470q-13 13-19 30t-4 34t10 34t26 27q25 17 54 12t49-24l64-63q2-3 6-1q30 13 62 18M619 31q27 21 42 50t17 60t-9 62t-35 54L505 386q-31 31-72 45t-85 8q-38-5-59-22t-35-37q-2-4 1-7l18-18q11-10 25-10t24 10q12 12 27 18t31 6t31-6t26-18l148-147q13-13 19-31t4-35t-11-33t-26-27q-24-16-53-12t-50 25l-63 63q-3 3-6 1q-28-12-62-19q-4 0-4-4t1-5l83-83q20-20 46-32t52-15t54 5t50 25" />
           </svg>
           <p class="acction-text">Compartir</p>
         </button>
-        <button class="btn btn-primary" onclick="downloadFile(currentPreviewPath)">
+        <button class="btn btn-primary" aria-label="download-file" onclick="downloadFile(currentPreviewPath)">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="icon icon-tabler icons-tabler-outline icon-tabler-download">
@@ -511,7 +531,7 @@
 
   <!-- Modal para gestionar permisos -->
   <div class="modal" id="permissionsModal">
-    <div class="modal-content" style="max-width: 500px">
+    <div class="modal-content">
       <div class="modal-header">
         <span style="flex-shrink: 0">Gestionar Permisos: </span>
         <span id="permFileName" style="
@@ -547,7 +567,7 @@
               <option value="MANAGE">MANAGE (Gestionar todo el contenido)</option>
             </select>
           </div>
-          <details style="margin-top: 15px;">
+          <details style="max-width: 500px; margin-top: 15px;">
             <summary style="font-weight: 500; cursor: pointer; margin-bottom: 10px; color: var(--primary, #FF146C);">
               Guía de Permisos y Roles del Sistema
             </summary>
@@ -629,7 +649,7 @@
             </div>
           </details>
           <div class="modal-actions" style="margin-top: 20px">
-            <button class="btn" onclick="closeModal(currentModalActive)">
+            <button class="btn" aria-label="close-modal" onclick="closeModal(currentModalActive)">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-x">
@@ -639,7 +659,7 @@
               </svg>
               <p class="acction-text">Cerrar</p>
             </button>
-            <button class="btn btn-primary" type="submit">
+            <button class="btn btn-primary" aria-label="asign-permission" type="submit">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                 class="icon icon-tabler icons-tabler-outline icon-tabler-user-plus">
@@ -659,20 +679,22 @@
   <div class="modal" id="musicPlayerModal">
     <div class="player-content-image">
       <div class="player-image-container">
-        <img id="playerImageBack" src="public/img/back.png" alt="" class="player-image">
-        <img id="playerImage" src="public/img/back.png" alt="" loading="lazy" class="player-image active">
+        <img id="playerImageBack" src="public/img/back.webp" alt="" width="500" height="500" loading="lazy"
+          decoding="async" class="player-image">
+        <img id="playerImage" src="public/img/back.webp" alt="" width="500" height="500" loading="lazy" decoding="async"
+          class="player-image active">
       </div>
     </div>
     <div class="modal-content-player">
       <div class="modal-header-player">
-        <button id="playMusic" class="btn-player">
+        <button id="playMusic" aria-label="play-music" class="btn-player">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
             class="icon icon-tabler icons-tabler-filled icon-tabler-player-play" viewBox="0 0 24 24">
             <path fill="none" d="M0 0h24v24H0z" />
             <path d="M6 4v16a1 1 0 0 0 1.524.852l13-8a1 1 0 0 0 0-1.704l-13-8A1 1 0 0 0 6 4" />
           </svg>
         </button>
-        <button id="pauseMusic" class="btn-player" style="display: none">
+        <button id="pauseMusic" class="btn-player" aria-label="stop-music" style="display: none">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
             class="icon icon-tabler icons-tabler-filled icon-tabler-player-pause" viewBox="0 0 24 24">
             <path fill="none" d="M0 0h24v24H0z" />
@@ -692,7 +714,7 @@
           <path d="M22 19l-3 -3l-3 3" />
         </svg>
         <div class="volume-container">
-          <input type="range" class="volumeBar" id="volumeBar" value="40" min="0" max="100" />
+          <input type="range" class="volumeBar" id="volumeBar" aria-label="Volumen" value="40" min="0" max="100" />
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             class="icon icon-tabler icons-tabler-outline icon-tabler-volume" viewBox="0 0 24 24">
@@ -706,7 +728,8 @@
         <div class="playlist" id="playlist"></div>
       </div>
       <div class="modal-actions-player">
-        <input type="range" id="progressBar" class="progressMusic" value="0" min="0" max="100" />
+        <input type="range" id="progressBar" aria-label="Progreso de reproducción" class="progressMusic" value="0"
+          min="0" max="100" />
       </div>
     </div>
   </div>
@@ -717,22 +740,23 @@
     <div class="miniplayer-content">
       <div style="display: flex; align-items: center; gap: 10px;">
         <div class="miniplayer-artwork" onclick="readyPlayerMusic()">
-          <img src="public/img/back.png" ondragstart="return false;" alt="Caratula" />
+          <img src="public/img/back.webp" width="40" height="40" loading="lazy" decoding="async"
+            ondragstart="return false;" alt="Caratula" />
         </div>
         <div class="miniplayer-info">
-          <h3 class="miniplayer-title">The Unknown</h3>
+          <h1 class="miniplayer-title">The Unknown</h1>
           <p class="miniplayer-artist">Desconocido</p>
         </div>
       </div>
       <div class="miniplayer-controls">
-        <button class="btn-player" id="miniplayerPlay">
+        <button class="btn-player" aria-label="play-music" id="miniplayerPlay">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
             class="icon icon-tabler icons-tabler-filled icon-tabler-player-play">
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
             <path d="M6 4v16a1 1 0 0 0 1.524 .852l13 -8a1 1 0 0 0 0 -1.704l-13 -8a1 1 0 0 0 -1.524 .852z" />
           </svg>
         </button>
-        <button class="btn-player" id="miniplayerPause" style="display: none">
+        <button class="btn-player" aria-label="stop-music" id="miniplayerPause" style="display: none">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
             class="icon icon-tabler icons-tabler-filled icon-tabler-player-pause">
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -756,23 +780,23 @@
     <p>Suelta tus archivos aquí para subirlos a CherryBox</p>
   </div>
   <div id="toast-container"></div>
-  <script src="public/js/lib/var.js"></script>
-  <script src="public/js/components/logger.js"></script>
-  <script src="public/js/utils/formatBytes.js"></script>
-  <script src="public/js/utils/icons.js"></script>
-  <script src="public/js/utils/helpers.js"></script>
-  <script src="public/js/services/api.service.js"></script>
-  <script src="public/js/utils/formats.js"></script>
-  <script src="public/js/services/permission.service.js"></script>
-  <script src="public/js/services/musicPlayer.service.js"></script>
-  <script src="public/js/components/templates.js"></script>
-  <script src="public/js/components/renderers.js"></script>
-  <script src="public/js/components/ui-logic.js"></script>
-  <script src="public/js/components/info-user.js"></script>
-  <script src="public/js/components/filesManager.js"></script>
-  <script src="public/js/script.js"></script>
-  <script src="public/js/components/toast.js"></script>
-  <script src="public/js/services/logout.service.js"></script>
+  <script defer src="public/js/lib/var.js"></script>
+  <script defer src="public/js/components/logger.js"></script>
+  <script defer src="public/js/utils/formatBytes.js"></script>
+  <script defer src="public/js/utils/icons.js"></script>
+  <script defer src="public/js/utils/helpers.js"></script>
+  <script defer src="public/js/services/api.service.js"></script>
+  <script defer src="public/js/utils/formats.js"></script>
+  <script defer src="public/js/services/permission.service.js"></script>
+  <script defer src="public/js/services/musicPlayer.service.js"></script>
+  <script defer src="public/js/components/templates.js"></script>
+  <script defer src="public/js/components/renderers.js"></script>
+  <script defer src="public/js/components/ui-logic.js"></script>
+  <script defer src="public/js/components/info-user.js"></script>
+  <script defer src="public/js/components/filesManager.js"></script>
+  <script defer src="public/js/script.js"></script>
+  <script defer src="public/js/components/toast.js"></script>
+  <script defer src="public/js/services/logout.service.js"></script>
 </body>
 
 </html>

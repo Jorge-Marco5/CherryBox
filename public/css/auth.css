@@ -1,9 +1,7 @@
-@import url('header.css');
-@import url('toast.css');
-
 @font-face {
     font-family: "Geist";
     src: url(../fonts/Geist-Regular.ttf) format("truetype");
+    font-display: swap;
 }
 
 :root {
@@ -17,7 +15,7 @@
     --input-bg: #252525;
     --glass: rgba(26, 26, 26, 0.8);
     --font: "Geist", sans-serif;
-}   
+}
 
 * {
     margin: 0;
@@ -27,16 +25,27 @@
 
 body {
     font-family: var(--font);
-    background: var(--bg-dark);
-    background-image:
-        radial-gradient(at 0% 0%, rgba(210, 4, 45, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(128, 0, 32, 0.1) 0px, transparent 50%);
+    font-style: normal;
     color: var(--text);
     min-height: 100vh;
+    width: 100vw;
+    padding: 10px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    padding: 15px;
+    justify-content: center;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url(../img/background-main.webp) center / cover no-repeat;
+    z-index: -1;
+    pointer-events: none;
 }
 
 .container {

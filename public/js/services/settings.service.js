@@ -1,3 +1,4 @@
+const API_URL = "/api";
 document.addEventListener("DOMContentLoaded", () => {
     const formSettings = document.getElementById("form-settings");
     const baseDir = document.getElementById("baseDir");
@@ -10,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function getSettings() {
         try {
-            const response = await axios.get("/api/getSettings");
+            const response = await axios.get(`${API_URL}/getSettings`);
             limitStorage.value = response.data.limitStorage;
             baseDir.value = response.data.baseDir;
             maxFileSize.value = response.data.maxFileSize;
@@ -64,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             try {
                 // Guardar Límite de Almacenamiento
-                await axios.post("/api/setSettings", {
+                await axios.post(`${API_URL}/setSettings`, {
                     setting: "BASE_DIR",
                     value: baseDir.value
                 }, { silent: true });
@@ -82,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             try {
                 // Guardar Límite de Almacenamiento
-                await axios.post("/api/setSettings", {
+                await axios.post(`${API_URL}/setSettings`, {
                     setting: "LIMIT_STORAGE",
                     value: limitStorage.value
                 }, { silent: true });
@@ -100,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             try {
                 // Guardar Límite de Tamaño de Archivo
-                await axios.post("/api/setSettings", {
+                await axios.post(`${API_URL}/setSettings`, {
                     setting: "MAX_FILE_SIZE",
                     value: maxFileSize.value
                 }, { silent: true });
@@ -118,7 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             try {
                 // Guardar Límite de Archivos
-                await axios.post("/api/setSettings", {
+                await axios.post(`${API_URL}/setSettings`, {
                     setting: "MAX_FILES",
                     value: maxFiles.value
                 }, { silent: true });
@@ -138,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             btn.disabled = true;
             btn.innerHTML = '<span class="loader"></span> Sincronizando...';
-            const response = await axios.post("/api/sync", {}, { silent: true });
+            const response = await axios.post(`${API_URL}/sync`, {}, { silent: true });
             showToast(response.data.message, 'success');
         } catch (error) {
             showToast(error.response?.data?.error || "Error en la sincronización", 'error');
@@ -154,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             btn.disabled = true;
             btn.innerHTML = '<span class="loader"></span> Analizando...';
-            const response = await axios.post("/api/analyzeFiles", {}, { silent: true });
+            const response = await axios.post(`${API_URL}/analyzeFiles`, {}, { silent: true });
             showToast(response.data.message, 'info');
         } catch (error) {
             showToast(error.response?.data?.error || "Error en el análisis", 'error');

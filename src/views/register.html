@@ -6,18 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - CherryBox</title>
     <link rel="icon" type="image/svg+xml" href="public/cherries.svg">
+    <link rel="preload" href="public/fonts/Geist-Regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="public/css/header.css">
     <link rel="stylesheet" href="public/css/auth.css">
-    <script src="public/js/lib/axios.min.js"></script>
+    <link rel="stylesheet" href="public/css/toast.css" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="public/css/toast.css">
+    </noscript>
+    <script defer src="public/js/lib/axios.min.js"></script>
 </head>
 
 <body>
-    <div class="container">
+    <main class="container">
         <div class="header">
             <div class="icon" onclick="window.location.href='/'">
                 <h1>CherryBox</h1>
                 <img src="public/cherries.svg" alt="CherryBox" width="50" height="50">
             </div>
-            <button title="Ir atras" class="btn btn-primary"
+            <button title="Ir atras" aria-label="Ir atrás" class="btn btn-primary"
                 style="max-width: 50px; max-height: 50px; border: 1px solid #bebebe; display: flex; justify-content: center; align-items: center;"
                 onclick="window.location.href='/users'">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -30,7 +36,7 @@
         </div>
         <div class="auth-container">
             <div class="image">
-                <img src="public/img/back.png" alt="CherryBox">
+                <img src="public/img/back.webp" alt="CherryBox" width="600" height="338" decoding="async">
             </div>
             <div class="form-wrapper">
                 <h2>Crear Cuenta</h2>
@@ -52,7 +58,8 @@
                         <div class="input-group">
                             <input type="password" name="passwordConfirm" id="passwordConfirm" placeholder="••••••••"
                                 oninput="validatePass()" required>
-                            <button type="button" class="toggle-password" id="toggleAll" onclick="toggleAllPasswords()">
+                            <button type="button" class="toggle-password" id="toggleAll"
+                                aria-label="Mostrar u ocultar contraseña" onclick="toggleAllPasswords()">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round"
@@ -70,11 +77,11 @@
                 </form>
             </div>
         </div>
-    </div>
+    </main>
     <div id="toast-container"></div>
-    <script src="public/js/components/logger.js"></script>
-    <script src="public/js/components/toast.js"></script>
-    <script src="public/js/services/auth.service.js"></script>
+    <script defer src="public/js/components/logger.js"></script>
+    <script defer src="public/js/components/toast.js"></script>
+    <script defer src="public/js/services/auth.service.js"></script>
 </body>
 
 </html>

@@ -6,7 +6,7 @@
 }
 
 /* Estilo del botón */
-.dropbtn {
+.btn-dropdown {
     background-color: #2a2a2a;
     display: flex;
     align-items: center;
@@ -93,6 +93,6 @@
     display: block;
 }
 
-.dropdown:hover .dropbtn {
+.dropdown:hover .btn-dropdown {
     background-color: #333;
 }

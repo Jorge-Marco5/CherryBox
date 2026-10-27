@@ -128,13 +128,17 @@ TemplateManager.register("files", {
             window.filesManager.loadFiles(targetPath);
         }
 
+        const adminActions = document.getElementById("admin-actions");
+        if (adminActions && window.user && window.user.role !== "ADMIN" && window.user.role !== "SUPERADMIN") {
+            adminActions.style.display = "none";
+        }
+
         if (window.UILogic && typeof window.UILogic.setupDragAndDrop === "function") {
             window.UILogic.setupDragAndDrop();
         }
 
         const btnRefreshFiles = document.getElementById("btnRefreshFiles");
-        console.log(btnRefreshFiles);
-            if(btnRefreshFiles){
+        if (btnRefreshFiles) {
             btnRefreshFiles.addEventListener('click', (e) => {
                 e.preventDefault();
                 showToast("Carpeta actualizada", "info");

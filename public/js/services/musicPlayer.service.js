@@ -10,7 +10,7 @@ class MusicPlayerService {
     this.playlist = [];
     this.currentIndex = -1;
     this.isPlaying = false;
-    this.currentArtworkUrl = "public/img/back.png";
+    this.currentArtworkUrl = "public/img/back.webp";
 
     this.playBtn = null;
     this.pauseBtn = null;
@@ -189,7 +189,7 @@ class MusicPlayerService {
   }
 
   async updateCaratuleBackground(artworkSrc) {
-    const targetSrc = artworkSrc || "public/img/back.png";
+    const targetSrc = artworkSrc || "public/img/back.webp";
     const imgFront = document.getElementById("playerImage");
     const imgBack = document.getElementById("playerImageBack");
 
@@ -217,7 +217,7 @@ class MusicPlayerService {
       currentActive.classList.remove("active");
     };
     tempImg.onerror = () => {
-      currentInactive.src = "public/img/back.png";
+      currentInactive.src = "public/img/back.webp";
       currentInactive.classList.add("active");
       currentActive.classList.remove("active");
     };
@@ -246,7 +246,7 @@ class MusicPlayerService {
       }
     }
 
-    this.currentArtworkUrl = artworkUrl || "public/img/back.png";
+    this.currentArtworkUrl = artworkUrl || "public/img/back.webp";
 
     const currentTrack = this.playlist[this.currentIndex];
     const fallbackTitle = currentTrack?.name ? currentTrack.name.replace(/\.[^/.]+$/, "") : "Título Desconocido";
@@ -254,7 +254,7 @@ class MusicPlayerService {
     metadata.title = tags.title || fallbackTitle;
     metadata.artist = tags.artist || "Artista Desconocido";
     metadata.album = tags.album || "Álbum Desconocido";
-    metadata.artwork = artworkBase64 || "public/img/back.png"
+    metadata.artwork = artworkBase64 || "public/img/back.webp"
       ? [
         {
           src: artworkBase64,
@@ -286,7 +286,7 @@ class MusicPlayerService {
     });
 
     this.updateMediaSessionPlaybackState();
-    this.currentArtworkUrl = "public/img/back.png";
+    this.currentArtworkUrl = "public/img/back.webp";
   }
 
   updateMediaSessionPlaybackState() {
@@ -418,28 +418,8 @@ class MusicPlayerService {
       this.miniArtist.textContent = metadata.artist || "Artista Desconocido";
     }
     if (this.miniImg) {
-      this.miniImg.src = metadata.artworkUrl || "public/img/back.png";
+      this.miniImg.src = metadata.artworkUrl || "public/img/back.webp";
     }
-  }
-
-  //destructor
-  destroyMusicPlayer() {
-    if (this.currentArtworkUrl && this.currentArtworkUrl.startsWith("blob:")) {
-      URL.revokeObjectURL(this.currentArtworkUrl);
-    }
-    this.playlist = [];
-    this.currentIndex = -1;
-    this.isPlaying = false;
-    this.currentArtworkUrl = "public/img/back.png";
-
-    this.playBtn = null;
-    this.pauseBtn = null;
-    this.progressBar = null;
-    this.volumeBar = null;
-
-    this.cherryJamActive = false;
-
-    this.progressInterval = null;
   }
 
 }
@@ -448,7 +428,7 @@ class MusicPlayerService {
 const MusicPlayer = new MusicPlayerService();
 
 // Funciones auxiliares
-function containsOnlyOneMusicFile(files) {
+const containsOnlyOneMusicFile = (files) => {
   return files.some(
     (file) => file.type === "file" && audioPlayerExts.includes("." + file.name.split(".").pop().toLowerCase()),
   );

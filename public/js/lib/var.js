@@ -11,9 +11,31 @@ let activeUploads = [];
 let uploadHistory = [];
 let currentModalActive = '';
 
+//url actual
 const urlPath = window.location.pathname;
 
-/*
-mock
-{ "id": "upl-1789688858360-0-dkkv", "file": {}, "name": "Age-of-Mythology-Extended-Edition-unpackgames.com.7z", "size": 1947171482, "status": "error", "loaded": 1947171726, "percent": 100, "controller": {}, "folder": "", "error": "El archivo excede el límite de tamaño (500MB)", "timestamp": 1789688858361 }, { "id": "upl-1789689101656-0-ggls", "file": {}, "name": "22.pdf", "size": 214297, "status": "uploading", "loaded": 0, "percent": 0, "controller": {}, "folder": "", "error": null, "timestamp": 1789689101657 }, { "id": "upl-1789689101656-0-ggls", "file": {}, "name": "22.pdf", "size": 214297, "status": "completed", "loaded": 214297, "percent": 100, "controller": {}, "folder": "", "error": null, "timestamp": 1789689101657 }
-*/
+//retorna el tipo de dispositivo [movil, tablet, desktop]
+const DeviceType = () => {
+    const userAgent = navigator.userAgent;
+    if (
+        userAgent.match(/Android/i) ||
+        userAgent.match(/webOS/i) ||
+        userAgent.match(/iPhone/i) ||
+        userAgent.match(/iPad/i) ||
+        userAgent.match(/iPod/i)
+    ) {
+        return "movil";
+    } else if (userAgent.match(/iPad/i) || userAgent.match(/Macintosh/i)) {
+        return "tablet";
+    } else {
+        return "desktop";
+    }
+}
+
+//formatos de archivos de localStorage
+const codeExts = localStorage.getItem("codeExts") ? JSON.parse(localStorage.getItem("codeExts")) : [];
+const textExts = localStorage.getItem("textExts") ? JSON.parse(localStorage.getItem("textExts")) : [];
+const imageExts = localStorage.getItem("imageExts") ? JSON.parse(localStorage.getItem("imageExts")) : [];
+const videoExts = localStorage.getItem("videoExts") ? JSON.parse(localStorage.getItem("videoExts")) : [];
+const audioExts = localStorage.getItem("audioExts") ? JSON.parse(localStorage.getItem("audioExts")) : [];
+const pdfExts = localStorage.getItem("pdfExts") ? JSON.parse(localStorage.getItem("pdfExts")) : [];

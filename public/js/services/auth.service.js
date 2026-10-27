@@ -1,3 +1,4 @@
+const API_URL = '/api';
 // Manejo de formulario de Login
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
@@ -7,7 +8,7 @@ if (loginForm) {
         const password = document.getElementById('password').value;
 
         try {
-            const response = await axios.post('/api/auth/login', { email, password });
+            const response = await axios.post(`${API_URL}/auth/login`, { email, password });
             //guardar datos basicos de usuario en localStorage
             localStorage.setItem('user', JSON.stringify(response.data.user));
             window.location.href = '/';
@@ -34,7 +35,7 @@ if (registerForm) {
         }
 
         try {
-            const res = await axios.post('/api/auth/register', { email, password }, { silent: true });
+            const res = await axios.post(`${API_URL}/auth/register`, { email, password }, { silent: true });
             showToast(res.data.message || 'Usuario registrado exitosamente', 'success');
             registerForm.reset();
         } catch (error) {

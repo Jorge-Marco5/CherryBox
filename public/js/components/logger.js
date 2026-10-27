@@ -27,11 +27,16 @@ if (user) {
     const adminActions = document.getElementById('admin-actions');
     if (adminActions && user.role !== 'ADMIN' && user.role !== 'SUPERADMIN') {
         adminActions.style.display = 'none';
+    } else if (user.role !== 'ADMIN' && user.role !== 'SUPERADMIN') {
+        const tmplFiles = document.getElementById('tmpl-files');
+        const tmplAdminActions = tmplFiles?.content?.getElementById('admin-actions');
+        if (tmplAdminActions) {
+            tmplAdminActions.style.display = 'none';
+        }
     }
 } else if (isAdminPage) {
     window.location.href = '/login';
 }
-
 
 // Interceptor global para errores
 axios.interceptors.response.use(

@@ -6,21 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CherryBox - Administrador de Archivos</title>
     <link rel="icon" type="image/svg+xml" href="public/cherries.svg">
+    <link rel="preload" href="public/fonts/Geist-Regular.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="public/css/header.css">
     <link rel="stylesheet" href="public/css/styles.css">
+    <link rel="stylesheet" href="public/css/dropdown.css">
     <link rel="stylesheet" href="public/css/logs.css">
-    <script src="public/js/lib/axios.min.js"></script>
+    <link rel="stylesheet" href="public/css/toast.css" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="public/css/toast.css">
+    </noscript>
+    <script defer src="public/js/lib/axios.min.js"></script>
 </head>
 
 <body>
-    <div class="container">
+    <main class="container">
         <div class="header">
             <div class="icon" onclick="window.location.href='/'">
                 <h1>CherryBox</h1>
                 <img src="public/cherries.svg" alt="CherryBox" width="50" height="50">
             </div>
-            <button class="btn btn-primary" style="border: solid 1px #bebebe;" onclick="logout()"><svg
-                    xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            <button class="btn btn-primary" aria-label="Cerrar sesión" style="border: solid 1px #bebebe;"
+                onclick="logout()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-logout">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
@@ -44,7 +51,7 @@
                     <h1 class="title">Usuarios</h1>
                 </div>
                 <div class="dropdown">
-                    <button class="dropbtn">
+                    <button class="btn-dropdown">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                             stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                             class="icon icon-tabler icons-tabler-outline icon-tabler-dots-circle-horizontal">
@@ -114,8 +121,7 @@
             <table id="users" class="supabase-table">
             </table>
         </div>
-    </div>
-    </div>
+    </main>
 
     <!-- Modal para Editar Usuario -->
     <div id="editUserModal" class="modal">
@@ -147,13 +153,11 @@
     </div>
     <p id="userId" style="position: fixed; bottom: 5px; left: 5px; color: white; font-size: 0.7rem;">-</p>
     <div id="toast-container"></div>
-    <script src="public/js/lib/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
-    <script src="public/js/components/logger.js"></script>
-    <script src="public/js/components/toast.js"></script>
-    <script src="public/js/services/users.service.js"></script>
-    <script src="public/js/services/logout.service.js"></script>
-    <script src="public/js/components/info-user.js"></script>
+    <script defer src="public/js/components/logger.js"></script>
+    <script defer src="public/js/components/toast.js"></script>
+    <script defer src="public/js/services/users.service.js"></script>
+    <script defer src="public/js/services/logout.service.js"></script>
+    <script defer src="public/js/components/info-user.js"></script>
 </body>
 
 </html>

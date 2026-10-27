@@ -1,3 +1,4 @@
+const API_URL = "/api";
 document.addEventListener("DOMContentLoaded", () => {
     const usersTable = document.getElementById("users");
     const editUserModal = document.getElementById("editUserModal");
@@ -18,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function updateUsers() {
         try {
-            const response = await axios.get("/api/users");
+            const response = await axios.get(`${API_URL}/users`);
             const tbody = usersTable.querySelector("tbody");
             tbody.innerHTML = "";
 
@@ -94,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.toggleBlock = async (id) => {
         try {
-            await axios.patch(`/api/users/${id}/block`);
+            await axios.patch(`${API_URL}/users/${id}/block`);
             updateUsers();
         } catch (error) {
             showToast(error.response.data.error || "Error al cambiar estado de bloqueo", 'error');
@@ -104,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.toggleRole = async (id, currentRole) => {
         const newRole = currentRole === 'ADMIN' ? 'USER' : 'ADMIN';
         try {
-            await axios.patch(`/api/users/${id}/role`, { role: newRole });
+            await axios.patch(`${API_URL}/users/${id}/role`, { role: newRole });
             updateUsers();
         } catch (error) {
             showToast(error.response.data.error || "Error al cambiar el rol", 'error');
@@ -114,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.confirmDelete = async (id) => {
         if (confirm("¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.")) {
             try {
-                await axios.delete(`/api/users/${id}`);
+                await axios.delete(`${API_URL}/users/${id}`);
                 updateUsers();
             } catch (error) {
                 showToast(error.response.data.error || "Error al eliminar usuario", 'error');
@@ -131,10 +132,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             if (email) {
-                await axios.put(`/api/users/${id}`, { email });
+                await axios.put(`${API_URL}/users/${id}`, { email });
             }
             if (role) {
-                await axios.patch(`/api/users/${id}/role`, { role });
+                await axios.patch(`${API_URL}/users/${id}/role`, { role });
             }
             closeEditModal();
             updateUsers();

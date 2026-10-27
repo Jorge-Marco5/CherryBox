@@ -52,7 +52,7 @@ const Renderers = {
     // Fila inicial con checkbox para seleccionar todos
     fileList.innerHTML = `
             <div class="file-item" style="position: sticky; top: 0; z-index: 10; background: #1E1E1E;">
-                <input type="checkbox" class="file-checkbox" id="checkbox-all" onchange="toggleSelectAll(this)">
+                <input type="checkbox" class="file-checkbox" id="checkbox-all" aria-label="Seleccionar todos los archivos" onchange="toggleSelectAll(this)">
                 <label for="checkbox-all" class="checkbox-label"><div class="file-icon"></div></label>
                 <div class="file-info">
                     <div class="file-name" style="font-weight: 600;"></div>
@@ -76,6 +76,7 @@ const Renderers = {
         const folderColor = escapeJS(file.folder_color);
         const escId = escapeJS(file.id);
         const attrPath = escapeHTML(file.path);
+        const attrName = escapeHTML(file.name);
         const attrType = escapeHTML(file.type);
 
         //Imagenes y videos se renderizan en el mansory
@@ -86,8 +87,8 @@ const Renderers = {
 
         return `
                 <div class="file-item" onclick="${isFolder ? `navigateTo('${escPath}')` : `previewFile('${escPath}', '${escName}')`}">
-                    <input onchange="updateSelectionButtons()" type="checkbox" id="checkbox-${attrPath}" class="file-checkbox" data-type="${attrType}" data-path="${attrPath}" onclick="event.stopPropagation();">
-                    <label for="checkbox-${attrPath}" class="checkbox-label">
+                    <input onchange="updateSelectionButtons()" type="checkbox" id="checkbox-${attrPath}" aria-label="Seleccionar ${attrName}" class="file-checkbox" data-type="${attrType}" data-path="${attrPath}" onclick="event.stopPropagation();">
+                    <label for="checkbox-${attrPath}" class="checkbox-label" onclick=" event.stopPropagation();">
                         <div class="file-icon">${icon}</div>
                     </label>
                     <div class="file-info">
@@ -221,6 +222,7 @@ const Renderers = {
     img.src = escPath;
     img.alt = escName;
     img.loading = "lazy";
+    img.decoding = "async";
     img.draggable = false;
     img.setAttribute("draggable", "false");
     img.ondragstart = (e) => { e.preventDefault(); return false; };
@@ -236,7 +238,7 @@ const Renderers = {
     item.innerHTML += `
       <div class="image-actions">
         <div class="selector-image">
-          <input onchange="updateSelectionButtons()" type="checkbox" id="checkbox-${attrPath}" class="file-checkbox" data-type="image" data-path="${attrPath}" onclick="event.stopPropagation();">
+          <input onchange="updateSelectionButtons()" type="checkbox" id="checkbox-${attrPath}" aria-label="Seleccionar ${escName}" class="file-checkbox" data-type="image" data-path="${attrPath}" onclick="event.stopPropagation();">
         </div>
         <div class="image-buttons">
           <button class="icon-btn" onclick="event.stopPropagation(); showPermissionsModal('${file.id}', '${escName}')" title="Permisos">
@@ -270,6 +272,7 @@ const Renderers = {
     img.src = escPath;
     img.alt = escName;
     img.loading = "lazy";
+    img.decoding = "async";
     img.draggable = false;
     img.setAttribute("draggable", "false");
     img.ondragstart = (e) => { e.preventDefault(); return false; };
@@ -289,7 +292,7 @@ const Renderers = {
       </div>
       <div class="image-actions">
         <div class="selector-image">
-          <input onchange="updateSelectionButtons()" type="checkbox" id="checkbox-${attrPath}" class="file-checkbox" data-type="image" data-path="${attrPath}" onclick="event.stopPropagation();">
+          <input onchange="updateSelectionButtons()" type="checkbox" id="checkbox-${attrPath}" aria-label="Seleccionar ${escName}" class="file-checkbox" data-type="image" data-path="${attrPath}" onclick="event.stopPropagation();">
         </div>
         <div class="image-buttons">
           <button class="icon-btn" onclick="event.stopPropagation(); showPermissionsModal(null, '${escName}')" title="Permisos">
@@ -338,16 +341,6 @@ const Renderers = {
       checkboxAll.indeterminate = checkedCount > 0 && checkedCount < totalCount;
     }
   }
-};
-
-window.onload = () => {
-  const elem = document.querySelector('.image-list');
-  const msnry = new Masonry(elem, {
-    itemSelector: '.image-file',
-    columnWidth: '.image-file',
-    percentPosition: true,
-    gutter: 10 // Espaciado entre columnas
-  });
 };
 
 window.Renderers = Renderers;

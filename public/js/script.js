@@ -661,7 +661,7 @@ window.getStorage = getStorage;
 window.showCurrentFolderPermissions = showCurrentFolderPermissions;
 
 // Inicialización de la vista principal con TemplateManager
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   try {
     if (window.TemplateManager) {
       if (urlPath === "/") {
@@ -670,8 +670,8 @@ document.addEventListener('DOMContentLoaded', () => {
         TemplateManager.render(urlPath.replace("/", ""));
       }
     } else if (document.getElementById("fileList")) {
-      filesManager.loadFiles();
-      UILogic.setupDragAndDrop();
+      await filesManager.loadFiles();
+      await UILogic.setupDragAndDrop();
     }
   } catch (error) {
     showToast("Error al iniciar...", "warning");

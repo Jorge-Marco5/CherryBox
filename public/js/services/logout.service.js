@@ -1,6 +1,6 @@
 async function logout() {
     try {
-        await axios.post('/api/auth/logout');
+        await axios.post(`${API_URL}/auth/logout`);
         localStorage.removeItem('user');
         window.location.href = '/login';
     } catch (error) {

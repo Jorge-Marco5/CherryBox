@@ -1,43 +1,3 @@
-//formatos de archivos de localStorage
-const codeExts = localStorage.getItem("codeExts") ? JSON.parse(localStorage.getItem("codeExts")) : [];
-const textExts = localStorage.getItem("textExts") ? JSON.parse(localStorage.getItem("textExts")) : [];
-const imageExts = localStorage.getItem("imageExts") ? JSON.parse(localStorage.getItem("imageExts")) : [];
-const videoExts = localStorage.getItem("videoExts") ? JSON.parse(localStorage.getItem("videoExts")) : [];
-const audioExts = localStorage.getItem("audioExts") ? JSON.parse(localStorage.getItem("audioExts")) : [];
-const pdfExts = localStorage.getItem("pdfExts") ? JSON.parse(localStorage.getItem("pdfExts")) : [];
-
-//retorna el tipo de dispositivo [movil, tablet, desktop]
-function getTypeDevice() {
-  const userAgent = navigator.userAgent;
-  if (
-    userAgent.match(/Android/i) ||
-    userAgent.match(/webOS/i) ||
-    userAgent.match(/iPhone/i) ||
-    userAgent.match(/iPad/i) ||
-    userAgent.match(/iPod/i)
-  ) {
-    return "movil";
-  } else if (userAgent.match(/iPad/i) || userAgent.match(/Macintosh/i)) {
-    return "tablet";
-  } else {
-    return "desktop";
-  }
-}
-
-// Carga dinámica de scripts externos
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) {
-      return resolve();
-    }
-    const script = document.createElement("script");
-    script.src = src;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-}
-
 /**
  * Lógica de interfaz de usuario, modales y previsualización.
  */
@@ -89,8 +49,8 @@ const PREVIEW_STRATEGIES = [
     },
     async render(path, name, ext, contentUrl, container) {
       MusicPlayer.pause();
-        container.innerHTML = `<video controls preload="metadata" controlsList="nodownload"><source src="${contentUrl}" type="video/${ext}"></video>`;
-      
+      container.innerHTML = `<video controls preload="metadata" controlsList="nodownload"><source src="${contentUrl}" type="video/${ext}"></video>`;
+
     },
   },
   {
@@ -113,8 +73,6 @@ const PREVIEW_STRATEGIES = [
       return "preview-pdf";
     },
     async render(path, name, ext, contentUrl, container) {
-      const device = getTypeDevice();
-      const isMobile = device === "movil";
 
       if (navigator.onLine) {
         // Desktop/Tablet + Online: Usar pdfjs-viewer-element (Funciones Completas)
