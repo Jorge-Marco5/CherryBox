@@ -497,7 +497,7 @@
         <div class="preview-loading"></div>
       </div>
       <div class="modal-actions">
-        <button class="btn" aria-label="closen-modal" onclick="closeModal(currentModalActive)">
+        <button class="btn" aria-label="close-modal" onclick="closeModal(currentModalActive)">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="icon icon-tabler icons-tabler-outline icon-tabler-x">
@@ -729,9 +729,6 @@
       </div>
     </div>
   </div>
-  <p id="userId" style="position: fixed; bottom: 5px; left: 5px; color: white; font-size: 0.7rem">
-    -
-  </p>
   <div class="miniplayer" id="miniplayer">
     <div class="miniplayer-content">
       <div style="display: flex; align-items: center; gap: 10px;">
@@ -772,6 +769,26 @@
       </div>
     </div>
   </div>
+  <!-- Modal para renombrar -->
+  <div class="modal" id="info-user-modal">
+    <div class="modal-content">
+      <div class="modal-header">Mi perfil</div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" aria-label="close-modal" onclick="closeModal(currentModalActive)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            class="icon icon-tabler icons-tabler-outline icon-tabler-check" viewBox="0 0 24 24">
+            <path fill="none" stroke="none" d="M0 0h24v24H0z" />
+            <path d="m5 12 5 5L20 7" />
+          </svg>
+          <p class="acction-text">Aceptar</p>
+        </button>
+      </div>
+    </div>
+  </div>
+  <p id="userId" style="position: fixed; bottom: 5px; left: 5px; color: white; font-size: 0.7rem">-</p>
   <div id="drop-overlay">
     <p>Suelta tus archivos aquí para subirlos a CherryBox</p>
   </div>
