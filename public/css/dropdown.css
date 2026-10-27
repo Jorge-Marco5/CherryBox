@@ -28,7 +28,7 @@
     background-color: var(--card-bg, #1e1e1e);
     min-width: 180px;
     box-shadow: 0px 8px 20px 0px rgba(0, 0, 0, 0.35);
-    z-index: 1000;
+    z-index: 9999;
     border-radius: 10px;
     border: 1px solid #333;
     overflow: hidden;

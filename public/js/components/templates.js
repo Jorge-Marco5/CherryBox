@@ -127,6 +127,9 @@ TemplateManager.register("files", {
         if (typeof window.filesManager.loadFiles === "function") {
             window.filesManager.loadFiles(targetPath);
         }
+        if (typeof window.updateUploadIndicators === "function") {
+            window.updateUploadIndicators(false, false);
+        }
 
         const adminActions = document.getElementById("admin-actions");
         if (adminActions && window.user && window.user.role !== "ADMIN" && window.user.role !== "SUPERADMIN") {
@@ -169,6 +172,10 @@ TemplateManager.register("uploads", {
         if (typeof window.renderUploadManagerView === "function") {
             window.renderUploadManagerView();
         }
+        const activeUploadToast = document.getElementById("active-upload-toast");
+        if (activeUploadToast) {
+            activeUploadToast.style.display = "none";
+        }
 
         // Configurar soporte drag & drop directo en la zona de subida
         const uploadArea = document.getElementById("uploadArea");
@@ -191,7 +198,7 @@ TemplateManager.register("uploads", {
 
                 if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                     if (typeof window.uploadFilesProcess === "function") {
-                        window.uploadFilesProcess(e.dataTransfer.files);
+                        window.uploadFilesProcess(Array.from(e.dataTransfer.files));
                     }
                 }
             });
@@ -214,6 +221,9 @@ window.renderUploadTemplate = function () {
 
 window.navigateTo = function (path) {
     window.location.pathname !== "/" ? history.pushState({}, '', '/') : null;
+    if (TemplateManager.currentView === "files" && document.getElementById("fileList")) {
+        return window.filesManager.loadFiles(path);
+    }
     return TemplateManager.render("files", { path });
 };
 

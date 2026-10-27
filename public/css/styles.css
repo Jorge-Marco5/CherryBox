@@ -1247,12 +1247,6 @@ body::before {
     border: 1px solid #333;
 }
 
-@media (max-width: 768px) {
-    .card-storage {
-        display: none;
-    }
-}
-
 .bar-storage-info {
     display: flex;
     justify-content: space-between;
@@ -1380,7 +1374,7 @@ input[type="search"]::-webkit-search-cancel-button {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     z-index: 9999;
