@@ -135,7 +135,6 @@
     color: #FF146C;
 }
 
-/* Estilo general de los inputs de rango (Sliderrs) */
 .progressMusic,
 .volumeBar {
     -webkit-appearance: none;
@@ -146,7 +145,6 @@
     outline: none;
 }
 
-/* Pista (Track) - Webkit */
 .progressMusic::-webkit-slider-runnable-track,
 .volumeBar::-webkit-slider-runnable-track {
     background: transparent;
@@ -154,7 +152,6 @@
     border-radius: 10px;
 }
 
-/* Pista (Track) - Firefox */
 .progressMusic::-moz-range-track,
 .volumeBar::-moz-range-track {
     background: transparent;
@@ -162,7 +159,6 @@
     border-radius: 10px;
 }
 
-/* Pulgar (Thumb) - Webkit */
 .progressMusic::-webkit-slider-thumb,
 .volumeBar::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -171,13 +167,11 @@
     background: #FF146C;
     border-radius: 50%;
     margin-top: -6px;
-    /* Centrado: (track_height/2 - thumb_height/2) */
     box-shadow: 0 0 8px rgba(255, 20, 108, 0.5);
     transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: none;
 }
 
-/* Pulgar (Thumb) - Firefox */
 .progressMusic::-moz-range-thumb,
 .volumeBar::-moz-range-thumb {
     height: 18px;
@@ -189,7 +183,6 @@
     transition: transform 0.2s ease;
 }
 
-/* Estados Hover y Active */
 .progressMusic:hover::-webkit-slider-runnable-track,
 .volumeBar:hover::-webkit-slider-runnable-track {
     background: rgba(238, 238, 238, 0.25);
@@ -230,19 +223,16 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     z-index: 1000;
     left: -320px;
-    /* Totalmente fuera de pantalla por defecto */
     transition: left 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), border-radius 0.35s ease;
 }
 
 .miniplayer.hide {
     left: -250px;
-    /* Oculto parcialmente dejando el grip visible */
     border-radius: 0 10px 10px 0;
 }
 
 .miniplayer.show {
     left: 10px;
-    /* Totalmente visible */
     border-radius: 10px;
 }
 

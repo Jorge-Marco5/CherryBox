@@ -246,7 +246,6 @@ body::before {
     gap: 10px;
 }
 
-/* Galería Masonry estilo Pinterest */
 .image-list {
     width: 100%;
     margin: 0 auto;
@@ -254,11 +253,10 @@ body::before {
     box-sizing: border-box;
 }
 
-/* Sizers y elementos de imagen con columnas adaptativas según pantalla */
 .grid-sizer,
 .image-file {
     width: calc(50% - 8px);
-    /* 2 columnas en móviles (<540px) */
+
     margin-bottom: 16px;
     box-sizing: border-box;
 }
@@ -267,7 +265,6 @@ body::before {
     width: 16px;
 }
 
-/* 3 columnas en móviles grandes / phablets */
 @media (min-width: 540px) {
 
     .grid-sizer,
@@ -276,7 +273,6 @@ body::before {
     }
 }
 
-/* 4 columnas en tablets */
 @media (min-width: 768px) {
     .file-item {
         padding: 15px;
@@ -288,7 +284,6 @@ body::before {
     }
 }
 
-/* 5 columnas en escritorios */
 @media (min-width: 1200px) {
 
     .grid-sizer,
@@ -297,7 +292,6 @@ body::before {
     }
 }
 
-/* 6 columnas en pantallas ultrawide */
 @media (min-width: 1600px) {
 
     .grid-sizer,
@@ -495,7 +489,6 @@ body::before {
     background: #444;
 }
 
-/* Ocultar texto en móviles para botones de acciones */
 @media (max-width: 767px) {
     .icon-btn {
         padding: 8px;
@@ -563,7 +556,6 @@ body::before {
     }
 }
 
-/* Estilos específicos para el modal de preview */
 .modal-content.preview-modal {
     width: auto;
     display: inline-flex;
@@ -574,7 +566,6 @@ body::before {
         opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/**Skeleton de cargando vista previa**/
 .preview-loading {
     width: 300px;
     height: 100px;
@@ -598,7 +589,6 @@ body::before {
 }
 
 
-/* En móviles/tablets, asegurar que ocupen casi todo el ancho */
 .modal.preview-pdf .modal-content.preview-modal,
 .modal.preview-text .modal.preview-code .modal-content.preview-modal,
 .modal.preview-video .modal-content.preview-modal {
@@ -612,13 +602,13 @@ body::before {
         width: auto;
     }
 
-    /* Forzar ancho para PDFs y texto en desktop */
+
     .modal.preview-pdf .modal-content.preview-modal,
     .modal.preview-text .modal-content.preview-modal {
         width: 95vw;
     }
 
-    /* Ajustar ancho para videos en desktop si son muy grandes */
+
     .modal.preview-video .modal-content.preview-modal {
         width: 85vw;
         max-width: 800px;
@@ -716,13 +706,12 @@ body::before {
     width: 40px;
     height: 40px;
     border-radius: 10px;
-    /* Lo vuelve un círculo */
+
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
 }
 
-/* Quita el borde interior en WebKit (Chrome/Safari) */
 .form-group input[type="color"]::-webkit-color-swatch-wrapper {
     padding: 0;
 }
@@ -732,7 +721,6 @@ body::before {
     border-radius: 50%;
 }
 
-/* Quita el borde interior en Firefox */
 .form-group input[type="color"]::-moz-color-swatch {
     border: none;
     border-radius: 50%;
@@ -789,7 +777,7 @@ body::before {
     background-color: #000;
     display: block;
     object-fit: contain;
-    /* Evitar que la imagen se pueda seleccionar o deslizar*/
+
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
@@ -898,7 +886,6 @@ body::before {
 }
 
 
-/* Mejoras táctiles para móvil */
 @media (hover: none) and (pointer: coarse) {
 
     .file-item,
@@ -909,7 +896,6 @@ body::before {
     }
 }
 
-/* Scrollbar personalizada para desktop */
 @media (min-width: 768px) {
     ::-webkit-scrollbar {
         width: 8px;
@@ -1213,7 +1199,6 @@ body::before {
     background-color: rgba(239, 68, 68, 0.15);
 }
 
-/* Toast interactivo de subida */
 .toast.upload-toast {
     cursor: pointer;
     border-left: 4px solid var(--primary, #FF146C);
@@ -1389,7 +1374,6 @@ input[type="search"]::-webkit-search-cancel-button {
     display: none;
 }
 
-/* Drag & Drop Global Overlay */
 #drop-overlay {
     position: fixed;
     top: 0;
@@ -1443,7 +1427,6 @@ input[type="search"]::-webkit-search-cancel-button {
     }
 }
 
-/* Global Drag & Drop Overlay */
 #drop-overlay {
     position: fixed;
     top: 0;
@@ -1451,21 +1434,21 @@ input[type="search"]::-webkit-search-cancel-button {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
-    /* Negro opaco solicitado */
+
     z-index: 10000;
-    /* Por encima de todo */
+
     display: none;
     justify-content: center;
     align-items: center;
     transition: all 0.3s ease;
     pointer-events: none;
-    /* Dejar que pasen los eventos de drag si es necesario */
+
 }
 
 #drop-overlay.active {
     display: flex;
     pointer-events: auto;
-    /* Bloquear para recibir el drop */
+
 }
 
 .drop-message {
@@ -1484,7 +1467,6 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 
-/* Modal Header Long Filename Truncation */
 .modal-header svg {
     flex-shrink: 0;
 }
@@ -1497,7 +1479,6 @@ input[type="search"]::-webkit-search-cancel-button {
     flex: 1;
 }
 
-/* Mobile PDF Custom Horizontal Scroller */
 .pdf-horizontal-scroller {
     display: flex;
     flex-direction: row;

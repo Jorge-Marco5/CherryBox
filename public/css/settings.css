@@ -112,7 +112,6 @@ hr {
     margin: 20px 0;
 }
 
-/* Loader para botones */
 .loader {
     width: 16px;
     height: 16px;
@@ -135,7 +134,6 @@ hr {
     }
 }
 
-/* Mejoras en botones */
 .btn:disabled {
     opacity: 0.7;
     cursor: not-allowed;

@@ -56,7 +56,6 @@ pre {
     overflow-y: auto;
     height: 75dvh;
     max-height: 75dvh;
-    /* Ajustar basado en el header */
     padding: 15px;
     color: #ededed;
     font-size: 13px;
@@ -73,10 +72,7 @@ pre code {
     font-family: 'Geist Mono', 'Courier New', Courier, monospace;
     line-height: 1.5;
     white-space: pre;
-    /*si se termina el espacio continuar en nueva linea abajo*/
     text-wrap: balance;
-
-    /* Evitar que envuelva las líneas de logs largas, mejor hacer scroll horizontal */
     tab-size: 4;
 }
 
@@ -108,7 +104,6 @@ pre#logs {
     border: 1px solid #1c1c1c;
 }
 
-/* Scrollbar personalizada */
 #logs::-webkit-scrollbar {
     width: 6px;
 }
@@ -126,7 +121,6 @@ pre#logs {
     background: #444;
 }
 
-/* Línea de Log estilo Vercel */
 .log-line {
     display: flex;
     align-items: center;
@@ -212,7 +206,6 @@ pre#logs {
     color: #ffcb7d;
 }
 
-/* Tabla de Usuarios*/
 .supabase-table-container {
     border-radius: 8px;
     background: #1c1c1c;
@@ -253,7 +246,6 @@ pre#logs {
     background-color: #242424;
 }
 
-/* Badges */
 .badge {
     padding: 4px 10px;
     border-radius: 6px;
@@ -288,7 +280,6 @@ pre#logs {
     border: 1px solid rgba(107, 114, 128, 0.2);
 }
 
-/* Modales */
 .modal {
     display: flex;
     position: fixed;

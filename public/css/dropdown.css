@@ -1,11 +1,9 @@
-/* Estilo del contenedor principal */
 .dropdown {
     position: relative;
     display: inline-block;
     z-index: 1000;
 }
 
-/* Estilo del botón */
 .btn-dropdown {
     background-color: #2a2a2a;
     display: flex;
@@ -21,7 +19,6 @@
     transition: background-color 0.2s ease;
 }
 
-/* Contenido del dropdown (oculto por defecto) */
 .dropdown-content {
     display: none;
     position: absolute;
@@ -35,10 +32,8 @@
     border-radius: 10px;
     border: 1px solid #333;
     overflow: hidden;
-    /* Evita que las opciones o sus fondos en hover desborden las esquinas */
 }
 
-/* Enlaces dentro del dropdown */
 .dropdown-content a {
     position: relative;
     color: rgb(255, 255, 255);
@@ -53,7 +48,6 @@
     transition: background-color 0.2s ease, filter 0.2s ease;
 }
 
-/* Evitar desborde en esquinas redondeadas y eliminar borde del último ítem */
 .dropdown-content a:first-child {
     border-top-left-radius: 9px;
     border-top-right-radius: 9px;
@@ -82,13 +76,11 @@
     z-index: 2;
 }
 
-/* Efecto hover sin desbordar los bordes redondeados */
 .dropdown-content a:hover {
     background-color: #333;
     filter: brightness(1.15);
 }
 
-/* Mostrar el menú al pasar el ratón */
 .dropdown:hover .dropdown-content {
     display: block;
 }
