@@ -37,7 +37,10 @@ const PREVIEW_STRATEGIES = [
       return "preview-image";
     },
     async render(path, name, ext, contentUrl, container) {
-      container.innerHTML = `<img src="${contentUrl}" alt="${name}" loading="lazy" draggable="false" ondragstart="return false;" oncontextmenu="return false;" onmousedown="return false;">`;
+      container.innerHTML = `
+      <picture>
+        <img src="${contentUrl}" alt="${name}" loading="lazy" draggable="false" ondragstart="return false;" oncontextmenu="return false;" onmousedown="return false;">
+      </picture>`;
     },
   },
   {
@@ -86,8 +89,7 @@ const PREVIEW_STRATEGIES = [
         container.innerHTML = `
             <pdfjs-viewer-element 
               src="${contentUrl}" 
-              viewer-css-theme="DARK" 
-              style="height: 75dvh; width: 100%; display: block;">
+              viewer-css-theme="DARK" >
             </pdfjs-viewer-element>
           `;
       } else {
@@ -126,6 +128,7 @@ const UILogic = {
     colorInput.value = currentColor;
     if (input) input.value = currentName;
     document.getElementById(currentModalActive)?.classList.add("active");
+    document.body.classList.add("modal-open");
   },
 
   /**
@@ -134,6 +137,7 @@ const UILogic = {
   showCreateFolderModal() {
     currentModalActive = 'createFolderModal';
     document.getElementById(currentModalActive)?.classList.add("active");
+    document.body.classList.add("modal-open");
   },
 
   /**
@@ -147,6 +151,7 @@ const UILogic = {
 
     currentModalActive = "shareModal";
     document.getElementById(currentModalActive)?.classList.add("active");
+    document.body.classList.add("modal-open");
   },
 
   /**
@@ -158,6 +163,9 @@ const UILogic = {
     if (!modal) return;
 
     modal.classList.remove("active");
+    if (!document.querySelector(".modal.active")) {
+      document.body.classList.remove("modal-open");
+    }
 
     if (modalId === "previewModal") {
       modal.classList.remove(
@@ -203,12 +211,50 @@ const UILogic = {
     const ext = name.split(".").pop().toLowerCase();
     const previewContent = document.getElementById("previewContent");
     const previewTitle = document.getElementById("previewTitle");
-    previewTitle.onclick = () => { this.showShareModal(path) }
     const modal = document.getElementById(currentModalActive);
 
     if (!modal || !previewContent || !previewTitle) return;
 
-    previewTitle.innerHTML = `${getFileIcon(ext)} <span class="modal-title-text">${escapeHTML(name)}</span>`;
+    previewTitle.innerHTML = `
+      <div class="preview-title-group" title="${escapeHTML(name)}">
+        ${getFileIcon(ext)}
+        <span class="modal-title-text">${escapeHTML(name)}</span>
+      </div>
+
+      <div class="preview-actions">
+        <button class="btn btn-primary" aria-label="share-file" title="Enlace temporal"
+          onclick="showShareModal(currentPreviewPath)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            class="icon icon-tabler icons-tabler-outline icon-tabler-clock-share" viewBox="0 0 24 24">
+            <path fill="none" stroke="none" d="M0 0h24v24H0z" />
+            <path d="M20.943 13.016A9 9 0 1 0 12.028 21M16 22l5-5m0 4.5V17h-4.5" />
+            <path d="M12 7v5l2 2" />
+          </svg>
+        </button>
+        <button class="btn btn-primary" aria-label="download-file" title="Descargar" onclick="downloadFile(currentPreviewPath)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="icon icon-tabler icons-tabler-outline icon-tabler-download">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+            <path d="M7 11l5 5l5 -5" />
+            <path d="M12 4l0 12" />
+          </svg>
+          <p class="acction-text">Descargar</p>
+        </button>
+        <button class="btn btn-secondary" aria-label="close-modal" title="Cerrar" onclick="closeModal(currentModalActive)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M18 6l-12 12" />
+            <path d="M6 6l12 12" />
+          </svg>
+          <p class="acction-text">Cerrar</p>
+        </button>
+      </div>
+    `;
     previewContent.innerHTML = `<div class="preview-loading"></div>`;
 
     modal.classList.remove(
@@ -220,6 +266,7 @@ const UILogic = {
       "preview-code",
     );
     modal.classList.add("active");
+    document.body.classList.add("modal-open");
     modal.scrollTop = 0;
 
     try {
@@ -327,6 +374,7 @@ const UILogic = {
       playerEl.classList.remove("show", "hide");
     }
     document.getElementById("musicPlayerModal").classList.add("active");
+    document.body.classList.add("modal-open");
     MusicPlayer.highlightTrack(MusicPlayer.currentIndex);
     MusicPlayer.cherryJamActive = true;
   },

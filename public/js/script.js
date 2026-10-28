@@ -137,6 +137,7 @@ async function showPermissionsModal(fileId, fileName) {
   currentModalActive = "permissionsModal";
   document.getElementById("permFileName").textContent = fileName;
   document.getElementById(currentModalActive).classList.add("active");
+  document.body.classList.add("modal-open");
   await loadPermissions(fileId);
 }
 
