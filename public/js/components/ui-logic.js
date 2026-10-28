@@ -37,10 +37,41 @@ const PREVIEW_STRATEGIES = [
       return "preview-image";
     },
     async render(path, name, ext, contentUrl, container) {
+      if (UILogic.zoomistInstance) {
+        UILogic.zoomistInstance.destroy();
+        UILogic.zoomistInstance = null;
+      }
+
+      await new Promise((resolve, reject) => {
+        const preloadImg = new Image();
+        preloadImg.onload = () => resolve();
+        preloadImg.onerror = (err) => reject(err);
+        preloadImg.src = contentUrl;
+      });
+
+      if (currentPreviewPath !== path) return;
+
       container.innerHTML = `
-      <picture>
-        <img src="${contentUrl}" alt="${name}" loading="lazy" draggable="false" ondragstart="return false;" oncontextmenu="return false;" onmousedown="return false;">
-      </picture>`;
+      <div class="zoomist-container">
+        <div class="zoomist-wrapper">
+          <div class="zoomist-image">
+            <img src="${contentUrl}" alt="${escapeHTML(name)}" draggable="false" ondragstart="return false;" oncontextmenu="return false;">
+          </div>
+        </div>
+      </div>`;
+
+      const zoomistEl = container.querySelector(".zoomist-container");
+      if (zoomistEl && typeof Zoomist !== "undefined") {
+        UILogic.zoomistInstance = new Zoomist(zoomistEl, {
+          maxScale: 4,
+          bounds: true,
+          slider: true,
+          zoomer: true,
+          wheelable: true,
+          draggable: true,
+          pinchable: true,
+        });
+      }
     },
   },
   {
@@ -168,6 +199,10 @@ const UILogic = {
     }
 
     if (modalId === "previewModal") {
+      if (UILogic.zoomistInstance) {
+        UILogic.zoomistInstance.destroy();
+        UILogic.zoomistInstance = null;
+      }
       modal.classList.remove(
         "preview-pdf",
         "preview-image",
@@ -278,7 +313,7 @@ const UILogic = {
         if (modalClass) {
           modal.classList.add(modalClass);
         }
-        strategy.render(path, name, ext, contentUrl, previewContent);
+        await strategy.render(path, name, ext, contentUrl, previewContent);
       }
     } catch (error) {
       console.error("Error al cargar vista previa:", error);

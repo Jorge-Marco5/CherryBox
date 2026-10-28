@@ -27,6 +27,9 @@
     --error: #ef4444;
     --warning: #f59e0b;
     --info: #3b82f6;
+
+    --zoomist-wrapper-bg-color: #efefef;
+    --zoomist-modules-tranistion-duration: 0.3s;
 }
 
 * {
@@ -827,32 +830,74 @@ body::before {
     pointer-events: auto;
 }
 
-.preview-content picture {
+.preview-content .zoomist-container {
+    --zoomist-wrapper-bg-color: transparent;
+    --zoomist-slider-bg-color: rgba(20, 20, 20, 0.75);
+    --zoomist-slider-track-color: rgba(255, 255, 255, 0.25);
+    --zoomist-slider-track-color-hover: rgba(255, 255, 255, 0.4);
+    --zoomist-slider-bar-color: var(--primary-color, #d10d31);
+    --zoomist-slider-bar-color-hover: #ff1f48;
+    --zoomist-slider-button-color: #ffffff;
+    --zoomist-zoomer-button-size: 38px;
+    --zoomist-zoomer-button-color: rgba(20, 20, 20, 0.75);
+    --zoomist-zoomer-button-color-hover: rgba(209, 13, 49, 0.9);
+    --zoomist-zoomer-button-color-disabled: rgba(20, 20, 20, 0.5);
+    --zoomist-zoomer-button-opacity-disabled: 0.45;
+    --zoomist-zoomer-icon-color: #ffffff;
+    --zoomist-zoomer-icon-color-hover: #ffffff;
+    --zoomist-zoomer-icon-color-disabled: #777777;
+    width: auto;
+    height: auto;
+    max-width: 95dvw;
+    max-height: calc(100dvh - 96px);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+}
+
+.preview-content .zoomist-container .zoomist-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
-    max-width: 94dvw;
-    max-height: calc(100dvh - 96px);
-    width: auto;
-    height: auto;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
 }
 
-.preview-content picture img,
-.preview-content>img {
-    max-width: 95dvw;
+.preview-content .zoomist-container .zoomist-wrapper:active {
+    cursor: grabbing;
+}
+
+.preview-content .zoomist-image {
+    width: auto;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform-origin: center center;
+}
+
+.preview-content .zoomist-container .zoomist-wrapper img,
+.preview-content .zoomist-image>img {
+    max-width: 92dvw;
     max-height: calc(100dvh - 96px);
     width: auto;
     height: auto;
     display: block;
     object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     -webkit-touch-callout: none;
+    pointer-events: none;
+}
+
+.preview-content .zoomist-slider,
+.preview-content .zoomist-zoomer {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
 .preview-content>video {
