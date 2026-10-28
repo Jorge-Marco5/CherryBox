@@ -832,14 +832,14 @@ body::before {
 
 .preview-content .zoomist-container {
     --zoomist-wrapper-bg-color: transparent;
-    --zoomist-slider-bg-color: rgba(20, 20, 20, 0.75);
+    --zoomist-slider-bg-color: rgba(20, 20, 20, 0.1);
     --zoomist-slider-track-color: rgba(255, 255, 255, 0.25);
     --zoomist-slider-track-color-hover: rgba(255, 255, 255, 0.4);
     --zoomist-slider-bar-color: var(--primary-color, #d10d31);
     --zoomist-slider-bar-color-hover: #ff1f48;
     --zoomist-slider-button-color: #ffffff;
     --zoomist-zoomer-button-size: 38px;
-    --zoomist-zoomer-button-color: rgba(20, 20, 20, 0.75);
+    --zoomist-zoomer-button-color: rgba(20, 20, 20, 0.1);
     --zoomist-zoomer-button-color-hover: rgba(209, 13, 49, 0.9);
     --zoomist-zoomer-button-color-disabled: rgba(20, 20, 20, 0.5);
     --zoomist-zoomer-button-opacity-disabled: 0.45;

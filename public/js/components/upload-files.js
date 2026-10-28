@@ -175,6 +175,14 @@ function updateUploadHeaderControls() {
 }
 
 /**
+ * Obtiene la ruta relativa completa de un archivo subido para su previsualización
+ */
+function getUploadItemFilePath(item) {
+    const cleanFolder = (item.folder || "").replace(/^\/+|\/+$/g, "");
+    return cleanFolder ? `${cleanFolder}/${item.name}` : item.name;
+}
+
+/**
  * Actualiza el DOM de una tarjeta individual de subida en tiempo real (estado, badge, barra y botón cancelar)
  */
 function updateSingleUploadItemDOM(item) {
@@ -187,6 +195,17 @@ function updateSingleUploadItemDOM(item) {
     }
 
     card.className = `upload-manager-item ${item.status}`;
+
+    if (item.status === "completed") {
+        card.style.cursor = "pointer";
+        card.title = "Haz clic para ver la vista previa";
+        const filePath = getUploadItemFilePath(item);
+        card.onclick = () => previewFile(filePath, item.name);
+    } else {
+        card.style.cursor = "";
+        card.title = "";
+        card.onclick = null;
+    }
 
     let statusLabel = "En cola";
     let badgeClass = "pending";
@@ -269,16 +288,22 @@ function renderUploadManagerView() {
         }
 
         const cancelBtnHtml = isProgressActive
-            ? `<button class="btn-cancel-single" onclick="cancelUpload('${item.id}')" title="Cancelar esta subida">
+            ? `<button class="btn-cancel-single" onclick="event.stopPropagation(); cancelUpload('${item.id}')" title="Cancelar esta subida">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></svg>
         </button>`
             : "";
 
         const safeName = typeof escapeHTML === "function" ? escapeHTML(item.name) : item.name;
         const safeStatus = typeof escapeHTML === "function" ? escapeHTML(statusLabel) : statusLabel;
+        const filePath = getUploadItemFilePath(item);
+        const jsPath = typeof escapeJS === "function" ? escapeHTML(escapeJS(filePath)) : safeName;
+        const jsName = typeof escapeJS === "function" ? escapeHTML(escapeJS(item.name)) : safeName;
+        const completedAttrs = item.status === "completed"
+            ? `style="cursor: pointer;" title="Haz clic para ver la vista previa" onclick="previewFile('${jsPath}', '${jsName}')"`
+            : "";
 
         return `
-      <div class="upload-manager-item ${item.status}" id="upload-item-${item.id}">
+      <div class="upload-manager-item ${item.status}" id="upload-item-${item.id}" ${completedAttrs}>
         <div class="upload-item-header">
           <div class="upload-item-info">
             ${getFileIcon(item.name)}
@@ -328,13 +353,14 @@ async function uploadFilesProcess(files) {
         return;
     }
 
-    const targetFolder = currentPath;
+    const targetFolder = typeof currentPath !== "undefined" ? currentPath : "";
     const newItems = fileArray.map((file, index) => {
         const item = {
             id: "upl-" + Date.now() + "-" + index + "-" + Math.random().toString(36).substring(2, 6),
             file: file,
             name: file.name,
             size: file.size,
+            folder: targetFolder,
             status: "pending",
             loaded: 0,
             percent: 0,
