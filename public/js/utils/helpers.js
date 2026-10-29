@@ -5,7 +5,10 @@
  */
 function escapeJS(str) {
     if (!str) return '';
-    return str.replace(/'/g, "\\'");
+    return String(str)
+        .replace(/\\/g, "\\\\")
+        .replace(/'/g, "\\'")
+        .replace(/"/g, "&quot;");
 }
 
 /**
@@ -48,7 +51,7 @@ function encodePath(pathStr) {
     if (!pathStr) return '';
     return pathStr
         .split('/')
-        .map(segment => encodeURIComponent(segment))
+        .map(segment => encodeURIComponent(segment).replace(/'/g, '%27'))
         .join('/');
 }
 

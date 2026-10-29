@@ -398,10 +398,9 @@ export const downloadFile = async (req: AuthRequest, res: Response) => {
     const relativePath = (req.query.path as string) || "";
     if (!isValidPath(relativePath)) return res.status(403).json({ error: "Ruta no válida" });
 
-    // Aquí no movemos el res.download porque es una respuesta específica de Express,
-    // pero mantenemos la lógica mínima.
-    const fullPath = path.join(system_setting.getBaseDir(), relativePath);
-    logger.info(`[AUDIT] Usuario ${req.user?.id} DESCARGÓ el archivo: ${relativePath}`);
+    const decodePathValid = decodePath(relativePath);
+    const fullPath = path.join(system_setting.getBaseDir(), decodePathValid);
+    logger.info(`[AUDIT] Usuario ${req.user?.id} DESCARGÓ el archivo: ${decodePathValid}`);
     res.download(fullPath);
   } catch (error: any) {
     logger.error(`Error al descargar (Usuario: ${req.user?.id}): ` + error.message);

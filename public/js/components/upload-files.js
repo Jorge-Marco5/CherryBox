@@ -199,7 +199,7 @@ function updateSingleUploadItemDOM(item) {
     if (item.status === "completed") {
         card.style.cursor = "pointer";
         card.title = "Haz clic para ver la vista previa";
-        const filePath = getUploadItemFilePath(item);
+        const filePath = encodePath(getUploadItemFilePath(item));
         card.onclick = () => previewFile(filePath, item.name);
     } else {
         card.style.cursor = "";
@@ -296,8 +296,8 @@ function renderUploadManagerView() {
         const safeName = typeof escapeHTML === "function" ? escapeHTML(item.name) : item.name;
         const safeStatus = typeof escapeHTML === "function" ? escapeHTML(statusLabel) : statusLabel;
         const filePath = getUploadItemFilePath(item);
-        const jsPath = typeof escapeJS === "function" ? escapeHTML(escapeJS(filePath)) : safeName;
-        const jsName = typeof escapeJS === "function" ? escapeHTML(escapeJS(item.name)) : safeName;
+        const jsPath = typeof encodePath === "function" ? encodePath(filePath) : escapeJS(filePath);
+        const jsName = typeof escapeJS === "function" ? escapeJS(item.name) : safeName;
         const completedAttrs = item.status === "completed"
             ? `style="cursor: pointer;" title="Haz clic para ver la vista previa" onclick="previewFile('${jsPath}', '${jsName}')"`
             : "";
