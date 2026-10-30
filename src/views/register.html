@@ -9,6 +9,7 @@
     <link rel="preload" href="public/fonts/Geist-Regular.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="public/css/header.css">
     <link rel="stylesheet" href="public/css/auth.css">
+    <link rel="stylesheet" href="public/css/button.css">
     <link rel="stylesheet" href="public/css/toast.css" media="print" onload="this.media='all'">
     <noscript>
         <link rel="stylesheet" href="public/css/toast.css">
@@ -23,8 +24,7 @@
                 <h1>CherryBox</h1>
                 <img src="public/cherries.svg" alt="CherryBox" width="50" height="50">
             </div>
-            <button title="Ir atras" aria-label="Ir atrás" class="btn btn-primary"
-                style="max-width: 50px; max-height: 50px; border: 1px solid #bebebe; display: flex; justify-content: center; align-items: center;"
+            <button title="Ir atras" aria-label="Ir atrás" class="square transparent"
                 onclick="window.location.href='/users'">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -73,7 +73,7 @@
                         </div>
                     </div>
                     <p id="message" style="font-size: 0.9rem; margin: 10px 0 0 0;"></p>
-                    <button class="btn btn-primary" type="submit">Registrarse</button>
+                    <button class="full primary" type="submit">Registrarse</button>
                 </form>
             </div>
         </div>

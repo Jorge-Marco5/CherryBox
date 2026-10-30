@@ -47,16 +47,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${statusBadge}</td>
                 <td>
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-secondary" title="Editar" onclick="openEditModal('${user.id}', '${user.email}', '${user.role}')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        <button class="square secondary" title="Editar" onclick="openEditModal('${user.id}', '${user.email}', '${user.role}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         </button>
-                        <button class="btn ${user.is_blocked ? 'btn-secondary' : 'btn-primary'}" title="${user.is_blocked ? 'Desbloquear' : 'Bloquear'}" onclick="toggleBlock('${user.id}')">
+                        <button class="square ${user.is_blocked ? 'secondary' : 'primary'}" title="${user.is_blocked ? 'Desbloquear' : 'Bloquear'}" onclick="toggleBlock('${user.is_blocked ? 'Desbloquear' : 'Bloquear'}','${user.id}')">
                             ${user.is_blocked
-                        ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-lock-access-off"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 8v-2c0 -.554 .225 -1.055 .588 -1.417" /><path d="M4 16v2a2 2 0 0 0 2 2h2" /><path d="M16 4h2a2 2 0 0 1 2 2v2" /><path d="M16 20h2c.55 0 1.05 -.222 1.41 -.582" /><path d="M15 11a1 1 0 0 1 1 1m-.29 3.704a1 1 0 0 1 -.71 .296h-6a1 1 0 0 1 -1 -1v-3a1 1 0 0 1 1 -1h2" /><path d="M10 11v-1m1.182 -2.826a2 2 0 0 1 2.818 1.826v1" /><path d="M3 3l18 18" /></svg>'
-                        : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-lock-access"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 8v-2a2 2 0 0 1 2 -2h2" /><path d="M4 16v2a2 2 0 0 0 2 2h2" /><path d="M16 4h2a2 2 0 0 1 2 2v2" /><path d="M16 20h2a2 2 0 0 0 2 -2v-2" /><path d="M8 12a1 1 0 0 1 1 -1h6a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-6a1 1 0 0 1 -1 -1l0 -3" /><path d="M10 11v-2a2 2 0 1 1 4 0v2" /></svg>'}
+                        ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-lock-open"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2l0 -6" /><path d="M11 16a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M8 11v-5a4 4 0 0 1 8 0" /></svg>'
+                        : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-lock"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6" /><path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" /><path d="M8 11v-4a4 4 0 1 1 8 0v4" /></svg>'}
                         </button>
-                        <button class="btn btn-danger" title="Eliminar" onclick="confirmDelete('${user.id}')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                        <button class="square danger" title="Eliminar" onclick="confirmDelete('${user.id}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                         </button>
                     </div>
                 </td>
@@ -82,23 +82,50 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Funciones Globales para los onclick
-    window.openEditModal = (id, email, role) => {
-        document.getElementById('editUserId').value = id;
-        document.getElementById('editEmail').value = email;
-        document.getElementById('editRole').value = role;
-        editUserModal.classList.add('active');
+    window.openEditModal = async (id, email, role) => {
+        const modalData = await modalHandler.callModalForm({
+            title: "Editar usuario",
+            description: "Edita la informacion de un usuario.",
+            formContent: [
+                {
+                    name: "email",
+                    label: "Nuevo email",
+                    placeholder: "Ingresa el nuevo email.",
+                    type: "text",
+                    value: email,
+                    required: true
+                },
+                {
+                    name: "role",
+                    label: "Nuevo rol",
+                    placeholder: "Selecciona un nuevo rol",
+                    type: "select",
+                    options: [{ label: 'ADMIN', value: 'ADMIN' }, { label: 'USER', value: 'USER' }],
+                    value: role,
+                    required: true
+                },
+            ],
+            options: {
+                confirmText: "Guardar",
+                cancelText: "Cancelar",
+                type: "primary",
+            }
+        });
+        if (!modalData) {
+            return;
+        }
+        updateInfoUser(id, modalData.email, modalData.role)
+        updateUsers();
     };
 
-    window.closeEditModal = () => {
-        editUserModal.classList.remove('active');
-    };
-
-    window.toggleBlock = async (id) => {
-        try {
-            await axios.patch(`${API_URL}/users/${id}/block`);
-            updateUsers();
-        } catch (error) {
-            showToast(error.response.data.error || "Error al cambiar estado de bloqueo", 'error');
+    window.toggleBlock = async (lockStatus, id) => {
+        if (await modalHandler.callModalConfirm(`${lockStatus} usuario`, `¿Estás seguro de que deseas ${lockStatus.toLowerCase()} al usuario?`)) {
+            try {
+                await axios.patch(`${API_URL}/users/${id}/block`);
+                updateUsers();
+            } catch (error) {
+                showToast(error.response.data.error || "Error al cambiar estado de bloqueo", 'error');
+            }
         }
     };
 
@@ -113,9 +140,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     window.confirmDelete = async (id) => {
-        if (confirm("¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.")) {
+        if (await modalHandler.callModalConfirm('Eliminar usuario', '¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.')) {
             try {
                 await axios.delete(`${API_URL}/users/${id}`);
+                showToast("Usuario eliminado con exito", 'success');
                 updateUsers();
             } catch (error) {
                 showToast(error.response.data.error || "Error al eliminar usuario", 'error');
@@ -123,13 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // Manejo de Formulario de Edición
-    editUserForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = document.getElementById('editUserId').value;
-        const email = document.getElementById('editEmail').value;
-        const role = document.getElementById('editRole').value;
-
+    async function updateInfoUser(id, email, role) {
         try {
             if (email) {
                 await axios.put(`${API_URL}/users/${id}`, { email });
@@ -137,19 +159,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (role) {
                 await axios.patch(`${API_URL}/users/${id}/role`, { role });
             }
-            closeEditModal();
-            updateUsers();
+            showToast("Usuario actualizado correctamente", 'success');
         } catch (error) {
             showToast(error.response.data.error || "Error al guardar cambios", 'error');
         }
-    });
-
-    // Cerrar modal al hacer click fuera
-    window.addEventListener('click', (e) => {
-        if (e.target === editUserModal) {
-            closeEditModal();
-        }
-    });
+    }
 
     updateUsers();
 });

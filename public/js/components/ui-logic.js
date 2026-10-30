@@ -145,30 +145,79 @@ const PREVIEW_STRATEGIES = [
 const UILogic = {
   /**
    * Muestra el modal de renombrado.
+   * @param {string} type - Tipo de archivo (Folder/File)
    * @param {string} path - Ruta del archivo.
    * @param {string} currentName - Nombre actual.
+   * @param {string} color - Color de la carpeta
    */
-  showRenameModal(type, path, currentName, currentColor) {
+  async showRenameModal(type, path, currentName, currentColor) {
     currentRenameItem = path;
-    currentModalActive = "renameModal";
-    const input = document.getElementById("renameInput");
-    const colorFolderCustom = document.getElementById("colorFolderCustom");
-    if (type === "file") colorFolderCustom.style.display = "none";
-    else colorFolderCustom.style.display = "flex";
-    const colorInput = document.getElementById("renameColorInput");
-    colorInput.value = currentColor;
-    if (input) input.value = currentName;
-    document.getElementById(currentModalActive)?.classList.add("active");
-    document.body.classList.add("modal-open");
+    const modalData = await modalHandler.callModalForm({
+      title: "Renombrar",
+      description: "Renombra el archivo o carpeta actual ",
+      formContent: [
+        {
+          name: "newName",
+          label: "Nuevo nombre",
+          placeholder: "Nombre del archivo o carpeta.",
+          type: "text",
+          value: currentName,
+          required: true
+        },
+        {
+          name: "newColor",
+          label: type === 'folder' ? "Color de la carpeta" : '',
+          placeholder: "Selecciona un color para la carpeta",
+          type: type === 'folder' ? "color" : 'hidden',
+          value: currentColor,
+          required: type === 'folder' ? true : false
+        },
+      ],
+      options: {
+        confirmText: "Guardar",
+        cancelText: "Cancelar",
+        type: "primary",
+      }
+    });
+
+    if (!modalData) return;
+    confirmRename(modalData.newName, modalData.newColor);
   },
 
   /**
    * Muestra el modal para crear carpeta.
    */
-  showCreateFolderModal() {
-    currentModalActive = 'createFolderModal';
-    document.getElementById(currentModalActive)?.classList.add("active");
-    document.body.classList.add("modal-open");
+  async showCreateFolderModal() {
+    const modalData = await modalHandler.callModalForm({
+      title: "Nueva carpeta",
+      description: "Creacion de una nueva carpeta ",
+      formContent: [
+        {
+          name: "folderName",
+          label: "Nombre de la carpeta",
+          placeholder: "Nombre de la carpeta.",
+          type: "text",
+          value: 'Nueva carpeta',
+          required: true
+        },
+        {
+          name: "folderColor",
+          label: "Color de la carpeta",
+          placeholder: "Selecciona un color para la carpeta",
+          type: "color",
+          value: "#FFE36C",
+          required: true
+        },
+      ],
+      options: {
+        confirmText: "Guardar",
+        cancelText: "Cancelar",
+        type: "primary",
+      }
+    });
+
+    if (!modalData) return;
+    createFolder(modalData.folderName, modalData.folderColor);
   },
 
   /**
@@ -176,14 +225,57 @@ const UILogic = {
    * @param {string} path - Ruta del archivo.
    * @param {string} name - Nombre del archivo.
    */
-  showShareModal(path) {
-    currentRenameItem = path;
+  async showShareModal(path) {
     this.closeModal(currentModalActive);
 
-    currentModalActive = "shareModal";
-    document.getElementById(currentModalActive)?.classList.add("active");
-    document.body.classList.add("modal-open");
-  },
+    const modalData = await modalHandler.callModalForm({
+      title: "Enlace temporal",
+      description: "Crea un enlace temporal para compartir y acceder temporalmente al archivo. ",
+      formContent: [
+        {
+          name: "time",
+          label: "Tiempo limite",
+          placeholder: "Selecciona un tiempo limite",
+          type: "select",
+          options: [{ label: '1 minuto', value: '60000' }, { label: '1 hora', value: '3600000' }, { label: '5 horas', value: '18000000' }, { label: '1 dia', value: '86400000' }, { label: '1 semana', value: '604800000' }, { label: '1 mes', value: '2592000000' }],
+          required: true
+        },
+      ],
+      options: {
+        confirmText: "Generar",
+        cancelText: "Cancelar",
+        type: "primary",
+      }
+    });
+
+    if (!modalData) {
+      return;
+    }
+
+    const link = await createShareLink(path, modalData.time);
+    if (!link) {
+      showToast("Error al generar el enlace", "warning")
+      return 0;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    if (await modalHandler.callModalConfirm('Enlace temporal', `Copia el enlace temporal`, {
+      bodyContent: `
+      <div class="form-group">
+        <input type="text" id="inputPathShare" aria-label="Enlace para compartir" placeholder="Enlace para compartir"
+            value="${link}" readonly>
+      </div>
+      `,
+      type: "info",          // Pone el botón en rojo
+      confirmText: "Copiar", // Texto del botón afirmativo
+      cancelText: "Cerrar",    // Texto del botón negativo
+      size: "lg"               // Tamaño compacto para diálogos
+    })) {
+      copyToClipboard(link)
+    }
+  }
+  ,
 
   /**
    * Cierra un modal específico.
@@ -257,7 +349,7 @@ const UILogic = {
       </div>
 
       <div class="preview-actions">
-        <button class="btn btn-primary" aria-label="share-file" title="Enlace temporal"
+        <button class="square primary" aria-label="share-file" title="Enlace temporal"
           onclick="showShareModal(currentPreviewPath)">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -267,7 +359,7 @@ const UILogic = {
             <path d="M12 7v5l2 2" />
           </svg>
         </button>
-        <button class="btn btn-primary" aria-label="download-file" title="Descargar" onclick="downloadFile(currentPreviewPath)">
+        <button class="default primary" aria-label="download-file" title="Descargar" onclick="downloadFile(currentPreviewPath)">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="icon icon-tabler icons-tabler-outline icon-tabler-download">
@@ -278,7 +370,7 @@ const UILogic = {
           </svg>
           <p class="acction-text">Descargar</p>
         </button>
-        <button class="btn btn-secondary" aria-label="close-modal" title="Cerrar" onclick="closeModal(currentModalActive)">
+        <button class="default secondary" aria-label="close-modal" title="Cerrar" onclick="closeModal(currentModalActive)">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
             class="icon icon-tabler icons-tabler-outline icon-tabler-x">

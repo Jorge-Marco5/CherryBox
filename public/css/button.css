@@ -1,0 +1,131 @@
+button,
+.button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text);
+    transition: border-color 0.25s;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+button svg,
+.button svg {
+    pointer-events: none;
+}
+
+button.primary,
+.button.primary {
+    background-color: var(--primary, #333);
+    color: var(--light);
+}
+
+button.secondary,
+.button.secondary {
+    background-color: var(--secondary, #333);
+    color: var(--light);
+}
+
+button.outline,
+.button.outline {
+    border: 2px solid var(--text);
+    background-color: transparent;
+    color: var(--text)
+}
+
+button.btn-edit,
+.button-btn-edit {
+    background-color: var(--info);
+    color: var(--light);
+}
+
+button.btn-delete,
+.button.btn-delete {
+    background-color: var(--danger);
+    color: var(--light);
+}
+
+button.info,
+.button.info {
+    background-color: var(--info);
+    color: var(--light);
+}
+
+button.transparent,
+.button.info {
+    background-color: transparent;
+    color: var(--light);
+    box-shadow: none;
+}
+
+button.success,
+.button.success {
+    background-color: var(--success);
+    color: var(--light);
+}
+
+button.warning,
+.button.warning {
+    background-color: var(--warning);
+    color: var(--light);
+}
+
+button.danger,
+.button.danger {
+    background-color: var(--danger);
+    color: var(--light);
+}
+
+button.default,
+.button.default {
+    padding: 0.6em 1.2em;
+}
+
+button.square,
+.button.square {
+    width: auto;
+    height: auto;
+    padding: 0.5rem;
+    aspect-ratio: 1/1;
+}
+
+button.circle,
+.button.circle {
+    width: auto;
+    height: auto;
+    aspect-ratio: 1/1;
+    padding: 0.5rem;
+    border-radius: 50px;
+}
+
+button.rounded,
+.button.rounded {
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+}
+
+button:hover,
+.button:hover {
+    border-color: var(--light);
+}
+
+button:active,
+.button:active {
+    border-color: var(--light);
+    background-color: var(--background-color);
+}
+
+button,
+.button {
+    outline: none;
+}
+
+button.full,
+.button.full {
+    width: 100%;
+    padding: 0.6em 1.2em;
+}

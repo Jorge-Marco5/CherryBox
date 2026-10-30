@@ -1,3 +1,18 @@
+.btn-music-player {
+    display: none;
+    background: linear-gradient(180deg, #FF146C, #8d0023);
+    color: white;
+}
+
+.btn-music-player:hover {
+    background: linear-gradient(180deg, #8d0023, #FF146C);
+    transform: translateY(-1px);
+}
+
+.btn-music-player:active {
+    transform: translateY(1px);
+}
+
 .modal-content-player {
     width: 100%;
     max-width: 500px;

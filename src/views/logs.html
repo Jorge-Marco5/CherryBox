@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="public/css/header.css">
     <link rel="stylesheet" href="public/css/styles.css">
     <link rel="stylesheet" href="public/css/dropdown.css">
+    <link rel="stylesheet" href="public/css/button.css" />
+    <link rel="stylesheet" href="public/css/modal.css" />
     <link rel="stylesheet" href="public/css/logs.css">
     <link rel="stylesheet" href="public/css/toast.css" media="print" onload="this.media='all'">
     <noscript>
@@ -43,9 +45,9 @@
                 <h1>CherryBox</h1>
                 <img src="public/cherries.svg" alt="CherryBox" width="50" height="50">
             </div>
-            <button class="btn btn-primary" aria-label="Cerrar sesión" style="border: solid 1px #bebebe;"
-                onclick="logout()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            <button class="square transparent" aria-label="Cerrar sesión" onclick="logout()"><svg
+                    xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="icon icon-tabler icons-tabler-outline icon-tabler-logout">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
@@ -75,7 +77,7 @@
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <div class="dropdown">
-                        <button class="btn-dropdown">
+                        <button class="default btn-dropdown">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                 fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round"
@@ -86,7 +88,7 @@
                                 <path d="M12 12l0 .01" />
                                 <path d="M16 12l0 .01" />
                             </svg>
-                            Opciones</button>
+                            &nbsp;Opciones</button>
                         <div class="dropdown-content">
                             <a href="/users">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -135,8 +137,40 @@
             </div>
         </div>
     </main>
+    <!-- Contenedor para la generacion de modales -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-head">
+                <div class="modal-text">
+                    <div class="modal-title">
+                        <h4>Titulo del modal</h4>
+                        <span id="closeModal">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-x">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M18 6l-12 12" />
+                                <path d="M6 6l12 12" />
+                            </svg>
+                        </span>
+                    </div>
+                    <p></p>
+                </div>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <div class="modal-actions-1"></div>
+                <div class="modal-actions-2">
+                    <button class="outline default">Cancelar</button>
+                    <button class="primary default">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <p id="userId" style="position: fixed; bottom: 5px; left: 5px; color: white; font-size: 0.7rem;">-</p>
     <div id="toast-container"></div>
+    <script defer src="public/js/components/modal.js"></script>
     <script defer src="public/js/components/logger.js"></script>
     <script defer src="public/js/components/toast.js"></script>
     <script defer src="public/js/components/logs.js"></script>

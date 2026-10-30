@@ -1,4 +1,7 @@
 class FilesManager {
+    constructor() {
+        this.modalHandler = new ModalHandler();
+    }
     /**
      * Carga los archivos de una ruta específica.
      */
@@ -56,54 +59,46 @@ class FilesManager {
     }
 
     /**
-     * Crea una nueva carpeta.
+     * Crear una nueva carpeta
+     * @param {*} name 
+     * @param {*} color 
      */
     async createFolder(name, color) {
-        const folderName = name !== undefined ? name : document.getElementById("folderNameInput")?.value.trim();
-        const folderColor = color !== undefined ? color : document.getElementById("folderColorInput")?.value;
-
-        if (!folderName) {
-            showToast("Por favor ingresa un nombre", "warning");
-            return;
-        }
+        // const folderName = name !== undefined ? name : document.getElementById("folderNameInput")?.value.trim();
+        // const folderColor = color !== undefined ? color : document.getElementById("folderColorInput")?.value;
 
         try {
-            const response = await FileService.createFolder(currentPath, folderName, folderColor);
+            const response = await FileService.createFolder(currentPath, name, color);
             if (response.data.success) {
-                if (typeof UILogic !== "undefined" && UILogic.closeModal) {
-                    UILogic.closeModal(currentModalActive);
-                }
-                const input = document.getElementById("folderNameInput");
-                if (input) input.value = "";
-
                 await this.loadFiles(currentPath);
             } else {
                 showToast(response.data.error, "error");
             }
         } catch (error) {
+            console.error(error)
             showToast("Error al crear carpeta", "error");
         }
     }
 
     /**
-     * Confirma el renombrado de un archivo o carpeta.
+     * Renombrar una nueva carpeta o archivo
+     * @param {*} newName 
+     * @param {*} newColor 
+     * @returns 
      */
     async confirmRename(newName, newColor) {
-        const name = newName !== undefined ? newName : document.getElementById("renameInput")?.value.trim();
-        const color = newColor !== undefined ? newColor : document.getElementById("renameColorInput")?.value;
-
-        if (!name) {
-            showToast("Por favor ingresa un nombre", "warning");
-            return;
-        }
+        if (!newName) {
+            showToast("Ingresa un nombre para el archivo", 'info')
+            return
+        };
 
         try {
-            await FileService.rename(currentRenameItem, name, color);
-            if (typeof UILogic !== "undefined" && UILogic.closeModal) {
-                UILogic.closeModal(currentModalActive);
+            const response = await FileService.rename(currentRenameItem, newName, newColor);
+            if (response.data.success) {
+                await this.loadFiles(currentPath);
+            } else {
+                showToast(response.data.error, "error");
             }
-
-            await this.loadFiles(currentPath);
         } catch (error) {
             console.error("Error al renombrar:", error);
             showToast("Error al renombrar", "error");
@@ -114,21 +109,8 @@ class FilesManager {
      * Genera un enlace temporal de descarga/compartir.
      */
     async createShareLink(filePath, time) {
-        const path = filePath !== undefined ? filePath : currentRenameItem;
-        const timeShare = time !== undefined ? time : document.getElementById("selectTimeShare")?.value;
-        const inputPathShare = document.getElementById("inputPathShare");
-        if (inputPathShare) inputPathShare.value = "";
-
-        if (!timeShare) {
-            showToast("Por favor selecciona un tiempo límite", "warning");
-            return null;
-        }
-
         try {
-            const res = await FileService.createShareLink(path, timeShare);
-            if (inputPathShare) {
-                inputPathShare.value = res.data.url;
-            }
+            const res = await FileService.createShareLink(filePath, time);
             return res.data.url;
         } catch (error) {
             console.error("Error al crear enlace compartido:", error);
@@ -141,14 +123,23 @@ class FilesManager {
      * Elimina un archivo o carpeta específico.
      */
     async deleteFile(path, name) {
-        if (!confirm(`¿Estás seguro de eliminar "${name}"?`)) return;
+        const options = {
+            type: "danger",          // Pone el botón en rojo
+            confirmText: "Eliminar", // Texto del botón afirmativo
+            cancelText: "Cancelar",    // Texto del botón negativo
+            size: "sm"               // Tamaño compacto para diálogos
+        }
+        if (!await this.modalHandler.callModalConfirm('Eliminar archivo', `¿Está seguro de eliminar ${name}?`, options)) {
+            return
+        }
+        // if (!confirm(`¿Estás seguro de eliminar "${name}"?`)) return;
 
         try {
             await FileService.delete(path);
             await this.loadFiles(currentPath);
         } catch (error) {
             console.error("Error al eliminar:", error);
-            showToast("Error al eliminar", "error");
+            showToast("Error al eliminar", error.message);
         }
     }
 
@@ -279,7 +270,8 @@ class FilesManager {
                 barFill.style.backgroundColor = percentage < 50 ? "#22c55e" : percentage < 80 ? "#f59e0b" : "#ef4444";
             }
         } catch (error) {
-            console.error("Error al obtener el límite de almacenamiento:", error);
+            document.querySelector('.card-storage').style.display = 'none';
+            console.error("Error al obtener el límite de almacenamiento:");
         }
     }
 }

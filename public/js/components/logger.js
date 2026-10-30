@@ -53,7 +53,10 @@ axios.interceptors.response.use(
 
         if (status === 401 && window.location.pathname !== '/login') {
             window.location.href = '/login';
-        } else {
+        } else if (status = 403) {
+            console.error('No tienes permiso para realizar algunas acciones')
+        }
+        else {
             console.error(message);
         }
         return Promise.reject(error);

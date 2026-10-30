@@ -24,7 +24,7 @@
     --font: "Geist", sans-serif;
     --font-text-preview: "PT Serif", sans-serif;
     --success: #22c55e;
-    --error: #ef4444;
+    --danger: #ef4444;
     --warning: #f59e0b;
     --info: #3b82f6;
 
@@ -152,85 +152,6 @@ body::before {
 .breadcrumb span:hover {
     background: #333;
     color: #ededed;
-}
-
-.btn {
-    width: fit-content;
-    min-width: 50px;
-    max-width: 150px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    gap: 5px;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
-
-@media (min-width: 768px) {
-    .btn {
-        padding: 8px 16px;
-        font-size: 14px;
-        flex: 0 1 auto;
-        min-width: auto;
-    }
-}
-
-.btn-primary {
-    background: #d2042d;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #800020;
-    transform: translateY(-1px);
-}
-
-.btn-primary:active {
-    transform: translateY(0);
-}
-
-.btn-secondary {
-    background: #444;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #333;
-    transform: translateY(-1px);
-}
-
-.btn-secondary:active {
-    transform: translateY(0);
-}
-
-.btn-danger {
-    background: #ef4444;
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #dc2626;
-}
-
-.btn-music-player {
-    display: none;
-    background: linear-gradient(180deg, #FF146C, #8d0023);
-    color: white;
-}
-
-.btn-music-player:hover {
-    background: linear-gradient(180deg, #8d0023, #FF146C);
-    transform: translateY(-1px);
-}
-
-.btn-music-player:active {
-    transform: translateY(1px);
 }
 
 .files-container {
@@ -434,7 +355,7 @@ body::before {
 }
 
 .file-name {
-    font-weight: 500;
+    font-weight: 550;
     font-size: 14px;
     margin-bottom: 3px;
     overflow: hidden;
@@ -464,6 +385,10 @@ body::before {
     gap: 6px;
     flex-shrink: 0;
     flex-wrap: wrap;
+}
+
+.file-actions button {
+    font-size: 0.8rem;
 }
 
 @media (min-width: 768px) {
@@ -546,7 +471,7 @@ body::before {
 
 .modal-content {
     background: #1E1E1E;
-    padding: 15px;
+    /* padding: 15px; */
     border-radius: 12px;
     border: 1px solid #333;
     border-top: 4px solid var(--primary);

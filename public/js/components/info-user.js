@@ -9,21 +9,16 @@ if (userIdBtn && user) {
     userIdBtn.addEventListener('mouseenter', () => userIdBtn.style.color = '#d2042d');
     userIdBtn.addEventListener('mouseleave', () => userIdBtn.style.color = 'white');
 
-    userIdBtn.addEventListener('click', () => {
-        currentModalActive = 'info-user-modal';
-        document.getElementById(currentModalActive)?.classList.add("active");
+    userIdBtn.addEventListener('click', async () => {
 
-        const modalOverlay = document.querySelector('#info-user-modal');
-
-        const userModalBody = modalOverlay.querySelector('.modal-body')
-        userModalBody.innerHTML = `
+        const userModalBody = `
             <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
                 <label style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Identificador</label>
-                <div style="background: #252525; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-family: monospace; color: var(--primary);">${user.id}</div>
+                <div onclick="copyToClipboard('${user.id}')" style="background: #252525; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-family: monospace; color: var(--primary); cursor: pointer;">${user.id}</div>
             </div>
             <div style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px;">
                 <label style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Correo Electrónico</label>
-                <div style="padding: 5px 0; border-bottom: 1px solid var(--border);">${user.email}</div>
+                <div onclick="copyToClipboard('${user.email}')" style="padding: 5px 0; border-bottom: 1px solid var(--border); cursor: pointer;">${user.email}</div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <label style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Rol Asignado</label>
@@ -34,5 +29,10 @@ if (userIdBtn && user) {
                 </div>
             </div>
         `;
+
+        await modalHandler.callModalMessage('Mi Perfil', 'Información general del perfil', {
+            bodyContent: userModalBody,
+            size: "md"               // Tamaño compacto para diálogos
+        })
     });
 }

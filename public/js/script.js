@@ -60,14 +60,6 @@ async function createShareLink(filePath, time) {
   return await filesManager.createShareLink(filePath, time);
 }
 
-const formShareTime = document.getElementById("form-share-time");
-if (formShareTime) {
-  formShareTime.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    await createShareLink();
-  });
-}
-
 /**
  * Elimina un archivo o carpeta.
  */
@@ -160,8 +152,8 @@ async function loadPermissions(fileId) {
                         <div style="font-weight: 500;">${p.user.email}</div>
                         <div style="font-size: 0.8rem; color: #666;">Acceso: ${p.access}</div>
                     </div>
-                    <button class="btn btn-danger" style="padding: 5px;" onclick="revokePermission('${p.id}')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button class="square danger" style="padding: 5px;" onclick="revokePermission('${p.id}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                             <path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
                         </svg>
@@ -271,13 +263,11 @@ document.addEventListener("click", (e) => {
 });
 
 /**
- * Funcion para copiar un texto de un componente
+ * Funcion para copiar un texto
  * @param {*} input 
  */
-async function copyToClipboard(input) {
-  const copy = document.getElementById(input);
-  copy.select();
-  await navigator.clipboard.writeText(copy.value);
+async function copyToClipboard(text) {
+  await navigator.clipboard.writeText(text);
   showToast("Copiado", "success");
 }
 

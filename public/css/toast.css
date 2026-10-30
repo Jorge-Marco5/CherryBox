@@ -31,7 +31,7 @@
 }
 
 .toast.error {
-    border-left-color: var(--error);
+    border-left-color: var(--danger);
 }
 
 .toast.warning {

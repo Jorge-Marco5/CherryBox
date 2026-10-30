@@ -131,6 +131,7 @@ function updateUploadIndicators(isCompleted = false, rebuildList = true) {
     // Si estamos en la vista de subida, actualizar encabezados/barras o reconstruir la lista completa
     if (isUploadsViewActive()) {
         if (rebuildList) {
+            getStorage();
             renderUploadManagerView();
         } else {
             updateUploadHeaderControls();
@@ -249,7 +250,6 @@ function updateSingleUploadItemDOM(item) {
 function renderUploadManagerView() {
     const container = document.getElementById("uploadManagerList");
     if (!container) return;
-
     updateUploadHeaderControls();
 
     if (uploadHistory.length === 0) {
@@ -333,23 +333,46 @@ async function uploadFilesProcess(files) {
     if (fileArray.length === 0) return;
 
     try {
-        const settings = await axios.get("/api/getSettings");
-        const maxFileSizeMB = settings.data.maxFileSize;
-        const maxFiles = settings.data.maxFiles;
+        // Consultar los límites configurados en el servidor en tiempo real (accesible para cualquier usuario)
+        const response = await axios.get("/api/upload-limits");
+        const limits = response.data;
+        const maxFileSizeBytes = Number(limits.maxFileSize) || (500 * 1024 * 1024);
+        const maxFiles = Number(limits.maxFiles) || 10;
+        const availableStorage = typeof limits.availableStorage === "number" ? limits.availableStorage : Infinity;
 
-        if (fileArray.length > maxFiles) {
-            showToast(`Se permiten subir hasta ${maxFiles} archivos por subida`, "error");
+        // 1. Validar si el almacenamiento del servidor ya está lleno
+        if (availableStorage <= 0) {
+            showToast("El almacenamiento del servidor está lleno. No hay espacio disponible para subir más archivos.", "error");
             return;
         }
 
+        // 2. Validar cantidad máxima de archivos por lote
+        if (fileArray.length > maxFiles) {
+            showToast(`Has seleccionado ${fileArray.length} archivos. El límite máximo permitido es de ${maxFiles} archivos por subida.`, "error");
+            return;
+        }
+
+        // 3. Validar tamaño individual de cada archivo antes de subir
         for (let file of fileArray) {
-            if (file.size / (1024 * 1024) > maxFileSizeMB) {
-                showToast(`El archivo "${file.name}" excede el límite de tamaño (${formatBytes(file.size)}). Tamaño maximo por archivo ${maxFileSizeMB} MB`, "error");
+            if (file.size > maxFileSizeBytes) {
+                showToast(`El archivo "${file.name}" (${formatBytes(file.size)}) supera el tamaño máximo permitido (${formatBytes(maxFileSizeBytes)}).`, "error");
                 return;
             }
         }
+
+        // 4. Validar que la suma total no supere el almacenamiento disponible en disco
+        const totalBatchSize = fileArray.reduce((acc, f) => acc + (f.size || 0), 0);
+        if (totalBatchSize > availableStorage) {
+            showToast(`El tamaño total (${formatBytes(totalBatchSize)}) supera el espacio disponible restante en el servidor (${formatBytes(availableStorage)}).`, "error");
+            return;
+        }
     } catch (err) {
-        showToast("Error al verificar límites de subida", "error");
+        if (err.response && err.response.status === 401) {
+            window.location.href = "/login";
+            return;
+        }
+        console.warn("No se pudieron verificar los límites de subida en tiempo real:", err);
+        showToast("Error al verificar límites de subida con el servidor", "error");
         return;
     }
 
