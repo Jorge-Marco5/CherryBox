@@ -166,6 +166,49 @@ export const getSettings = async (req: AuthRequest, res: Response, next: NextFun
 };
 
 /**
+ * Obtiene la configuración global del sistema.
+ *
+ * @param req Petición de Express
+ * @param res JSON con la configuración global
+ */
+export const getRoute = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const baseDir = system_setting.getBaseDir();
+
+    return res.status(200).json({
+      baseDir
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Obtiene los límites de subida de archivos (tamaño máximo por archivo, cantidad máxima y espacio disponible).
+ * Accesible para cualquier usuario autenticado para validaciones previas a la subida en el cliente.
+ */
+export const getUploadLimits = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const limitStorage = Number(system_setting.getSetting("LIMIT_STORAGE")) || 0;
+    const maxFileSize = Number(system_setting.getSetting("MAX_FILE_SIZE")) || 524288000;
+    const maxFiles = Number(system_setting.getSetting("MAX_FILES")) || 10;
+    const usedStorage = Number(await system_setting.getUsedStorage()) || 0;
+    const availableStorage = Math.max(0, limitStorage - usedStorage);
+
+    return res.status(200).json({
+      maxFileSize,
+      maxFileSizeMB: Math.round(maxFileSize / (1024 * 1024)),
+      maxFiles,
+      availableStorage,
+      limitStorage,
+      usedStorage,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Simula un análisis de archivos en busca de amenazas.
  */
 export const analyzeFiles = async (req: AuthRequest, res: Response, next: NextFunction) => {

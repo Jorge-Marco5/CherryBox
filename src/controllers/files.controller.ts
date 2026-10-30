@@ -178,6 +178,7 @@ export const renameFile = async (req: AuthRequest, res: Response, next: NextFunc
  */
 export const createShareLink = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+
     const { file_path, time } = req.body;
     const user = req.user;
     if (!file_path || !time) {

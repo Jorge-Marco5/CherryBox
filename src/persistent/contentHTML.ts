@@ -16,7 +16,7 @@ export const contentHtml = (fileName: string, fileSize: string, escapedContent: 
       --primary-hover: #d2042dba;
       --border: #333;
       --success: #22c55e;
-      --error: #ef4444;
+      --danger: #ef4444;
       --warning: #f59e0b;
       --info: #3b82f6;
     }
@@ -179,7 +179,7 @@ export const contentHtml = (fileName: string, fileSize: string, escapedContent: 
 }
 
 .toast.error {
-    border-left-color: var(--error);
+    border-left-color: var(--danger);
 }
 
 .toast.warning {
